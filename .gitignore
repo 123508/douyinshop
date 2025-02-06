@@ -1,0 +1,8 @@
+*.exe
+
+# IDE config
+.vscode
+.idea
+
+*/bin
+*/log

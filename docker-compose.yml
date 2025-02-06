@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  mysql:
+    image: 'mysql:latest'
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./deploy/mysql:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_DATABASE=gorm
+      - MYSQL_USER=gorm
+      - MYSQL_PASSWORD=gorm
+      - MYSQL_RANDOM_ROOT_PASSWORD="yes"
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./deploy/redis/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
+    privileged: true
+  etcd:
+    image: bitnami/etcd:3.5
+    container_name: etcd
+    ports:
+      - 2379:2379
+      - 2380:2380
+    volumes:
+      - ./deploy/etcd/data:/bitnami/etcd-data
+    environment:
+      - TZ=Asia/Shanghai
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_ROOT_PASSWORD=bitjump

@@ -1,0 +1,34 @@
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user: "gorm"
+  password: "gorm"
+  dbname: "gorm"
+  max_open_conns: 20
+  max_idle_conns: 20
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 100
+
+etcd:
+  endpoints: 127.0.0.1:2379
+  username: "root"
+  password: "bitjump"
+
+hertz:
+  host: 127.0.0.1
+  port: 8900
+
+auth:
+  host: 127.0.0.1
+  port: 8901
+  service_name: "bitjump.douyinshop.auth"
+
+user:
+  host: 127.0.0.1
+  port: 8902
+  service_name: "bitjump.douyinshop.user"
