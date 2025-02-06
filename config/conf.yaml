@@ -1,9 +1,9 @@
 mysql:
   host: 127.0.0.1
   port: 3306
-  user: "gorm"
-  password: "gorm"
-  dbname: "gorm"
+  user: "bitjump"
+  password: "bitjump"
+  dbname: "bitjump"
   max_open_conns: 20
   max_idle_conns: 20
 

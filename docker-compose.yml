@@ -8,9 +8,9 @@ services:
     volumes:
       - ./deploy/mysql:/docker-entrypoint-initdb.d
     environment:
-      - MYSQL_DATABASE=gorm
-      - MYSQL_USER=gorm
-      - MYSQL_PASSWORD=gorm
+      - MYSQL_DATABASE=bitjump
+      - MYSQL_USER=bitjump
+      - MYSQL_PASSWORD=bitjump
       - MYSQL_RANDOM_ROOT_PASSWORD="yes"
   redis:
     image: redis:latest
