@@ -19,6 +19,12 @@ etcd:
   username: "root"
   password: "bitjump"
 
+jwt:
+  # 设置jwt签名加密时使用的秘钥
+  admin_secret_key: "ThisServiceIsOfferedByBitJump"
+  # 设置jwt过期时间为7天
+  admin_ttl: 604800
+
 hertz:
   host: 127.0.0.1
   port: 8900
@@ -32,3 +38,28 @@ user:
   host: 127.0.0.1
   port: 8902
   service_name: "bitjump.douyinshop.user"
+
+cart:
+  host: 127.0.0.1
+  port: 8903
+  service_name: "bitjump.douyinshop.cart"
+
+checkout:
+  host: 127.0.0.1
+  port: 8904
+  service_name: "bitjump.douyinshop.checkout"
+
+order:
+  host: 127.0.0.1
+  port: 8905
+  service_name: "bitjump.douyinshop.order"
+
+payment:
+  host: 127.0.0.1
+  port: 8906
+  service_name: "bitjump.douyinshop.payment"
+
+product:
+  host: 127.0.0.1
+  port: 8907
+  service_name: "bitjump.douyinshop.product"
