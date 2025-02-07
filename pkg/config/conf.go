@@ -8,12 +8,18 @@ import (
 )
 
 type AppConfig struct {
-	*MySQLConfig `mapstructure:"mysql"`
-	*RedisConfig `mapstructure:"redis"`
-	*EtcdConfig  `mapstructure:"etcd"`
-	*HertzConfig `mapstructure:"hertz"`
-	*AuthConfig  `mapstructure:"auth"`
-	*UserConfig  `mapstructure:"user"`
+	*MySQLConfig    `mapstructure:"mysql"`
+	*RedisConfig    `mapstructure:"redis"`
+	*EtcdConfig     `mapstructure:"etcd"`
+	*Jwt            `mapstructure:"jwt"`
+	*HertzConfig    `mapstructure:"hertz"`
+	*AuthConfig     `mapstructure:"auth"`
+	*UserConfig     `mapstructure:"user"`
+	*CartConfig     `mapstructure:"cart"`
+	*CheckoutConfig `mapstructure:"checkout"`
+	*OrderConfig    `mapstructure:"order"`
+	*PaymentConfig  `mapstructure:"payment"`
+	*ProductConfig  `mapstructure:"product"`
 }
 
 type MySQLConfig struct {
@@ -41,6 +47,11 @@ type EtcdConfig struct {
 	Password  string   `mapstructure:"password"`
 }
 
+type Jwt struct {
+	AdminSecretKey string `mapstructure:"admin_secret_key"`
+	AdminTtl       int    `mapstructure:"admin_ttl"`
+}
+
 type HertzConfig struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
@@ -53,6 +64,36 @@ type AuthConfig struct {
 }
 
 type UserConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type CartConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type CheckoutConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type OrderConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type PaymentConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type ProductConfig struct {
 	Host        string `mapstructure:"host"`
 	Port        int    `mapstructure:"port"`
 	ServiceName string `mapstructure:"service_name"`
