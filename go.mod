@@ -7,6 +7,7 @@ require (
 	github.com/cloudwego/hertz v0.9.5
 	github.com/cloudwego/kitex v0.12.1
 	github.com/fsnotify/fsnotify v1.7.0
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/kitex-contrib/registry-etcd v0.2.5
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/spf13/viper v1.19.0
