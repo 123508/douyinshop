@@ -25,7 +25,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 		id = 0
 	}
 	resp = &user.LoginResp{
-		UserId: int32(id),
+		UserId: uint32(id),
 	}
 
 	return
