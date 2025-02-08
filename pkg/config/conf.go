@@ -50,6 +50,7 @@ type EtcdConfig struct {
 type Jwt struct {
 	AdminSecretKey string `mapstructure:"admin_secret_key"`
 	AdminTtl       int    `mapstructure:"admin_ttl"`
+	AdminSuv       int    `mapstructure:"admin_suv"`
 }
 
 type HertzConfig struct {

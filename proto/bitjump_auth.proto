@@ -23,4 +23,6 @@ message DeliveryResp {
 
 message VerifyResp {
     bool res = 1;
+    string token=2;
+    uint32 user_id=3;
 }

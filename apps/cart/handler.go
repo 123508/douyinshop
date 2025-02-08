@@ -26,3 +26,9 @@ func (s *CartServiceImpl) EmptyCart(ctx context.Context, req *cart.EmptyCartReq)
 	// TODO: Your code here...
 	return
 }
+
+// DeleteItem implements the CartServiceImpl interface.
+func (s *CartServiceImpl) DeleteItem(ctx context.Context, req *cart.DeleteItemReq) (resp *cart.EmptyCartResp, err error) {
+	// TODO: Your code here...
+	return
+}

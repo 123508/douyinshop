@@ -13,6 +13,7 @@ import (
 type Client interface {
 	AddItem(ctx context.Context, Req *cart.AddItemReq, callOptions ...callopt.Option) (r *cart.AddItemResp, err error)
 	GetCart(ctx context.Context, Req *cart.GetCartReq, callOptions ...callopt.Option) (r *cart.GetCartResp, err error)
+	DeleteItem(ctx context.Context, Req *cart.DeleteItemReq, callOptions ...callopt.Option) (r *cart.EmptyCartResp, err error)
 	EmptyCart(ctx context.Context, Req *cart.EmptyCartReq, callOptions ...callopt.Option) (r *cart.EmptyCartResp, err error)
 }
 
@@ -53,6 +54,11 @@ func (p *kCartServiceClient) AddItem(ctx context.Context, Req *cart.AddItemReq, 
 func (p *kCartServiceClient) GetCart(ctx context.Context, Req *cart.GetCartReq, callOptions ...callopt.Option) (r *cart.GetCartResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetCart(ctx, Req)
+}
+
+func (p *kCartServiceClient) DeleteItem(ctx context.Context, Req *cart.DeleteItemReq, callOptions ...callopt.Option) (r *cart.EmptyCartResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.DeleteItem(ctx, Req)
 }
 
 func (p *kCartServiceClient) EmptyCart(ctx context.Context, Req *cart.EmptyCartReq, callOptions ...callopt.Option) (r *cart.EmptyCartResp, err error) {

@@ -7,6 +7,8 @@ option go_package = '/cart';
 service CartService {
     rpc AddItem(AddItemReq) returns (AddItemResp) {}
     rpc GetCart(GetCartReq) returns (GetCartResp) {}
+    //增加删除某个物品方法
+    rpc DeleteItem(DeleteItemReq) returns (EmptyCartResp){}
     rpc EmptyCart(EmptyCartReq) returns (EmptyCartResp) {}
 }
 
@@ -32,6 +34,13 @@ message GetCartReq {
 
 message GetCartResp {
     Cart cart = 1;
+}
+
+//删除请求
+message DeleteItemReq{
+    uint32 user_id=1;
+    uint32 product_id=2;
+    uint32 num=3;
 }
 
 message Cart {
