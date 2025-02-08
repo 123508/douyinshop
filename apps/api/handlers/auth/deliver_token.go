@@ -15,7 +15,7 @@ import (
 func DeliverToken(ctx context.Context, c *app.RequestContext) {
 	user_id, err := strconv.Atoi(c.Query("userId"))
 	req := &auth.DeliverTokenReq{
-		UserId: int32(user_id),
+		UserId: uint32(user_id),
 	}
 
 	if err != nil {

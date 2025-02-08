@@ -34,7 +34,7 @@ func initUserRpc() {
 	userClient = c
 }
 
-func Register(ctx context.Context, req *user.RegisterReq) (int32, error) {
+func Register(ctx context.Context, req *user.RegisterReq) (uint32, error) {
 	resp, err := userClient.Register(ctx, req)
 	if err != nil {
 		return 0, err
@@ -42,7 +42,7 @@ func Register(ctx context.Context, req *user.RegisterReq) (int32, error) {
 	return resp.UserId, nil
 }
 
-func Login(ctx context.Context, req *user.LoginReq) (int32, error) {
+func Login(ctx context.Context, req *user.LoginReq) (uint32, error) {
 	resp, err := userClient.Login(ctx, req)
 	if err != nil {
 		return 0, err
