@@ -16,11 +16,11 @@ var secretKey = config.Conf.Jwt.AdminSecretKey
 type AuthServiceImpl struct{}
 
 type UserClaims struct {
-	UserId int `json:"user_id"`
+	UserId uint32 `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(userId int) (string, error) {
+func GenerateJWT(userId uint32) (string, error) {
 
 	claims := UserClaims{
 		UserId: userId,
@@ -58,7 +58,7 @@ func ParseJWT(tokenString string) (*UserClaims, error) {
 
 // DeliverTokenByRPC implements the AuthServiceImpl interface.
 func (s *AuthServiceImpl) DeliverTokenByRPC(ctx context.Context, req *auth.DeliverTokenReq) (resp *auth.DeliveryResp, err error) {
-	token, err := GenerateJWT(int(req.UserId))
+	token, err := GenerateJWT(req.UserId)
 	if err != nil {
 		klog.Fatal(err)
 	}
@@ -73,20 +73,23 @@ func (s *AuthServiceImpl) VerifyTokenByRPC(ctx context.Context, req *auth.Verify
 	if resp.Res {
 		//如果相差时间小于令牌存活阈值,就重新生成令牌
 		diff := config.Conf.AdminTtl - config.Conf.AdminSuv
-		if diff < 0 {
+		if diff <= 0 {
 			diff = 10800
 		}
 		suv := time.Duration(diff) * time.Second
 		if time.Since(token.IssuedAt.Time) >= suv {
 			newToken, err := GenerateJWT(token.UserId)
 			if err != nil {
-				return nil, err // 返回错误而不是直接终止程序
+				resp.Res = false
+				return resp, err // 返回错误而不是直接终止程序
 			}
 			//将token重新放入
 			resp.Token = newToken
 		} else {
 			resp.Token = req.Token
 		}
+		resp.UserId = token.UserId
 	}
+
 	return resp, err
 }
