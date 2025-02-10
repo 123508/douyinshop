@@ -12,6 +12,7 @@ type AppConfig struct {
 	*RedisConfig    `mapstructure:"redis"`
 	*EtcdConfig     `mapstructure:"etcd"`
 	*Jwt            `mapstructure:"jwt"`
+	*ElasticSearch  `mapstructure:"elasticsearch"`
 	*HertzConfig    `mapstructure:"hertz"`
 	*AuthConfig     `mapstructure:"auth"`
 	*UserConfig     `mapstructure:"user"`
@@ -51,6 +52,12 @@ type Jwt struct {
 	AdminSecretKey string `mapstructure:"admin_secret_key"`
 	AdminTtl       int    `mapstructure:"admin_ttl"`
 	AdminSuv       int    `mapstructure:"admin_suv"`
+}
+
+type ElasticSearch struct {
+	Hosts    []string `mapstructure:"hosts"`
+	Username string   `mapstructure:"username"`
+	Password string   `mapstructure:"password"`
 }
 
 type HertzConfig struct {

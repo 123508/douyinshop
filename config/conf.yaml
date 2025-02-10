@@ -27,6 +27,12 @@ jwt:
   # 令牌存活时间低于该时间令牌自动刷新
   admin_suv: 10800
 
+elasticsearch:
+  hosts:
+    - "http://127.0.0.1:9200"
+  username: "elastic"
+  password: "123456"
+
 hertz:
   host: 127.0.0.1
   port: 8900
