@@ -6,3 +6,6 @@
 
 */bin
 */log
+
+# ignore the data of elasticsearch
+deploy/els/data

@@ -34,3 +34,19 @@ services:
       - TZ=Asia/Shanghai
       - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
       - ETCD_ROOT_PASSWORD=bitjump
+  elasticsearch:
+    container_name: es01
+    image: elasticsearch:8.12.2
+    restart: unless-stopped
+    environment:
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - "TZ=Asia/Shanghai"
+      - "discovery.type=single-node"
+      - "ELASTIC_PASSWORD=123456"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./deploy/els/config:/usr/share/elasticsearch/config
+      - ./deploy/els/data:/usr/share/elasticsearch/data
+      - ./deploy/els/plugins:/usr/share/elasticsearch/plugins
