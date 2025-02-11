@@ -91,3 +91,11 @@ ai:
   host: 127.0.0.1
   port: 8911
   service_name: "bitjump.douyinshop.ai"
+
+
+aliyun:
+  oss:
+    endpoint: "your endpoint"
+    accessKeyId: "your accessKeyId"
+    accessKeySecret: "your accessKeySecret"
+    bucketName: "your bucketName"

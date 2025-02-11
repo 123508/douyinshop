@@ -93,7 +93,7 @@ func (x *RegisterReq) fastReadField6(buf []byte, _type int8) (offset int, err er
 }
 
 func (x *RegisterReq) fastReadField7(buf []byte, _type int8) (offset int, err error) {
-	x.Gender, offset, err = fastpb.ReadBytes(buf, _type)
+	x.Gender, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -268,7 +268,7 @@ func (x *GetUserInfoResp) fastReadField4(buf []byte, _type int8) (offset int, er
 }
 
 func (x *GetUserInfoResp) fastReadField5(buf []byte, _type int8) (offset int, err error) {
-	x.Gender, offset, err = fastpb.ReadBytes(buf, _type)
+	x.Gender, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -373,10 +373,10 @@ func (x *RegisterReq) fastWriteField6(buf []byte) (offset int) {
 }
 
 func (x *RegisterReq) fastWriteField7(buf []byte) (offset int) {
-	if len(x.Gender) == 0 {
+	if x.Gender == 0 {
 		return offset
 	}
-	offset += fastpb.WriteBytes(buf[offset:], 7, x.GetGender())
+	offset += fastpb.WriteUint32(buf[offset:], 7, x.GetGender())
 	return offset
 }
 
@@ -498,10 +498,10 @@ func (x *GetUserInfoResp) fastWriteField4(buf []byte) (offset int) {
 }
 
 func (x *GetUserInfoResp) fastWriteField5(buf []byte) (offset int) {
-	if len(x.Gender) == 0 {
+	if x.Gender == 0 {
 		return offset
 	}
-	offset += fastpb.WriteBytes(buf[offset:], 5, x.GetGender())
+	offset += fastpb.WriteUint32(buf[offset:], 5, x.GetGender())
 	return offset
 }
 
@@ -591,10 +591,10 @@ func (x *RegisterReq) sizeField6() (n int) {
 }
 
 func (x *RegisterReq) sizeField7() (n int) {
-	if len(x.Gender) == 0 {
+	if x.Gender == 0 {
 		return n
 	}
-	n += fastpb.SizeBytes(7, x.GetGender())
+	n += fastpb.SizeUint32(7, x.GetGender())
 	return n
 }
 
@@ -716,10 +716,10 @@ func (x *GetUserInfoResp) sizeField4() (n int) {
 }
 
 func (x *GetUserInfoResp) sizeField5() (n int) {
-	if len(x.Gender) == 0 {
+	if x.Gender == 0 {
 		return n
 	}
-	n += fastpb.SizeBytes(5, x.GetGender())
+	n += fastpb.SizeUint32(5, x.GetGender())
 	return n
 }
 

@@ -25,6 +25,7 @@ type AppConfig struct {
 	*BusinessOrderConfig `mapstructure:"business_order"`
 	*ShopConfig          `mapstructure:"shop"`
 	*AIConfig            `mapstructure:"ai"`
+	*AliyunConfig        `mapstructure:"aliyun"`
 }
 
 type MySQLConfig struct {
@@ -133,6 +134,17 @@ type AIConfig struct {
 	Host        string `mapstructure:"host"`
 	Port        int    `mapstructure:"port"`
 	ServiceName string `mapstructure:"service_name"`
+}
+
+type AliyunConfig struct {
+	Oss AliOssConfig `mapstructure:"oss"`
+}
+
+type AliOssConfig struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	AccessKeyId     string `mapstructure:"accessKeyId"`
+	AccessKeySecret string `mapstructure:"accessKeySecret"`
+	BucketName      string `mapstructure:"bucketName"`
 }
 
 var Conf AppConfig

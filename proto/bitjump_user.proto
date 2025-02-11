@@ -22,7 +22,7 @@ message RegisterReq {
     string nickname = 4;
     string avatar = 5;
     string phone = 6;
-    bytes  gender = 7;
+    uint32  gender = 7;
 }
 
 message RegisterResp {
@@ -47,7 +47,7 @@ message GetUserInfoResp {
     string nickname = 2;
     string avatar = 3;
     string phone = 4;
-    bytes  gender = 5;
+    uint32  gender = 5;
 }
 
 message LogoutReq {
