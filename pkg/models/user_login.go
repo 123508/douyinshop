@@ -9,4 +9,5 @@ type UserLogin struct {
 	UserId   uint32 `gorm:"comment '用户ID'"`
 	User     User
 	Password string `gorm:"size:200;notnull comment '加密后的密码'"`
+	IsLive   byte   `gorm:"comment '1删除 0存在'"`
 }
