@@ -5,6 +5,7 @@ import (
 	"errors"
 	auth "github.com/123508/douyinshop/kitex_gen/auth"
 	"github.com/123508/douyinshop/pkg/config"
+	"github.com/123508/douyinshop/pkg/redis"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
@@ -67,9 +68,40 @@ func (s *AuthServiceImpl) DeliverTokenByRPC(ctx context.Context, req *auth.Deliv
 }
 
 // VerifyTokenByRPC implements the AuthServiceImpl interface.
+// 验证令牌接口
+// 如果redis中标记该令牌无效,返回错误响应
+// 如果令牌无效,返回错误响应
+// 如果令牌存活时间小于等于阈值,刷新令牌并返回成功响应
+// 如果令牌存活时间大于阈值,直接返回成功响应
+// 注意每次需要使用响应去接收token
 func (s *AuthServiceImpl) VerifyTokenByRPC(ctx context.Context, req *auth.VerifyTokenReq) (resp *auth.VerifyResp, err error) {
+
+	if req.Token == "" {
+		return &auth.VerifyResp{Res: false}, errors.New("请求令牌为空")
+	}
+
+	redis, err := redis.InitRedis()
+	if err != nil {
+		klog.Fatal(err)
+	}
+	//在redis中检查token是否存活
+	result, err := redis.Exists(ctx, req.Token).Result()
+
+	//如果redis连接出错,直接返回错误信息
+	if err != nil {
+		klog.Fatal(err)
+	} else {
+		//如果在redis中检测到token,则直接返回失败响应
+		if result == 1 {
+			resp = &auth.VerifyResp{Res: false}
+			return resp, errors.New("token已失效,请注意")
+		}
+	}
+
 	token, err := ParseJWT(req.Token)
+	//判断令牌是否可以被解析,如果令牌无法被解析返回失败响应
 	resp = &auth.VerifyResp{Res: err == nil}
+
 	if resp.Res {
 		//如果相差时间小于令牌存活阈值,就重新生成令牌
 		diff := config.Conf.AdminTtl - config.Conf.AdminSuv
