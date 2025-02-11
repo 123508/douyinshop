@@ -71,3 +71,23 @@ product:
   host: 127.0.0.1
   port: 8907
   service_name: "bitjump.douyinshop.product"
+
+address:
+  host: 127.0.0.1
+  port: 8908
+  service_name: "bitjump.douyinshop.address"
+
+business_order:
+  host: 127.0.0.1
+  port: 8909
+  service_name: "bitjump.douyinshop.business_order"
+
+shop:
+  host: 127.0.0.1
+  port: 8910
+  service_name: "bitjump.douyinshop.shop"
+
+ai:
+  host: 127.0.0.1
+  port: 8911
+  service_name: "bitjump.douyinshop.ai"

@@ -8,19 +8,23 @@ import (
 )
 
 type AppConfig struct {
-	*MySQLConfig    `mapstructure:"mysql"`
-	*RedisConfig    `mapstructure:"redis"`
-	*EtcdConfig     `mapstructure:"etcd"`
-	*Jwt            `mapstructure:"jwt"`
-	*ElasticSearch  `mapstructure:"elasticsearch"`
-	*HertzConfig    `mapstructure:"hertz"`
-	*AuthConfig     `mapstructure:"auth"`
-	*UserConfig     `mapstructure:"user"`
-	*CartConfig     `mapstructure:"cart"`
-	*CheckoutConfig `mapstructure:"checkout"`
-	*OrderConfig    `mapstructure:"order"`
-	*PaymentConfig  `mapstructure:"payment"`
-	*ProductConfig  `mapstructure:"product"`
+	*MySQLConfig         `mapstructure:"mysql"`
+	*RedisConfig         `mapstructure:"redis"`
+	*EtcdConfig          `mapstructure:"etcd"`
+	*Jwt                 `mapstructure:"jwt"`
+	*ElasticSearch       `mapstructure:"elasticsearch"`
+	*HertzConfig         `mapstructure:"hertz"`
+	*AuthConfig          `mapstructure:"auth"`
+	*UserConfig          `mapstructure:"user"`
+	*CartConfig          `mapstructure:"cart"`
+	*CheckoutConfig      `mapstructure:"checkout"`
+	*OrderConfig         `mapstructure:"order"`
+	*PaymentConfig       `mapstructure:"payment"`
+	*ProductConfig       `mapstructure:"product"`
+	*AddressConfig       `mapstructure:"address"`
+	*BusinessOrderConfig `mapstructure:"business_order"`
+	*ShopConfig          `mapstructure:"shop"`
+	*AIConfig            `mapstructure:"ai"`
 }
 
 type MySQLConfig struct {
@@ -102,6 +106,30 @@ type PaymentConfig struct {
 }
 
 type ProductConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type AddressConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type BusinessOrderConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type ShopConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	ServiceName string `mapstructure:"service_name"`
+}
+
+type AIConfig struct {
 	Host        string `mapstructure:"host"`
 	Port        int    `mapstructure:"port"`
 	ServiceName string `mapstructure:"service_name"`
