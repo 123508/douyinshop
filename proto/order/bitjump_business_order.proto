@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package order.businessOrder;
+
+import "order/bitjump_order_common.proto";
+
+option go_package = "order/businessOrder";
+
+message ConfirmReq{
+  uint32 order_id=1;
+  int32 status=2;
+}
+
+message RejectionReq{
+  uint32 order_id=1;
+  string rejection_reason=2;
+}
+
+message DeliveryReq{
+  uint32 order_id=1;
+}
+
+message ReceiveReq{
+  uint32 order_id=1;
+}
+
+message GetOrderListReq{
+  uint32 shop_id=1;
+  uint32 page=2;
+  uint32 page_size=3;
+}
+
+message GetOrderListResp{
+  repeated common.OrderResp list=1;
+}
+
+service OrderBusinessService{
+  // 获取订单列表
+  rpc GetOrderList(GetOrderListReq) returns (GetOrderListResp);
+  // 获取订单详情
+  rpc Detail(common.OrderReq) returns (common.OrderResp);
+  // 确认订单
+  rpc Confirm(ConfirmReq) returns (common.Empty);
+  // 派送订单
+  rpc Delivery(DeliveryReq) returns (common.Empty);
+  // 转变订单状态为待收货
+  rpc Receive(ReceiveReq) returns (common.Empty);
+  // 拒绝订单
+  rpc Rejection(ReceiveReq) returns (common.Empty);
+  // 取消订单
+  rpc Cancel(common.CancelReq) returns (common.Empty);
+}

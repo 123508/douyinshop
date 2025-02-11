@@ -229,6 +229,16 @@ func (x *SearchProductsReq) FastRead(buf []byte, _type int8, number int32) (offs
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -244,6 +254,16 @@ ReadFieldError:
 
 func (x *SearchProductsReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.Query, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *SearchProductsReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.Page, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *SearchProductsReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.PageSize, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -429,6 +449,8 @@ func (x *SearchProductsReq) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -437,6 +459,22 @@ func (x *SearchProductsReq) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 1, x.GetQuery())
+	return offset
+}
+
+func (x *SearchProductsReq) fastWriteField2(buf []byte) (offset int) {
+	if x.Page == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetPage())
+	return offset
+}
+
+func (x *SearchProductsReq) fastWriteField3(buf []byte) (offset int) {
+	if x.PageSize == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetPageSize())
 	return offset
 }
 
@@ -610,6 +648,8 @@ func (x *SearchProductsReq) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -618,6 +658,22 @@ func (x *SearchProductsReq) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeString(1, x.GetQuery())
+	return n
+}
+
+func (x *SearchProductsReq) sizeField2() (n int) {
+	if x.Page == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(2, x.GetPage())
+	return n
+}
+
+func (x *SearchProductsReq) sizeField3() (n int) {
+	if x.PageSize == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(3, x.GetPageSize())
 	return n
 }
 
@@ -668,6 +724,8 @@ var fieldIDToName_GetProductResp = map[int32]string{
 
 var fieldIDToName_SearchProductsReq = map[int32]string{
 	1: "Query",
+	2: "Page",
+	3: "PageSize",
 }
 
 var fieldIDToName_SearchProductsResp = map[int32]string{

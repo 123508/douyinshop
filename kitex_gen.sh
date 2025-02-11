@@ -1,10 +1,14 @@
 kitex -module github.com/123508/douyinshop -I=./proto bitjump_auth.proto
 kitex -module github.com/123508/douyinshop -I=./proto bitjump_cart.proto
 kitex -module github.com/123508/douyinshop -I=./proto bitjump_checkout.proto
-kitex -module github.com/123508/douyinshop -I=./proto bitjump_order.proto
+kitex -module github.com/123508/douyinshop -I=./proto order/bitjump_order.proto
+kitex -module github.com/123508/douyinshop -I=./proto order/bitjump_business_order.proto
 kitex -module github.com/123508/douyinshop -I=./proto bitjump_payment.proto
 kitex -module github.com/123508/douyinshop -I=./proto bitjump_product.proto
 kitex -module github.com/123508/douyinshop -I=./proto bitjump_user.proto
+kitex -module github.com/123508/douyinshop -I=./proto bitjump_shop.proto
+kitex -module github.com/123508/douyinshop -I=./proto bitjump_address.proto
+kitex -module github.com/123508/douyinshop -I=./proto bitjump_ai.proto
 
 mkdir apps
 cd apps
@@ -26,7 +30,12 @@ cd ..
 
 mkdir order
 cd order
-kitex -module github.com/123508/douyinshop -service bitjump.douyinshop.order -use github.com/123508/douyinshop/kitex_gen -I ../../proto bitjump_order.proto
+kitex -module github.com/123508/douyinshop -service bitjump.douyinshop.order -use github.com/123508/douyinshop/kitex_gen -I ../../proto order/bitjump_order.proto
+cd ..
+
+mkdir businessorder
+cd businessorder
+kitex -module github.com/123508/douyinshop -service bitjump.douyinshop.businessorder -use github.com/123508/douyinshop/kitex_gen -I ../../proto order/bitjump_business_order.proto
 cd ..
 
 mkdir payment
@@ -42,4 +51,19 @@ cd ..
 mkdir user
 cd user
 kitex -module github.com/123508/douyinshop -service bitjump.douyinshop.user -use github.com/123508/douyinshop/kitex_gen -I ../../proto bitjump_user.proto
+cd ..
+
+mkdir ai
+cd ai
+kitex -module github.com/123508/douyinshop -service bitjump.douyinshop.ai -use github.com/123508/douyinshop/kitex_gen -I ../../proto bitjump_ai.proto
+cd ..
+
+mkdir shop
+cd shop
+kitex -module github.com/123508/douyinshop -service bitjump.douyinshop.shop -use github.com/123508/douyinshop/kitex_gen -I ../../proto bitjump_shop.proto
+cd ..
+
+mkdir address
+cd address
+kitex -module github.com/123508/douyinshop -service bitjump.douyinshop.address -use github.com/123508/douyinshop/kitex_gen -I ../../proto bitjump_address.proto
 cd ..

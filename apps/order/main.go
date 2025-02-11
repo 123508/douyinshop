@@ -1,13 +1,12 @@
 package main
 
 import (
+	userOrder "github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
 	"log"
-
-	order "github.com/123508/douyinshop/kitex_gen/order/orderservice"
 )
 
 func main() {
-	svr := order.NewServer(new(OrderServiceImpl))
+	svr := userOrder.NewServer(new(OrderUserServiceImpl))
 
 	err := svr.Run()
 

@@ -1,0 +1,81 @@
+syntax="proto3";
+
+package address;
+
+option go_package="/address";
+
+service AddressService {
+    // 添加地址
+    rpc AddAddress(AddAddressReq) returns (AddAddressResp) {}
+    // 获取用户的地址列表
+    rpc GetAddressList(GetAddressListReq) returns (GetAddressListResp) {}
+    // 删除地址
+    rpc DeleteAddress(DeleteAddressReq) returns (DeleteAddressResp) {}
+    // 更新地址
+    rpc UpdateAddress(UpdateAddressReq) returns (UpdateAddressResp) {}
+    // 设置默认地址
+    rpc SetDefaultAddress(SetDefaultAddressReq) returns (SetDefaultAddressResp) {}
+}
+
+message Address {
+    string street_address = 1; // 详细地址
+    string city = 2; // 城市
+    string state = 3; // 省份/州
+    string country = 4; // 国家
+    int32 zip_code = 5; // 邮编
+    string consignee = 6; // 收货人
+    bytes gender = 7; // 性别 1:男 0:女
+    string phone = 8; // 电话
+    string Label = 9; // 标签
+    bool is_default = 10; // 是否默认地址
+}
+
+message AddressItem {
+    uint64 addr_id = 1; // 地址ID
+    Address address = 2;
+}
+
+message AddAddressReq {
+    uint32 user_id = 1;
+    Address address = 2;
+}
+
+message AddAddressResp {
+    uint64 addr_id = 1;
+}
+
+message GetAddressListReq {
+    uint32 user_id = 1;
+}
+
+message GetAddressListResp {
+    repeated AddressItem address = 1;
+}
+
+message DeleteAddressReq {
+    uint32 user_id = 1;
+    uint64 addr_id = 2;
+}
+
+message DeleteAddressResp {
+    bool res = 1;
+}
+
+message UpdateAddressReq {
+    uint32 user_id = 1;
+    uint64 addr_id = 2;
+    Address address = 3;
+}
+
+message UpdateAddressResp {
+    bool res = 1;
+}
+
+message SetDefaultAddressReq {
+    uint32 user_id = 1;
+    uint64 addr_id = 2;
+}
+
+message SetDefaultAddressResp {
+    bool res = 1;
+}

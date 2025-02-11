@@ -5,14 +5,24 @@ package user;
 option go_package="/user";
 
 service UserService {
+    // 用户注册
     rpc Register(RegisterReq) returns (RegisterResp) {}
+    // 用户登录
     rpc Login(LoginReq) returns (LoginResp) {}
+    // 获取用户信息
+    rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoResp) {}
+    // 用户登出
+    rpc Logout(LogoutReq) returns (LogoutResp) {}
 }
 
 message RegisterReq {
     string email = 1;
     string password = 2;
     string confirm_password = 3;
+    string nickname = 4;
+    string avatar = 5;
+    string phone = 6;
+    bytes  gender = 7;
 }
 
 message RegisterResp {
@@ -27,3 +37,21 @@ message LoginReq {
 message LoginResp {
     uint32 user_id = 1;
 }
+
+message GetUserInfoReq {
+    string token = 1;
+}
+
+message GetUserInfoResp {
+    string email = 1;
+    string nickname = 2;
+    string avatar = 3;
+    string phone = 4;
+    bytes  gender = 5;
+}
+
+message LogoutReq {
+    string token = 1;
+}
+
+message LogoutResp {}

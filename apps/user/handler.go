@@ -17,6 +17,9 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 }
 
 // Login implements the UserServiceImpl interface.
+// 用户登录
+// 如果账号密码正确，返回用户ID
+// 如果账号密码错误，user_id为0
 func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *user.LoginResp, err error) {
 
 	// 临时测试用的代码，实际开发中需要替换为真实的逻辑
@@ -28,5 +31,17 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 		UserId: uint32(id),
 	}
 
+	return
+}
+
+// GetUserInfo implements the UserServiceImpl interface.
+func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfoReq) (resp *user.GetUserInfoResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// Logout implements the UserServiceImpl interface.
+func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp *user.LogoutResp, err error) {
+	// TODO: Your code here...
 	return
 }
