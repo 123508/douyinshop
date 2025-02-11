@@ -1,0 +1,29 @@
+syntax="proto3";
+
+package ai;
+
+option go_package="/ai";
+
+service AiService {
+    // 根据订单号查询订单信息
+    rpc OrderQuery(OrderQueryReq) returns (OrderQueryResp) {}
+    // 根据用户id和用户要求自动创建订单并返回订单号
+    rpc AutoPlaceOrder(AutoPlaceOrderReq) returns (AutoPlaceOrderResp) {}
+}
+
+message OrderQueryReq {
+    string order_id = 1;
+}
+
+message OrderQueryResp {
+    string response = 1;
+}
+
+message AutoPlaceOrderReq {
+    uint32 user_id = 1;
+    string request = 2;
+}
+
+message AutoPlaceOrderResp {
+    string order_id = 1;
+}

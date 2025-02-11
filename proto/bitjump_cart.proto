@@ -5,10 +5,13 @@ package cart;
 option go_package = '/cart';
 
 service CartService {
+    // 添加物品
     rpc AddItem(AddItemReq) returns (AddItemResp) {}
+    // 获取购物车
     rpc GetCart(GetCartReq) returns (GetCartResp) {}
-    //增加删除某个物品方法
+    // 删除某个物品
     rpc DeleteItem(DeleteItemReq) returns (EmptyCartResp){}
+    // 清空购物车
     rpc EmptyCart(EmptyCartReq) returns (EmptyCartResp) {}
 }
 
@@ -36,7 +39,7 @@ message GetCartResp {
     Cart cart = 1;
 }
 
-//删除请求
+// 删除请求
 message DeleteItemReq{
     uint32 user_id=1;
     uint32 product_id=2;

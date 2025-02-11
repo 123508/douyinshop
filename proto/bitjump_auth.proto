@@ -5,7 +5,9 @@ package auth;
 option go_package="/auth";
 
 service AuthService {
+    // 分发token
     rpc DeliverTokenByRPC(DeliverTokenReq) returns (DeliveryResp) {}
+    // 验证token/续期
     rpc VerifyTokenByRPC(VerifyTokenReq) returns (VerifyResp) {}
 }
 

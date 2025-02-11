@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package order.common;
+
+option go_package="order/order_common";
+
+message Order{
+  uint32 user_id=1;
+  string number=2; // 订单号
+  int32  status=3;
+  int32 address_book_id=4; // 收货地址
+  int32 pay_method=5;
+  int32 pay_status=6;
+  float amount=7;
+  string remark=8;
+  string phone=9;
+  string address=10; // 发货地址
+  string username=11;
+  string consignee=12;
+  string cancel_reason=13;
+  string rejection_reason=14;
+}
+
+message OrderDetail{
+  string name=1;
+  string image=2;
+  uint32 order_id=3;
+  uint32 product_id=4;
+  uint32 number=5; // 商品数量
+  float  amount=6; // 注意一个order可以关联多个orderDetail,orderDetail往往只含有一个Product
+}
+
+message OrderResp{
+  Order order=1;
+  repeated OrderDetail list=2;
+}
+
+message Empty{}
+
+message OrderReq{
+  uint32 order_id=1;
+}
+
+message CancelReq{
+  uint32 order_id=1;
+  string cancel_reason=2;
+}

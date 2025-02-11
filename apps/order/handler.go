@@ -2,27 +2,45 @@ package main
 
 import (
 	"context"
-
-	order "github.com/123508/douyinshop/kitex_gen/order"
+	order_common "github.com/123508/douyinshop/kitex_gen/order/order_common"
+	userOrder "github.com/123508/douyinshop/kitex_gen/order/userOrder"
 )
 
-// OrderServiceImpl implements the last service interface defined in the IDL.
-type OrderServiceImpl struct{}
+// OrderUserServiceImpl implements the last service interface defined in the IDL.
+type OrderUserServiceImpl struct{}
 
-// PlaceOrder implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) PlaceOrder(ctx context.Context, req *order.PlaceOrderReq) (resp *order.PlaceOrderResp, err error) {
+// Submit implements the OrderUserServiceImpl interface.
+func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderSubmitReq) (resp *userOrder.OrderSubmitResp, err error) {
 	// TODO: Your code here...
 	return
 }
 
-// ListOrder implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) ListOrder(ctx context.Context, req *order.ListOrderReq) (resp *order.ListOrderResp, err error) {
+// History implements the OrderUserServiceImpl interface.
+func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.HistoryReq) (resp *userOrder.HistoryResp, err error) {
 	// TODO: Your code here...
 	return
 }
 
-// MarkOrderPaid implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) MarkOrderPaid(ctx context.Context, req *order.MarkOrderPaidReq) (resp *order.MarkOrderPaidResp, err error) {
+// Detail implements the OrderUserServiceImpl interface.
+func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.OrderReq) (resp *order_common.OrderResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// Cancel implements the OrderUserServiceImpl interface.
+func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.CancelReq) (resp *order_common.Empty, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// Reminder implements the OrderUserServiceImpl interface.
+func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.ReminderReq) (resp *order_common.Empty, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// Complete implements the OrderUserServiceImpl interface.
+func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.CompleteReq) (resp *order_common.Empty, err error) {
 	// TODO: Your code here...
 	return
 }

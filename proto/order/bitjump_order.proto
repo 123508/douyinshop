@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package order.userOrder;
+
+option go_package = "order/userOrder";
+
+import "order/bitjump_order_common.proto";
+
+message OrderSubmitReq{
+    uint32 user_id=1;
+    int32 address_book_id=2;
+    int32 pay_method=3;
+    string remark=4;
+    float amount=5;
+}
+
+message OrderSubmitResp{
+    uint32 order_id=1;
+    string number=2;
+    float  order_amount=3;
+}
+
+message HistoryReq{
+    uint32 user_id=1;
+    uint32 page=2;
+    uint32 page_size=3;
+    int32 status=4;
+}
+
+message HistoryResp{
+    uint32 total=1;
+    repeated order.common.OrderResp list=2;
+    uint32 page = 3;
+    uint32 page_size = 4;
+}
+
+message ReminderReq{
+    uint32 user_id=1;
+    uint32 order_id=2;
+}
+
+message CompleteReq{
+    uint32 order_id=1;
+}
+
+service OrderUserService{
+    // 提交订单
+    rpc Submit(OrderSubmitReq) returns (OrderSubmitResp);
+    // 获取历史订单
+    rpc History(HistoryReq) returns (HistoryResp);
+    // 获取订单详情
+    rpc Detail(common.OrderReq) returns (common.OrderResp);
+    // 取消订单
+    rpc Cancel(common.CancelReq) returns (common.Empty);
+    // 提醒发货
+    rpc Reminder(ReminderReq) returns (common.Empty);
+    // 确认收货
+    rpc Complete(CompleteReq) returns (common.Empty);
+}

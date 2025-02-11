@@ -5,8 +5,11 @@ package product;
 option go_package = "/product";
 
 service ProductCatalogService {
+    // 获取商品列表
     rpc ListProducts(ListProductsReq) returns (ListProductsResp) {}
+    // 获取商品详情
     rpc GetProduct(GetProductReq) returns (GetProductResp) {}
+    // 搜索商品
     rpc SearchProducts(SearchProductsReq) returns (SearchProductsResp) {}
 }
 
@@ -41,6 +44,8 @@ message GetProductResp {
 
 message SearchProductsReq {
     string query = 1;
+    uint32 page = 2;
+    uint32 page_size = 3;
 }
 
 message SearchProductsResp {
