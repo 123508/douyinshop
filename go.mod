@@ -3,10 +3,10 @@ module github.com/123508/douyinshop
 go 1.23.1
 
 require (
+	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/cloudwego/fastpb v0.0.5
 	github.com/cloudwego/hertz v0.9.5
 	github.com/cloudwego/kitex v0.12.1
-	github.com/elastic/go-elasticsearch/v8 v8.17.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/kitex-contrib/registry-etcd v0.2.5
@@ -36,10 +36,7 @@ require (
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/elastic/elastic-transport-go/v8 v8.6.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
-	github.com/go-logr/logr v1.4.2 // indirect
-	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -75,8 +72,7 @@ require (
 	go.etcd.io/etcd/client/pkg/v3 v3.5.12 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.12 // indirect
 	go.opentelemetry.io/otel v1.28.0 // indirect
-	go.opentelemetry.io/otel/metric v1.28.0 // indirect
-	go.opentelemetry.io/otel/trace v1.28.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.21.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/arch v0.13.0 // indirect
@@ -85,6 +81,7 @@ require (
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240311132316-a219d84964c2 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240314234333-6e1732d8331c // indirect
