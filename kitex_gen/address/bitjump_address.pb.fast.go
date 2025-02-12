@@ -108,7 +108,7 @@ func (x *Address) fastReadField6(buf []byte, _type int8) (offset int, err error)
 }
 
 func (x *Address) fastReadField7(buf []byte, _type int8) (offset int, err error) {
-	x.Gender, offset, err = fastpb.ReadBytes(buf, _type)
+	x.Gender, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -548,10 +548,10 @@ func (x *Address) fastWriteField6(buf []byte) (offset int) {
 }
 
 func (x *Address) fastWriteField7(buf []byte) (offset int) {
-	if len(x.Gender) == 0 {
+	if x.Gender == 0 {
 		return offset
 	}
-	offset += fastpb.WriteBytes(buf[offset:], 7, x.GetGender())
+	offset += fastpb.WriteUint32(buf[offset:], 7, x.GetGender())
 	return offset
 }
 
@@ -877,10 +877,10 @@ func (x *Address) sizeField6() (n int) {
 }
 
 func (x *Address) sizeField7() (n int) {
-	if len(x.Gender) == 0 {
+	if x.Gender == 0 {
 		return n
 	}
-	n += fastpb.SizeBytes(7, x.GetGender())
+	n += fastpb.SizeUint32(7, x.GetGender())
 	return n
 }
 

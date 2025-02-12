@@ -24,7 +24,7 @@ message Address {
     string country = 4; // 国家
     int32 zip_code = 5; // 邮编
     string consignee = 6; // 收货人
-    bytes gender = 7; // 性别 1:男 0:女
+    uint32 gender = 7; // 性别 1:男 0:女
     string phone = 8; // 电话
     string Label = 9; // 标签
     bool is_default = 10; // 是否默认地址
