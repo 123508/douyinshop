@@ -6,8 +6,7 @@ import (
 
 type UserLogin struct {
 	gorm.Model
-	UserId   uint32 `gorm:"comment '用户ID'"`
-	User     User
+	UserId   uint32 `gorm:"unique comment '用户ID'"`
 	Password string `gorm:"size:200;notnull comment '加密后的密码'"`
 	IsLive   byte   `gorm:"comment '1删除 0存在'"`
 }
