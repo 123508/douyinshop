@@ -17,6 +17,7 @@ func extractAnySuffix(s string) string {
 	return s[lastIndex:]
 }
 
+
 func strBuilder(args ...string) string {
 	builder := strings.Builder{}
 	for _, k := range args {
@@ -31,6 +32,7 @@ func UploadImages(localFilePath string, serviceName string, userId uint32) (stri
 	if localFilePath == "" {
 		return "", nil
 	}
+
 
 	endpoint := config.Conf.AliyunConfig.Oss.Endpoint
 	accessKeyID := config.Conf.AliyunConfig.Oss.AccessKeyId
