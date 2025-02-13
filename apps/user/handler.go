@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/errors"
 	"github.com/123508/douyinshop/pkg/models"
@@ -55,20 +54,13 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 
 	//初始化用户属性
 	user1 := &models.User{}
-	user1.Name = req.Nickname
 	user1.Email = req.Email
+	user1.Name = req.Nickname
 	user1.Phone = req.Phone
 	user1.Gender = req.Gender
-	user1.CreatedAt = time.Now()
-	user1.UpdatedAt = time.Now()
 	user1.Avatar, _ = utils.UploadImages("", "user", 0)
-	user1.IsLive = 0
 	user2 := &models.UserLogin{}
-	user2.UserId = uint32(user1.ID)
 	user2.Password = encryption(req.Password)
-	user2.CreatedAt = time.Now()
-	user2.UpdatedAt = time.Now()
-	user2.IsLive = 0
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
@@ -76,6 +68,8 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 		if err := DB.Create(user1).Error; err != nil {
 			return err
 		}
+
+		user2.UserId = uint32(user1.ID)
 
 		if err := DB.Create(user2).Error; err != nil {
 			return err
@@ -108,7 +102,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 	DB.Model(&models.UserLogin{}).Where("user_id = ? and password = ?", row.ID, encryption(req.Password)).Find(&res)
 
 	//如果用户已经被删除也返回空
-	if res.ID == 0 || row.IsLive == 1 || res.IsLive == 1 {
+	if res.ID == 0 {
 		return &user.LoginResp{UserId: 0}, UserNotExists
 	}
 
@@ -122,10 +116,10 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfoReq) (resp *user.GetUserInfoResp, err error) {
 
 	var row models.User
-	DB.Model(&models.User{}).Where("id = ?", req.UserId).Find(&row)
+	DB.Model(&models.User{}).Where("id = ?", req.UserId).First(&row)
 
 	//如果查询到不存在该用户,返回error
-	if row.Email == "" || row.IsLive == 1 {
+	if row.Email == "" {
 		return nil, UserNotExists
 	}
 
@@ -162,9 +156,10 @@ func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp
 // 更新用户资料并
 // 绑定整个更新为事务,如果出错就进行回滚
 func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp *user.UpdateResp, err error) {
-	_, err = s.GetUserInfo(ctx, &user.GetUserInfoReq{UserId: req.UserId})
+
+	info, err := s.GetUserInfo(ctx, &user.GetUserInfoReq{UserId: req.UserId})
+
 	if err != nil {
-		fmt.Println("用户不存在")
 		return nil, UserNotExists
 	}
 
@@ -176,29 +171,29 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 			return err
 		}
 		if req.UserId == 0 {
-			return err
+			return UserNotExists
 		}
 		//更新用户信息部分
-		tx = DB.Model(&models.User{}).Where("id=?", req.UserId).Update("gender", req.Gender)
+		tx = DB.Model(&models.User{}).Where("id=?", req.UserId)
 
+		updates := make(map[string]interface{}, 5)
+
+		if req.Gender != info.Gender {
+			updates["gender"] = req.Gender
+		}
 		if req.Phone != "" {
-			if err = tx.Update("phone", req.Phone).Error; err != nil {
-				return err
-			}
+			updates["phone"] = req.Phone
 		}
 		if req.Avatar != "" {
-			if err = tx.Update("avatar", images).Error; err != nil {
-				return err
-			}
+			updates["avatar"] = images
 		}
 		if req.Nickname != "" {
-			if err = tx.Update("name", req.Nickname).Error; err != nil {
-				return err
-			}
+			updates["name"] = req.Nickname
 		}
-		if err = tx.Update("updated_at", time.Now()).Error; err != nil {
+		if err := tx.Updates(updates).Error; err != nil {
 			return err
 		}
+
 		//更新用户密码部分
 		if req.Password != "" {
 			where := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId)
@@ -221,10 +216,10 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp *user.DeleteResp, err error) {
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
-		if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).Update("is_live", 1).Error; err != nil {
+		if err := DB.Where("id = ?", req.UserId).Unscoped().Delete(&models.User{}).Error; err != nil {
 			return err
 		}
-		if err := DB.Model(&models.UserLogin{}).Where("user_id=?", req.UserId).Update("is_live", 1).Error; err != nil {
+		if err := DB.Where("user_id=?", req.UserId).Unscoped().Delete(&models.UserLogin{}).Error; err != nil {
 			return err
 		}
 

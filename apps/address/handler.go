@@ -9,13 +9,14 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
 	"log"
-	"time"
 )
 
 // AddressServiceImpl implements the last service interface defined in the IDL.
 type AddressServiceImpl struct{}
 
 var DB = open()
+
+//注意地址类型有Address,AddressItem,AddressBook
 
 func tranAddressToAddressBook(origin *address.Address) *models.AddressBook {
 	address := &models.AddressBook{}
@@ -77,8 +78,6 @@ func (s *AddressServiceImpl) AddAddress(ctx context.Context, req *address.AddAdd
 
 	address1 := &models.AddressBook{}
 	address1 = tranAddressToAddressBook(req.Address)
-	address1.UpdatedAt = time.Now()
-	address1.CreatedAt = time.Now()
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		//如果设置当前地址为默认地址
@@ -120,13 +119,16 @@ func (s *AddressServiceImpl) GetAddressList(ctx context.Context, req *address.Ge
 		return nil, err
 	}
 
-	var result []*address.AddressItem
+	//提前给定切片容量,优化性能
+	result := make([]*address.AddressItem, 0, len(res))
 
 	for _, k := range res {
 
 		result = append(result, &address.AddressItem{AddrId: uint64(k.ID), Address: tranAddressBookToAddress(&k)})
 
 	}
+
+	_ = res
 
 	return &address.GetAddressListResp{Address: result}, nil
 }
@@ -161,7 +163,7 @@ func (s *AddressServiceImpl) DeleteAddress(ctx context.Context, req *address.Del
 	}
 
 	// 执行删除操作
-	if err = tx.Delete(&address1).Error; err != nil {
+	if err = tx.Unscoped().Delete(&address1).Error; err != nil {
 		tx.Rollback()
 		return &address.DeleteAddressResp{Res: false}, &errors.BasicMessageError{Message: "地址删除失败,请联系管理员"}
 	}
@@ -190,64 +192,45 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		tx = DB.Model(&models.AddressBook{}).Where("id = ?", req.AddrId)
 
+		updates := make(map[string]interface{}, 10)
+
 		//更新StreetAddress字段
 		if req.Address.StreetAddress != "" {
-			if err := tx.Update("stress_address", req.Address.StreetAddress).Error; err != nil {
-				return err
-			}
+			updates["stress_address"] = req.Address.StreetAddress
 		}
 		//更新Phone字段
 		if req.Address.Phone != "" {
-			if err := tx.Update("phone", req.Address.Phone).Error; err != nil {
-				return err
-			}
+			updates["phone"] = req.Address.Phone
 		}
 		//更新.ZipCode字段
 		if req.Address.ZipCode != 0 {
-			if err := tx.Update("zip_code", req.Address.ZipCode).Error; err != nil {
-				return err
-			}
+			updates["zip_code"] = req.Address.ZipCode
 		}
 		//更新State字段
 		if req.Address.State != "" {
-			if err := tx.Update("state", req.Address.State).Error; err != nil {
-				return err
-			}
+			updates["state"] = req.Address.State
 		}
 		//更新City字段
 		if req.Address.City != "" {
-			if err := tx.Update("city", req.Address.City).Error; err != nil {
-				return err
-			}
+			updates["city"] = req.Address.City
 		}
 		//更新Consignee字段
 		if req.Address.Consignee != "" {
-			if err := tx.Update("consignee", req.Address.Consignee).Error; err != nil {
-				return err
-			}
+			updates["consignee"] = req.Address.Consignee
 		}
 		//更新Country字段
 		if req.Address.Country != "" {
-			if err := tx.Update("country", req.Address.Country).Error; err != nil {
-				return err
-			}
+			updates["country"] = req.Address.Country
 		}
 		//更新Label字段
 		if req.Address.Label != "" {
-			if err := tx.Update("label", req.Address.Label).Error; err != nil {
-				return err
-			}
-		}
-		//更新UpdatedAt字段
-		if err := tx.Update("updated_at", time.Now()).Error; err != nil {
-			return err
+			updates["label"] = req.Address.Label
 		}
 		//更新Gender字段
 		if row.Gender != req.Address.Gender {
-			if err := tx.Update("gender", req.Address.Gender).Error; err != nil {
-				return err
-			}
+			updates["gender"] = req.Address.Gender
 		}
+
 		//更新IsDefault字段
 		if req.Address.IsDefault {
 			if _, err := s.SetDefaultAddress(context.Background(), &address.SetDefaultAddressReq{UserId: req.UserId, AddrId: req.AddrId}); err != nil {
@@ -255,10 +238,12 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 			}
 		} else {
 			//默认地址可以不存在的逻辑,如果需要可以关闭
-			if err := tx.Update("is_default", false).Error; err != nil {
-				return err
-			}
+			updates["is_default"] = false
 		}
+		if err := tx.Updates(updates).Error; err != nil {
+			return err
+		}
+
 		//事务提交
 		return nil
 	})

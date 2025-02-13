@@ -17,6 +17,14 @@ func extractAnySuffix(s string) string {
 	return s[lastIndex:]
 }
 
+func strBuilder(args ...string) string {
+	builder := strings.Builder{}
+	for _, k := range args {
+		builder.WriteString(k)
+	}
+	return builder.String()
+}
+
 // UploadImages 阿里OSS对象存储上传图片
 func UploadImages(localFilePath string, serviceName string, userId uint32) (string, error) {
 
@@ -54,5 +62,6 @@ func UploadImages(localFilePath string, serviceName string, userId uint32) (stri
 
 	log.Println("File uploaded successfully.")
 
-	return endpoint[:8] + bucketName + "." + endpoint[8:] + "/" + objectKey, nil
+	//使用stringBuilder代替原本的直接拼接,优化性能
+	return strBuilder(endpoint[:8], bucketName, ".", endpoint[8:], "/", objectKey), nil
 }
