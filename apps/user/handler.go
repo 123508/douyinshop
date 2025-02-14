@@ -14,7 +14,7 @@ import (
 	"log"
 	"time"
 
-	user "github.com/123508/douyinshop/kitex_gen/user"
+	"github.com/123508/douyinshop/kitex_gen/user"
 )
 
 // UserServiceImpl implements the last service interface defined in the IDL.
@@ -69,7 +69,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 			return err
 		}
 
-		user2.UserId = uint32(user1.ID)
+		user2.UserId = user1.ID
 
 		if err := DB.Create(user2).Error; err != nil {
 			return err
@@ -81,7 +81,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 		return nil, err
 	}
 
-	return &user.RegisterResp{UserId: uint32(user1.ID)}, nil
+	return &user.RegisterResp{UserId: user1.ID}, nil
 }
 
 // Login implements the UserServiceImpl interface.
@@ -108,7 +108,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 
 	//这个方法之后要调用发放token的逻辑
 
-	return &user.LoginResp{UserId: uint32(row.ID)}, nil
+	return &user.LoginResp{UserId: row.ID}, nil
 }
 
 // GetUserInfo implements the UserServiceImpl interface.

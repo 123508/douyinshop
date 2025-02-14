@@ -14,12 +14,12 @@ import (
 )
 
 func main() {
-	db, err := db.InitDB()
+	database, err := db.InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db.AutoMigrate(&models.AddressBook{})
+	database.AutoMigrate(&models.AddressBook{})
 
 	r, err := etcd.NewEtcdRegistryWithAuth(config.Conf.EtcdConfig.Endpoints, config.Conf.EtcdConfig.Username, config.Conf.EtcdConfig.Password)
 	if err != nil {

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	address "github.com/123508/douyinshop/kitex_gen/address"
+	"github.com/123508/douyinshop/kitex_gen/address"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/errors"
 	"github.com/123508/douyinshop/pkg/models"
@@ -19,32 +19,32 @@ var DB = open()
 //注意地址类型有Address,AddressItem,AddressBook
 
 func tranAddressToAddressBook(origin *address.Address) *models.AddressBook {
-	address := &models.AddressBook{}
-	address.StressAddress = origin.StreetAddress
-	address.Phone = origin.Phone
-	address.Gender = origin.Gender
-	address.Consignee = origin.Consignee
-	address.State = origin.State
-	address.City = origin.City
-	address.Country = origin.Country
-	address.Label = origin.Label
-	address.ZipCode = origin.ZipCode //共计九个字段
-	return address
+	addr := &models.AddressBook{}
+	addr.StressAddress = origin.StreetAddress
+	addr.Phone = origin.Phone
+	addr.Gender = origin.Gender
+	addr.Consignee = origin.Consignee
+	addr.State = origin.State
+	addr.City = origin.City
+	addr.Country = origin.Country
+	addr.Label = origin.Label
+	addr.ZipCode = origin.ZipCode //共计九个字段
+	return addr
 }
 
 func tranAddressBookToAddress(origin *models.AddressBook) *address.Address {
-	address := &address.Address{}
-	address.StreetAddress = origin.StressAddress
-	address.Phone = origin.Phone
-	address.Gender = origin.Gender
-	address.Consignee = origin.Consignee
-	address.State = origin.State
-	address.City = origin.City
-	address.Country = origin.Country
-	address.Label = origin.Label
-	address.ZipCode = origin.ZipCode
-	address.IsDefault = origin.IsDefault //共计十个字段
-	return address
+	addr := &address.Address{}
+	addr.StreetAddress = origin.StressAddress
+	addr.Phone = origin.Phone
+	addr.Gender = origin.Gender
+	addr.Consignee = origin.Consignee
+	addr.State = origin.State
+	addr.City = origin.City
+	addr.Country = origin.Country
+	addr.Label = origin.Label
+	addr.ZipCode = origin.ZipCode
+	addr.IsDefault = origin.IsDefault //共计十个字段
+	return addr
 }
 
 // 获取默认地址
