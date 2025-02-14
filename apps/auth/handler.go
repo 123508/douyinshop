@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"errors"
-	auth "github.com/123508/douyinshop/kitex_gen/auth"
+	"github.com/123508/douyinshop/kitex_gen/auth"
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/123508/douyinshop/pkg/redis"
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -80,12 +80,12 @@ func (s *AuthServiceImpl) VerifyTokenByRPC(ctx context.Context, req *auth.Verify
 		return &auth.VerifyResp{Res: false}, errors.New("请求令牌为空")
 	}
 
-	redis, err := redis.InitRedis()
+	rds, err := redis.InitRedis()
 	if err != nil {
 		klog.Fatal(err)
 	}
 	//在redis中检查token是否存活
-	result, err := redis.Exists(ctx, req.Token).Result()
+	result, err := rds.Exists(ctx, req.Token).Result()
 
 	//如果redis连接出错,直接返回错误信息
 	if err != nil {
