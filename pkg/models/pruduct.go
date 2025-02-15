@@ -12,6 +12,6 @@ type Product struct {
 	Description string  `gorm:"comment '商品描述'"`
 	Picture     string  `gorm:"comment '商品图片'"`
 	Price       float32 `gorm:"type:decimal(10,2) comment '商品价格,精确到后两位'"`
-	Categories  []int64 `gorm:"many2many:product_categories;comment '类别ID'"`
+	Categories  string  `gorm:"comment '类别ID,多个类别用逗号分隔'"`
 	Status      bool    `gorm:"comment '商品是否出售'"`
 }
