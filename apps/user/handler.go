@@ -216,10 +216,10 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp *user.DeleteResp, err error) {
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
-		if err := DB.Where("id = ?", req.UserId).Unscoped().Delete(&models.User{}).Error; err != nil {
+		if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).Update("phone", nil).Update("email", nil).Delete(&models.User{}).Error; err != nil {
 			return err
 		}
-		if err := DB.Where("user_id=?", req.UserId).Unscoped().Delete(&models.UserLogin{}).Error; err != nil {
+		if err := DB.Where("user_id=?", req.UserId).Delete(&models.UserLogin{}).Error; err != nil {
 			return err
 		}
 
