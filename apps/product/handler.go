@@ -12,8 +12,36 @@ import (
 type ProductCatalogServiceImpl struct{}
 
 // ListProducts implements the ProductCatalogServiceImpl interface.
+// 若分类名为空，则返回所以商品中的第page页的pageSize个商品
+// 当商品不存在时，返回空列表
 func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *product.ListProductsReq) (resp *product.ListProductsResp, err error) {
-	// TODO: Your code here...
+	var products []models.Product
+	page := int(req.Page)
+	pageSize := int(req.PageSize)
+	productList := make([]*product.Product, 0)
+	if req.CategoryName == "" {
+		database.Offset((page - 1) * pageSize).Limit(pageSize).Find(&products)
+		for _, productItem := range products {
+			category := make([]string, 0)
+			for _, categoryIdStr := range strings.Split(productItem.Categories, ",") {
+				var categoryResult models.Category
+				categoryId, _ := strconv.Atoi(strings.Trim(categoryIdStr, " "))
+				database.First(&categoryResult, categoryId)
+				category = append(category, categoryResult.Name)
+			}
+			productList = append(productList, &product.Product{
+				Id:          uint32(productItem.ID),
+				Name:        productItem.Name,
+				Description: productItem.Description,
+				Picture:     productItem.Picture,
+				Price:       productItem.Price,
+				Categories:  category,
+			})
+		}
+	}
+	resp = &product.ListProductsResp{
+		Products: productList,
+	}
 	return
 }
 
