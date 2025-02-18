@@ -89,6 +89,11 @@ func (x *Product) FastRead(buf []byte, _type int8, number int32) (offset int, er
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 7:
+		offset, err = x.fastReadField7(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -134,6 +139,11 @@ func (x *Product) fastReadField6(buf []byte, _type int8) (offset int, err error)
 		return offset, err
 	}
 	x.Categories = append(x.Categories, v)
+	return offset, err
+}
+
+func (x *Product) fastReadField7(buf []byte, _type int8) (offset int, err error) {
+	x.Sales, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -341,6 +351,7 @@ func (x *Product) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField4(buf[offset:])
 	offset += x.fastWriteField5(buf[offset:])
 	offset += x.fastWriteField6(buf[offset:])
+	offset += x.fastWriteField7(buf[offset:])
 	return offset
 }
 
@@ -391,6 +402,14 @@ func (x *Product) fastWriteField6(buf []byte) (offset int) {
 	for i := range x.GetCategories() {
 		offset += fastpb.WriteString(buf[offset:], 6, x.GetCategories()[i])
 	}
+	return offset
+}
+
+func (x *Product) fastWriteField7(buf []byte) (offset int) {
+	if x.Sales == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 7, x.GetSales())
 	return offset
 }
 
@@ -540,6 +559,7 @@ func (x *Product) Size() (n int) {
 	n += x.sizeField4()
 	n += x.sizeField5()
 	n += x.sizeField6()
+	n += x.sizeField7()
 	return n
 }
 
@@ -590,6 +610,14 @@ func (x *Product) sizeField6() (n int) {
 	for i := range x.GetCategories() {
 		n += fastpb.SizeString(6, x.GetCategories()[i])
 	}
+	return n
+}
+
+func (x *Product) sizeField7() (n int) {
+	if x.Sales == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(7, x.GetSales())
 	return n
 }
 
@@ -708,6 +736,7 @@ var fieldIDToName_Product = map[int32]string{
 	4: "Picture",
 	5: "Price",
 	6: "Categories",
+	7: "Sales",
 }
 
 var fieldIDToName_ListProductsResp = map[int32]string{
