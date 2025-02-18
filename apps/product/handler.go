@@ -37,6 +37,7 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 				Picture:     productItem.Picture,
 				Price:       productItem.Price,
 				Categories:  category,
+				Sales:       productItem.Sales,
 			})
 		}
 	} else { // 分类名不为空时，返回指定类型商品
@@ -56,6 +57,7 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 				Picture:     productItem.Picture,
 				Price:       productItem.Price,
 				Categories:  category,
+				Sales:       productItem.Sales,
 			})
 		}
 	}
@@ -91,6 +93,7 @@ func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product
 				Picture:     result.Picture,
 				Price:       result.Price,
 				Categories:  category,
+				Sales:       result.Sales,
 			},
 		}
 	}
