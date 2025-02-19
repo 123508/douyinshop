@@ -32,6 +32,7 @@ message ChargeResp {
 
 message NotifyReq {
     string transaction_id = 1;
+    string order_id = 2;
 }
 
 message NotifyResp {
