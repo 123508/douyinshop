@@ -44,8 +44,10 @@ func main() {
 	))
 
 	// 创建Kitex服务实例
+	serviceImpl := new(ShopServiceImpl)
+	serviceImpl.db = database
 	svr := shopservice.NewServer(
-		&ShopServiceImpl{db: database},
+		serviceImpl,
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
