@@ -14,3 +14,9 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 	// TODO: Your code here...
 	return
 }
+
+// Notify implements the PaymentServiceImpl interface.
+func (s *PaymentServiceImpl) Notify(ctx context.Context, req *payment.NotifyReq) (resp *payment.NotifyResp, err error) {
+	// TODO: Your code here...
+	return
+}
