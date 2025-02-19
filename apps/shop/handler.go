@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/123508/douyinshop/pkg/config"
 	"log"
 	"strings"
 
@@ -18,45 +17,6 @@ type ShopServiceImpl struct {
 	db         *gorm.DB
 	etcdClient *clientv3.Client
 	leaseID    clientv3.LeaseID
-}
-
-// 新增etcd服务注册逻辑
-func (s *ShopServiceImpl) registerService() error {
-	serviceName := "douyinshop.shop.service"
-	serviceAddr := fmt.Sprintf("%s:%d",
-		config.Conf.ShopConfig.Host,
-		config.Conf.ShopConfig.Port,
-	)
-
-	lease := clientv3.NewLease(s.etcdClient)
-	grantResp, err := lease.Grant(context.TODO(), 10)
-	if err != nil {
-		return err
-	}
-
-	_, err = s.etcdClient.Put(context.TODO(),
-		fmt.Sprintf("/%s/%s", serviceName, serviceAddr),
-		serviceAddr,
-		clientv3.WithLease(grantResp.ID),
-	)
-	if err != nil {
-		return err
-	}
-
-	s.leaseID = grantResp.ID
-
-	// 维持心跳
-	go func() {
-		ch, err := lease.KeepAlive(context.TODO(), s.leaseID)
-		if err != nil {
-			log.Fatalf("keep alive failed: %v", err)
-		}
-		for {
-			<-ch
-		}
-	}()
-
-	return nil
 }
 
 // Register 注册店铺
