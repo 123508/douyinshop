@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	product "github.com/123508/douyinshop/kitex_gen/product"
+	"github.com/123508/douyinshop/pkg/els"
 	"github.com/123508/douyinshop/pkg/models"
 	"strconv"
 	"strings"
@@ -101,7 +102,36 @@ func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product
 }
 
 // SearchProducts implements the ProductCatalogServiceImpl interface.
+// 当搜索结果为空时，返回空列表
+// 当搜索结果不为空时，返回搜索结果
 func (s *ProductCatalogServiceImpl) SearchProducts(ctx context.Context, req *product.SearchProductsReq) (resp *product.SearchProductsResp, err error) {
-	// TODO: Your code here...
+	result, err := els.SearchProduct(req.Query, int(req.Page), int(req.PageSize))
+	if err != nil {
+		return nil, err
+	}
+	productList := make([]*product.Product, 0)
+	for _, productId := range result {
+		var productResult models.Product
+		database.First(&productResult, productId)
+		category := make([]string, 0)
+		for _, categoryIdStr := range strings.Split(productResult.Categories, ",") {
+			var categoryResult models.Category
+			categoryId, _ := strconv.Atoi(strings.Trim(categoryIdStr, " "))
+			database.First(&categoryResult, categoryId)
+			category = append(category, categoryResult.Name)
+		}
+		productList = append(productList, &product.Product{
+			Id:          uint32(productResult.ID),
+			Name:        productResult.Name,
+			Description: productResult.Description,
+			Picture:     productResult.Picture,
+			Price:       productResult.Price,
+			Categories:  category,
+			Sales:       productResult.Sales,
+		})
+	}
+	resp = &product.SearchProductsResp{
+		Results: productList,
+	}
 	return
 }

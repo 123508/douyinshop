@@ -32,7 +32,7 @@ func init() {
 // SearchProduct 搜索商品
 // name: 商品名称
 // 返回值: 商品id列表
-func SearchProduct(name string) ([]uint32, error) {
+func SearchProduct(name string, page int, size int) ([]uint32, error) {
 	if es == nil {
 		return nil, fmt.Errorf("ElasticSearch client is nil")
 	}
@@ -61,6 +61,8 @@ func SearchProduct(name string) ([]uint32, error) {
 				},
 			},
 		},
+		"from": (page - 1) * size,
+		"size": size,
 	}
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		return nil, fmt.Errorf("error encoding query: %s", err)
