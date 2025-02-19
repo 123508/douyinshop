@@ -170,3 +170,24 @@ func UpdateProduct(product *product.Product) error {
 	}
 	return nil
 }
+
+// DeleteProduct 删除ElasticSearch中的商品信息
+// id: 商品id
+// 返回值: 错误信息
+func DeleteProduct(id uint32) error {
+	if es == nil {
+		return fmt.Errorf("ElasticSearch client is nil")
+	}
+	res, err := es.Delete("product", strconv.Itoa(int(id)))
+	if err != nil {
+		return fmt.Errorf("error deleting: %s", err)
+	}
+	if res.IsError() {
+		var e map[string]interface{}
+		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
+			return fmt.Errorf("error parsing the response body: %s", err)
+		}
+		return fmt.Errorf("error: %s", e)
+	}
+	return nil
+}

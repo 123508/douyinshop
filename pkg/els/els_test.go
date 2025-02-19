@@ -32,3 +32,13 @@ func TestUpdateProduct(t *testing.T) {
 	}
 	t.Logf("UpdateProduct() success")
 }
+
+func TestDeleteProduct(t *testing.T) {
+	id := uint32(7)
+	err := DeleteProduct(id)
+	if err != nil {
+		t.Errorf("DeleteProduct() error = %v", err)
+		return
+	}
+	t.Logf("DeleteProduct() success")
+}
