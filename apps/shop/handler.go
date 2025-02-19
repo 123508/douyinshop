@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/123508/douyinshop/pkg/config"
 	"log"
 	"strings"
 
@@ -13,16 +14,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type ShopServiceServer struct {
+type ShopServiceImpl struct {
 	db         *gorm.DB
 	etcdClient *clientv3.Client
 	leaseID    clientv3.LeaseID
 }
 
 // 新增etcd服务注册逻辑
-func (s *ShopServiceServer) registerService() error {
+func (s *ShopServiceImpl) registerService() error {
 	serviceName := "douyinshop.shop.service"
-	serviceAddr := "localhost:8080"
+	serviceAddr := fmt.Sprintf("%s:%d",
+		config.Conf.ShopConfig.Host,
+		config.Conf.ShopConfig.Port,
+	)
 
 	lease := clientv3.NewLease(s.etcdClient)
 	grantResp, err := lease.Grant(context.TODO(), 10)
@@ -56,7 +60,7 @@ func (s *ShopServiceServer) registerService() error {
 }
 
 // Register 注册店铺
-func (s *ShopServiceServer) Register(ctx context.Context, req *pb.RegisterShopReq) (*pb.RegisterShopResp, error) {
+func (s *ShopServiceImpl) Register(ctx context.Context, req *pb.RegisterShopReq) (*pb.RegisterShopResp, error) {
 	shop := models.Shop{
 		UserId:      req.UserId,
 		Name:        req.ShopName,
@@ -72,7 +76,7 @@ func (s *ShopServiceServer) Register(ctx context.Context, req *pb.RegisterShopRe
 }
 
 // GetShopId 获取用户所开的店铺id
-func (s *ShopServiceServer) GetShopId(ctx context.Context, req *pb.GetShopIdReq) (*pb.GetShopIdResp, error) {
+func (s *ShopServiceImpl) GetShopId(ctx context.Context, req *pb.GetShopIdReq) (*pb.GetShopIdResp, error) {
 	var shop models.Shop
 	result := s.db.Where("user_id = ?", req.UserId).First(&shop)
 	if result.Error != nil {
@@ -85,7 +89,7 @@ func (s *ShopServiceServer) GetShopId(ctx context.Context, req *pb.GetShopIdReq)
 }
 
 // GetShopInfo 获取店铺信息
-func (s *ShopServiceServer) GetShopInfo(ctx context.Context, req *pb.GetShopInfoReq) (*pb.GetShopInfoResp, error) {
+func (s *ShopServiceImpl) GetShopInfo(ctx context.Context, req *pb.GetShopInfoReq) (*pb.GetShopInfoResp, error) {
 	var shop models.Shop
 	result := s.db.Where("id = ?", req.ShopId).First(&shop)
 	if result.Error != nil {
@@ -103,7 +107,7 @@ func (s *ShopServiceServer) GetShopInfo(ctx context.Context, req *pb.GetShopInfo
 }
 
 // UpdateShopInfo 更新店铺信息
-func (s *ShopServiceServer) UpdateShopInfo(ctx context.Context, req *pb.UpdateShopInfoReq) (*pb.UpdateShopInfoResp, error) {
+func (s *ShopServiceImpl) UpdateShopInfo(ctx context.Context, req *pb.UpdateShopInfoReq) (*pb.UpdateShopInfoResp, error) {
 	var shop models.Shop
 	result := s.db.Where("id = ?", req.ShopId).First(&shop)
 	if result.Error != nil {
@@ -124,7 +128,7 @@ func (s *ShopServiceServer) UpdateShopInfo(ctx context.Context, req *pb.UpdateSh
 }
 
 // AddProduct 添加商品
-func (s *ShopServiceServer) AddProduct(ctx context.Context, req *pb.AddProductReq) (*pb.AddProductResp, error) {
+func (s *ShopServiceImpl) AddProduct(ctx context.Context, req *pb.AddProductReq) (*pb.AddProductResp, error) {
 	if req.Product == nil {
 		return nil, fmt.Errorf("product information is missing")
 	}
@@ -146,7 +150,7 @@ func (s *ShopServiceServer) AddProduct(ctx context.Context, req *pb.AddProductRe
 }
 
 // DeleteProduct 删除商品
-func (s *ShopServiceServer) DeleteProduct(ctx context.Context, req *pb.DeleteProductReq) (*pb.DeleteProductResp, error) {
+func (s *ShopServiceImpl) DeleteProduct(ctx context.Context, req *pb.DeleteProductReq) (*pb.DeleteProductResp, error) {
 	var product models.Product
 	result := s.db.Where("id = ? AND shop_id = ?", req.ProductId, req.ShopId).Delete(&product)
 	if result.Error != nil {
@@ -156,7 +160,7 @@ func (s *ShopServiceServer) DeleteProduct(ctx context.Context, req *pb.DeletePro
 }
 
 // UpdateProduct 更新商品
-func (s *ShopServiceServer) UpdateProduct(ctx context.Context, req *pb.UpdateProductReq) (*pb.UpdateProductResp, error) {
+func (s *ShopServiceImpl) UpdateProduct(ctx context.Context, req *pb.UpdateProductReq) (*pb.UpdateProductResp, error) {
 	var product models.Product
 	result := s.db.Where("id = ? AND shop_id = ?", req.Product.Id, req.ShopId).First(&product)
 	if result.Error != nil {
@@ -181,7 +185,7 @@ func (s *ShopServiceServer) UpdateProduct(ctx context.Context, req *pb.UpdatePro
 }
 
 // GetProductList 获取商品列表
-func (s *ShopServiceServer) GetProductList(ctx context.Context, req *pb.GetProductListReq) (*pb.GetProductListResp, error) {
+func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProductListReq) (*pb.GetProductListResp, error) {
 	if req.Page < 1 {
 		req.Page = 1
 	}

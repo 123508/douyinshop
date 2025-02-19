@@ -15,7 +15,7 @@ import (
 	etcd "github.com/kitex-contrib/registry-etcd"
 )
 
-type ShopServiceImpl struct {
+type ShopServiceServer struct {
 	db *gorm.DB
 }
 
@@ -44,10 +44,8 @@ func main() {
 	))
 
 	// 创建Kitex服务实例
-	serviceImpl := new(ShopServiceImpl)
-	serviceImpl.db = database
 	svr := shopservice.NewServer(
-		serviceImpl,
+		&ShopServiceImpl{db: database},
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
