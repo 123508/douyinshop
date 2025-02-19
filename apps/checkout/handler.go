@@ -46,7 +46,6 @@ func (s *CheckoutServiceImpl) Checkout(ctx context.Context, req *checkout.Checko
 	// TODO: Your code here...
 	//get cart
 	cartResult, err := CartClient.GetCart(s.ctx, &cart.GetCartReq{UserId: req.UserId})
-
 	if err != nil {
 		klog.Error(err)
 		err = fmt.Errorf("GetCart.err:%v", err)
