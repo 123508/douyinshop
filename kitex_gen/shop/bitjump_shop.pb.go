@@ -493,6 +493,7 @@ type AddProductReq struct {
 
 	ShopId  uint32           `protobuf:"varint,1,opt,name=shop_id,json=shopId,proto3" json:"shop_id,omitempty"`
 	Product *product.Product `protobuf:"bytes,2,opt,name=product,proto3" json:"product,omitempty"`
+	Status  bool
 }
 
 func (x *AddProductReq) Reset() {
@@ -800,6 +801,7 @@ type GetProductListReq struct {
 	ShopId   uint32 `protobuf:"varint,1,opt,name=shop_id,json=shopId,proto3" json:"shop_id,omitempty"`
 	Page     uint32 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize uint32 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	From     interface{}
 }
 
 func (x *GetProductListReq) Reset() {

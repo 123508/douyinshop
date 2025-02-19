@@ -71,6 +71,7 @@ message GetShopInfoResp {
 message AddProductReq {
   uint32 shop_id = 1;
   product.Product product = 2;
+  bool status = 3;
 }
 
 message AddProductResp {
@@ -104,3 +105,5 @@ message GetProductListReq {
 message GetProductListResp {
   repeated product.Product products = 1;
 }
+
+
