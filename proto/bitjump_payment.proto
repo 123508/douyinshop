@@ -7,6 +7,7 @@ option go_package = "payment";
 
 service PaymentService {
     rpc Charge(ChargeReq) returns (ChargeResp) {}
+    rpc Notify(NotifyReq) returns (NotifyResp) {}
 }
 
 message CreditCardInfo {
@@ -25,5 +26,13 @@ message ChargeReq {
 }
 
 message ChargeResp {
+    string transaction_id = 1; // 如果是支付宝支付, 先留空
+    string pay_url = 2; // 支付宝或微信的支付链接
+}
+
+message NotifyReq {
     string transaction_id = 1;
+}
+
+message NotifyResp {
 }

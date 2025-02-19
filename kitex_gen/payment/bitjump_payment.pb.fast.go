@@ -144,6 +144,11 @@ func (x *ChargeResp) FastRead(buf []byte, _type int8, number int32) (offset int,
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -160,6 +165,49 @@ ReadFieldError:
 func (x *ChargeResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.TransactionId, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
+}
+
+func (x *ChargeResp) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.PayUrl, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *NotifyReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_NotifyReq[number], err)
+}
+
+func (x *NotifyReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.TransactionId, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *NotifyResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
 }
 
 func (x *CreditCardInfo) FastWrite(buf []byte) (offset int) {
@@ -262,6 +310,7 @@ func (x *ChargeResp) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -270,6 +319,37 @@ func (x *ChargeResp) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 1, x.GetTransactionId())
+	return offset
+}
+
+func (x *ChargeResp) fastWriteField2(buf []byte) (offset int) {
+	if x.PayUrl == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetPayUrl())
+	return offset
+}
+
+func (x *NotifyReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *NotifyReq) fastWriteField1(buf []byte) (offset int) {
+	if x.TransactionId == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 1, x.GetTransactionId())
+	return offset
+}
+
+func (x *NotifyResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
 	return offset
 }
 
@@ -373,6 +453,7 @@ func (x *ChargeResp) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
@@ -381,6 +462,37 @@ func (x *ChargeResp) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeString(1, x.GetTransactionId())
+	return n
+}
+
+func (x *ChargeResp) sizeField2() (n int) {
+	if x.PayUrl == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetPayUrl())
+	return n
+}
+
+func (x *NotifyReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *NotifyReq) sizeField1() (n int) {
+	if x.TransactionId == "" {
+		return n
+	}
+	n += fastpb.SizeString(1, x.GetTransactionId())
+	return n
+}
+
+func (x *NotifyResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
 	return n
 }
 
@@ -401,4 +513,11 @@ var fieldIDToName_ChargeReq = map[int32]string{
 
 var fieldIDToName_ChargeResp = map[int32]string{
 	1: "TransactionId",
+	2: "PayUrl",
 }
+
+var fieldIDToName_NotifyReq = map[int32]string{
+	1: "TransactionId",
+}
+
+var fieldIDToName_NotifyResp = map[int32]string{}
