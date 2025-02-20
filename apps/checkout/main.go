@@ -35,7 +35,7 @@ func main() {
 		server.WithRegistry(r),
 		server.WithServerBasicInfo(
 			&rpcinfo.EndpointBasicInfo{
-				ServiceName: config.Conf.AddressConfig.ServiceName,
+				ServiceName: config.Conf.CheckoutConfig.ServiceName,
 			},
 		),
 	)
