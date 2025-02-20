@@ -40,7 +40,7 @@ func (s *OrderBusinessServiceImpl) Receive(ctx context.Context, req *businessOrd
 }
 
 // Rejection implements the OrderBusinessServiceImpl interface.
-func (s *OrderBusinessServiceImpl) Rejection(ctx context.Context, req *businessOrder.ReceiveReq) (resp *order_common.Empty, err error) {
+func (s *OrderBusinessServiceImpl) Rejection(ctx context.Context, req *businessOrder.RejectionReq) (resp *order_common.Empty, err error) {
 	// TODO: Your code here...
 	return
 }
