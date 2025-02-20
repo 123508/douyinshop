@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/123508/douyinshop/pkg/els"
 	"log"
 	"strings"
 
@@ -106,6 +107,22 @@ func (s *ShopServiceImpl) AddProduct(ctx context.Context, req *pb.AddProductReq)
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
+	// 更新ES中的商品信息
+	err := els.UpdateProduct(
+		&ba.Product{
+			Id:          product.Id,
+			Name:        product.Name,
+			Description: product.Description,
+			Price:       product.Price,
+			Categories:  req.Product.Categories,
+			Sales:       0,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.AddProductResp{ProductId: product.Id}, nil
 }
 
@@ -116,6 +133,13 @@ func (s *ShopServiceImpl) DeleteProduct(ctx context.Context, req *pb.DeleteProdu
 	if result.Error != nil {
 		return &pb.DeleteProductResp{Res: false}, result.Error
 	}
+
+	// 删除ES中的商品信息
+	err := els.DeleteProduct(req.ProductId)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.DeleteProductResp{Res: result.RowsAffected > 0}, nil
 }
 
@@ -141,6 +165,13 @@ func (s *ShopServiceImpl) UpdateProduct(ctx context.Context, req *pb.UpdateProdu
 	if updateResult.Error != nil {
 		return &pb.UpdateProductResp{Res: false}, updateResult.Error
 	}
+
+	// 更新ES中的商品信息
+	err := els.UpdateProduct(req.Product)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.UpdateProductResp{Res: true}, nil
 }
 
