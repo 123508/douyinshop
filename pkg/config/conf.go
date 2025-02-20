@@ -109,7 +109,7 @@ type PaymentConfig struct {
 
 type AlipayConfig struct {
 	AppId      string `mapstructure:"app_id"`
-	PrivateKey string `mapstructure:"private_key"`
+	PrivateKey string `mapstructure:"app_private_key"`
 }
 
 type ProductConfig struct {

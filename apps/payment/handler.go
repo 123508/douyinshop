@@ -6,7 +6,6 @@ import (
 	payment "github.com/123508/douyinshop/kitex_gen/payment"
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/smartwalle/alipay/v3"
-	"log"
 	"math/rand"
 	"sync/atomic"
 	"time"
@@ -22,7 +21,7 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 		var client *alipay.Client
 		if client, err = alipay.New(config.Conf.PaymentConfig.Alipay.AppId, config.Conf.PaymentConfig.Alipay.PrivateKey,
 			false); err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 		// 支付链接参数
 		var p = alipay.TradePagePay{}
