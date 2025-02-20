@@ -46,7 +46,7 @@ service OrderBusinessService{
   // 转变订单状态为待收货
   rpc Receive(ReceiveReq) returns (common.Empty);
   // 拒绝订单
-  rpc Rejection(ReceiveReq) returns (common.Empty);
+  rpc Rejection(RejectionReq) returns (common.Empty);
   // 取消订单
   rpc Cancel(common.CancelReq) returns (common.Empty);
 }

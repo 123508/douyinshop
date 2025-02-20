@@ -101,9 +101,15 @@ type OrderConfig struct {
 }
 
 type PaymentConfig struct {
-	Host        string `mapstructure:"host"`
-	Port        int    `mapstructure:"port"`
-	ServiceName string `mapstructure:"service_name"`
+	Host        string       `mapstructure:"host"`
+	Port        int          `mapstructure:"port"`
+	ServiceName string       `mapstructure:"service_name"`
+	Alipay      AlipayConfig `mapstructure:"alipay"`
+}
+
+type AlipayConfig struct {
+	AppId      string `mapstructure:"app_id"`
+	PrivateKey string `mapstructure:"app_private_key"`
 }
 
 type ProductConfig struct {
