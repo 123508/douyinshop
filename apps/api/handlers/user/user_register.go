@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	// "log"
 
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/user"
