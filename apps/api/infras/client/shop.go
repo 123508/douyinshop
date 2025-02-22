@@ -16,10 +16,6 @@ import (
 
 var shopClient shopservice.Client
 
-func init() {
-	initShopRpc()
-}
-
 func initShopRpc() {
 	r, err := etcd.NewEtcdResolverWithAuth(config.Conf.EtcdConfig.Endpoints, config.Conf.EtcdConfig.Username, config.Conf.EtcdConfig.Password)
 	if err != nil {
