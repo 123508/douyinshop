@@ -95,6 +95,11 @@ func (x *OrderSubmitResp) FastRead(buf []byte, _type int8, number int32) (offset
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -121,6 +126,16 @@ func (x *OrderSubmitResp) fastReadField2(buf []byte, _type int8) (offset int, er
 func (x *OrderSubmitResp) fastReadField3(buf []byte, _type int8) (offset int, err error) {
 	x.OrderAmount, offset, err = fastpb.ReadFloat(buf, _type)
 	return offset, err
+}
+
+func (x *OrderSubmitResp) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	var v order_common.OrderReq
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.Order = &v
+	return offset, nil
 }
 
 func (x *HistoryReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
@@ -357,6 +372,7 @@ func (x *OrderSubmitResp) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
 	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
 	return offset
 }
 
@@ -381,6 +397,14 @@ func (x *OrderSubmitResp) fastWriteField3(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteFloat(buf[offset:], 3, x.GetOrderAmount())
+	return offset
+}
+
+func (x *OrderSubmitResp) fastWriteField4(buf []byte) (offset int) {
+	if x.Order == nil {
+		return offset
+	}
+	offset += fastpb.WriteMessage(buf[offset:], 4, x.GetOrder())
 	return offset
 }
 
@@ -572,6 +596,7 @@ func (x *OrderSubmitResp) Size() (n int) {
 	n += x.sizeField1()
 	n += x.sizeField2()
 	n += x.sizeField3()
+	n += x.sizeField4()
 	return n
 }
 
@@ -596,6 +621,14 @@ func (x *OrderSubmitResp) sizeField3() (n int) {
 		return n
 	}
 	n += fastpb.SizeFloat(3, x.GetOrderAmount())
+	return n
+}
+
+func (x *OrderSubmitResp) sizeField4() (n int) {
+	if x.Order == nil {
+		return n
+	}
+	n += fastpb.SizeMessage(4, x.GetOrder())
 	return n
 }
 
@@ -740,6 +773,7 @@ var fieldIDToName_OrderSubmitResp = map[int32]string{
 	1: "OrderId",
 	2: "Number",
 	3: "OrderAmount",
+	4: "Order",
 }
 
 var fieldIDToName_HistoryReq = map[int32]string{

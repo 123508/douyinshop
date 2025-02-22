@@ -18,6 +18,7 @@ message OrderSubmitResp{
     uint32 order_id=1;
     string number=2;
     float  order_amount=3;
+    order.common.OrderReq order=4;
 }
 
 message HistoryReq{
