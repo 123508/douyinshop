@@ -20,6 +20,9 @@ func main() {
 		log.Fatal(err)
 	}
 	db.AutoMigrate(&models.Order{})
+	db.AutoMigrate(&models.OrderDetail{})
+	db.AutoMigrate(&models.OrderStatusLog{})
+	db.AutoMigrate(&models.Product{})
 
 	// 设置 Etcd 注册
 	r, err := etcd.NewEtcdRegistryWithAuth(config.Conf.EtcdConfig.Endpoints, config.Conf.EtcdConfig.Username, config.Conf.EtcdConfig.Password)
@@ -28,7 +31,7 @@ func main() {
 	}
 
 	// 设置服务地址
-	addr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Conf.OrderConfig.Host, config.Conf.OrderConfig.Port))
+	addr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Conf.BusinessOrderConfig.Host, config.Conf.BusinessOrderConfig.Port))
 
 	// 创建 server
 	svr := businessOrder.NewServer(
@@ -37,7 +40,7 @@ func main() {
 		server.WithRegistry(r),
 		server.WithServerBasicInfo(
 			&rpcinfo.EndpointBasicInfo{
-				ServiceName: config.Conf.OrderConfig.ServiceName,
+				ServiceName: config.Conf.BusinessOrderConfig.ServiceName,
 			},
 		),
 	)

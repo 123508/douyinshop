@@ -19,7 +19,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&models.Order{}) // 迁移订单模型
+
+	db.AutoMigrate(&models.Order{})
+	db.AutoMigrate(&models.OrderDetail{})
+	db.AutoMigrate(&models.OrderStatusLog{})
 
 	// 设置 Etcd 注册
 	r, err := etcd.NewEtcdRegistryWithAuth(config.Conf.EtcdConfig.Endpoints, config.Conf.EtcdConfig.Username, config.Conf.EtcdConfig.Password)

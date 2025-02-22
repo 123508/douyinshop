@@ -17,7 +17,7 @@ type Client interface {
 	Confirm(ctx context.Context, Req *businessOrder.ConfirmReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
 	Delivery(ctx context.Context, Req *businessOrder.DeliveryReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
 	Receive(ctx context.Context, Req *businessOrder.ReceiveReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
-	Rejection(ctx context.Context, Req *businessOrder.ReceiveReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
+	Rejection(ctx context.Context, Req *businessOrder.RejectionReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
 	Cancel(ctx context.Context, Req *order_common.CancelReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
 }
 
@@ -75,7 +75,7 @@ func (p *kOrderBusinessServiceClient) Receive(ctx context.Context, Req *business
 	return p.kClient.Receive(ctx, Req)
 }
 
-func (p *kOrderBusinessServiceClient) Rejection(ctx context.Context, Req *businessOrder.ReceiveReq, callOptions ...callopt.Option) (r *order_common.Empty, err error) {
+func (p *kOrderBusinessServiceClient) Rejection(ctx context.Context, Req *businessOrder.RejectionReq, callOptions ...callopt.Option) (r *order_common.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Rejection(ctx, Req)
 }

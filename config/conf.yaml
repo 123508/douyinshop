@@ -66,6 +66,9 @@ payment:
   host: 127.0.0.1
   port: 8906
   service_name: "bitjump.douyinshop.payment"
+  alipay:
+    app_id: "your app_id"
+    app_private_key: "your app_private_key"
 
 product:
   host: 127.0.0.1

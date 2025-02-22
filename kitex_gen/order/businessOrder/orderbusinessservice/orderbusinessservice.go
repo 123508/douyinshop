@@ -900,7 +900,7 @@ func rejectionHandler(ctx context.Context, handler interface{}, arg, result inte
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(businessOrder.ReceiveReq)
+		req := new(businessOrder.RejectionReq)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
@@ -930,12 +930,12 @@ func newRejectionResult() interface{} {
 }
 
 type RejectionArgs struct {
-	Req *businessOrder.ReceiveReq
+	Req *businessOrder.RejectionReq
 }
 
 func (p *RejectionArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(businessOrder.ReceiveReq)
+		p.Req = new(businessOrder.RejectionReq)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -962,7 +962,7 @@ func (p *RejectionArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *RejectionArgs) Unmarshal(in []byte) error {
-	msg := new(businessOrder.ReceiveReq)
+	msg := new(businessOrder.RejectionReq)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -970,9 +970,9 @@ func (p *RejectionArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var RejectionArgs_Req_DEFAULT *businessOrder.ReceiveReq
+var RejectionArgs_Req_DEFAULT *businessOrder.RejectionReq
 
-func (p *RejectionArgs) GetReq() *businessOrder.ReceiveReq {
+func (p *RejectionArgs) GetReq() *businessOrder.RejectionReq {
 	if !p.IsSetReq() {
 		return RejectionArgs_Req_DEFAULT
 	}
@@ -1262,7 +1262,7 @@ func (p *kClient) Receive(ctx context.Context, Req *businessOrder.ReceiveReq) (r
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) Rejection(ctx context.Context, Req *businessOrder.ReceiveReq) (r *order_common.Empty, err error) {
+func (p *kClient) Rejection(ctx context.Context, Req *businessOrder.RejectionReq) (r *order_common.Empty, err error) {
 	var _args RejectionArgs
 	_args.Req = Req
 	var _result RejectionResult

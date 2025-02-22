@@ -22,6 +22,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"Notify": kitex.NewMethodInfo(
+		notifyHandler,
+		newNotifyArgs,
+		newNotifyResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 }
 
 var (
@@ -241,6 +248,159 @@ func (p *ChargeResult) GetResult() interface{} {
 	return p.Success
 }
 
+func notifyHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(payment.NotifyReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(payment.PaymentService).Notify(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *NotifyArgs:
+		success, err := handler.(payment.PaymentService).Notify(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*NotifyResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newNotifyArgs() interface{} {
+	return &NotifyArgs{}
+}
+
+func newNotifyResult() interface{} {
+	return &NotifyResult{}
+}
+
+type NotifyArgs struct {
+	Req *payment.NotifyReq
+}
+
+func (p *NotifyArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(payment.NotifyReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *NotifyArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *NotifyArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *NotifyArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *NotifyArgs) Unmarshal(in []byte) error {
+	msg := new(payment.NotifyReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var NotifyArgs_Req_DEFAULT *payment.NotifyReq
+
+func (p *NotifyArgs) GetReq() *payment.NotifyReq {
+	if !p.IsSetReq() {
+		return NotifyArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *NotifyArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *NotifyArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type NotifyResult struct {
+	Success *payment.NotifyResp
+}
+
+var NotifyResult_Success_DEFAULT *payment.NotifyResp
+
+func (p *NotifyResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(payment.NotifyResp)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *NotifyResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *NotifyResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *NotifyResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *NotifyResult) Unmarshal(in []byte) error {
+	msg := new(payment.NotifyResp)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *NotifyResult) GetSuccess() *payment.NotifyResp {
+	if !p.IsSetSuccess() {
+		return NotifyResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *NotifyResult) SetSuccess(x interface{}) {
+	p.Success = x.(*payment.NotifyResp)
+}
+
+func (p *NotifyResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *NotifyResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -256,6 +416,16 @@ func (p *kClient) Charge(ctx context.Context, Req *payment.ChargeReq) (r *paymen
 	_args.Req = Req
 	var _result ChargeResult
 	if err = p.c.Call(ctx, "Charge", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) Notify(ctx context.Context, Req *payment.NotifyReq) (r *payment.NotifyResp, err error) {
+	var _args NotifyArgs
+	_args.Req = Req
+	var _result NotifyResult
+	if err = p.c.Call(ctx, "Notify", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

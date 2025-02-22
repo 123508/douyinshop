@@ -13,16 +13,20 @@ service UserService {
     rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoResp) {}
     // 用户登出
     rpc Logout(LogoutReq) returns (LogoutResp) {}
+    //修改用户
+    rpc Update(UpdateReq) returns (UpdateResp){}
+    //删除用户
+    rpc Delete(DeleteReq) returns (DeleteResp){}
 }
 
 message RegisterReq {
     string email = 1;
     string password = 2;
-    string confirm_password = 3;
+    string confirm_password=3;
     string nickname = 4;
     string avatar = 5;
     string phone = 6;
-    uint32  gender = 7;
+    uint32 gender = 7;
 }
 
 message RegisterResp {
@@ -39,7 +43,7 @@ message LoginResp {
 }
 
 message GetUserInfoReq {
-    string token = 1;
+    uint32 user_id=1;
 }
 
 message GetUserInfoResp {
@@ -55,3 +59,20 @@ message LogoutReq {
 }
 
 message LogoutResp {}
+
+message UpdateReq{
+    string password = 1;
+    string nickname = 2;
+    string avatar = 3;
+    string phone = 4;
+    uint32 gender = 5;
+    uint32 user_id=6;
+}
+
+message UpdateResp{}
+
+message DeleteReq{
+    uint32 user_id=1;
+}
+
+message DeleteResp{}
