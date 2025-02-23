@@ -16,7 +16,7 @@ func ParseToken() app.HandlerFunc {
 
 		// 解析jwt
 		userId, newToken, err := client.VerifyToken(ctx, &auth.VerifyTokenReq{Token: token})
-		if err != nil {
+		if err != nil || userId == 0 {
 			c.JSON(401, map[string]interface{}{
 				"error": "请先登录",
 			})
