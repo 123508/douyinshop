@@ -12,13 +12,13 @@ message OrderSubmitReq{
     int32 pay_method=3;
     string remark=4;
     float amount=5;
+    order.common.OrderReq order=6;
 }
 
 message OrderSubmitResp{
     uint32 order_id=1;
     string number=2;
     float  order_amount=3;
-    order.common.OrderReq order=4;
 }
 
 message HistoryReq{
