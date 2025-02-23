@@ -48,5 +48,8 @@ func VerifyToken(ctx context.Context, req *auth.VerifyTokenReq) (uint32, string,
 	if err != nil {
 		return 0, "", err
 	}
+	if resp.Res == false {
+		return 0, "", nil
+	}
 	return resp.UserId, req.Token, nil
 }
