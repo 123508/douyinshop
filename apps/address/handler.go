@@ -249,7 +249,7 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 	})
 
 	if err != nil {
-		klog.Fatal(err)
+		klog.Error(err)
 		return &address.UpdateAddressResp{Res: false}, &errors.BasicMessageError{Message: "更新地址失败,请联系管理员"}
 	}
 
