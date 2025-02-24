@@ -7,7 +7,7 @@ type AddressBook struct {
 	UserId        uint32 `gorm:"comment '用户id'"`
 	Consignee     string `gorm:"type:varchar(60) comment '收货人'"`
 	Gender        uint32 `gorm:"comment '收货人性别 1男 0女'"`
-	Phone         string `gorm:"type:varchar(11) unique comment '手机号'"`
+	Phone         string `gorm:"type:varchar(11) comment '手机号'"`
 	StressAddress string `gorm:"type:varchar(255) comment '详细地址'"`
 	City          string `gorm:"type:varchar(60) comment '城市'"`
 	State         string `gorm:"type:varchar(60) comment '省份/州'"`
