@@ -24,7 +24,7 @@ func main() {
 	userGrop := hz.Group("/user")
 	userGrop.POST("/register", user.Register)
 	userGrop.POST("/login", user.Login)
-	userGrop.GET("/logout", middleware.ParseToken(), user.Logout)
+	userGrop.GET("/logout", user.Logout)
 	userGrop.GET("/info", middleware.ParseToken(), user.GetInfo)
 	userGrop.POST("/update_info", middleware.ParseToken(), user.UpdateInfo)
 	userGrop.DELETE("/delete", middleware.ParseToken(), user.Delete)
