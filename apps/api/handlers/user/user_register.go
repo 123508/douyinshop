@@ -24,12 +24,12 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	resp, err := client.Register(ctx, req)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{
-			"error": err,
+			"error": err.Error(),
 		})
 		return
 	}
 
 	c.JSON(consts.StatusOK, utils.H{
-		"userId": resp,
+		"ok": resp,
 	})
 }

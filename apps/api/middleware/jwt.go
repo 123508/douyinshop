@@ -20,6 +20,7 @@ func ParseToken() app.HandlerFunc {
 			c.JSON(401, map[string]interface{}{
 				"error": "请先登录",
 			})
+			c.Abort()
 			return
 		}
 
