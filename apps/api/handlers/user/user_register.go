@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/user"
@@ -11,21 +12,24 @@ import (
 )
 
 func Register(ctx context.Context, c *app.RequestContext) {
-	req := &user.RegisterReq{
-		Email:    c.Query("email"),
-		Password: c.Query("password"),
-	}
+	req := &user.RegisterReq{}
 
-	resp, err := client.Register(context.Background(), req)
-	if err != nil {
-		// log.Fatal(err)
-		c.JSON(500, utils.H{
-			"error": "internal server error",
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "Error binding JSON",
 		})
 		return
 	}
 
-	c.JSON(200, utils.H{
+	resp, err := client.Register(ctx, req)
+	if err != nil {
+		c.JSON(consts.StatusInternalServerError, utils.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.JSON(consts.StatusOK, utils.H{
 		"userId": resp,
 	})
 }
