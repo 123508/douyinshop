@@ -61,7 +61,7 @@ func ParseJWT(tokenString string) (*UserClaims, error) {
 func (s *AuthServiceImpl) DeliverTokenByRPC(ctx context.Context, req *auth.DeliverTokenReq) (resp *auth.DeliveryResp, err error) {
 	token, err := GenerateJWT(req.UserId)
 	if err != nil {
-		klog.Fatal(err)
+		return nil, err
 	}
 	resp = &auth.DeliveryResp{Token: token}
 	return resp, nil
@@ -89,7 +89,7 @@ func (s *AuthServiceImpl) VerifyTokenByRPC(ctx context.Context, req *auth.Verify
 
 	//如果redis连接出错,直接返回错误信息
 	if err != nil {
-		klog.Fatal(err)
+		return nil, err
 	} else {
 		//如果在redis中检测到token,则直接返回失败响应
 		if result == 1 {

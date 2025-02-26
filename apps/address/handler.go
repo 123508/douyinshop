@@ -189,6 +189,12 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 		return &address.UpdateAddressResp{Res: false}, &errors.BasicMessageError{Message: "地址不存在,请联系管理员"}
 	}
 
+	// 检查地址是否属于用户
+	var address1 models.AddressBook
+	if err = DB.Model(&models.AddressBook{}).Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&address1).Error; err != nil {
+		return nil, &errors.BasicMessageError{Message: "地址不存在或无权限访问"}
+	}
+
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		tx = DB.Model(&models.AddressBook{}).Where("id = ?", req.AddrId)
 
@@ -249,7 +255,7 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 	})
 
 	if err != nil {
-		klog.Fatal(err)
+		klog.Error(err)
 		return &address.UpdateAddressResp{Res: false}, &errors.BasicMessageError{Message: "更新地址失败,请联系管理员"}
 	}
 
@@ -260,6 +266,12 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 // 设置默认地址
 func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address.SetDefaultAddressReq) (resp *address.SetDefaultAddressResp, err error) {
 	defaultAddressId := s.getDefaultAddress(req.UserId)
+
+	// 检查地址是否属于用户
+	var address1 models.AddressBook
+	if err = DB.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&address1).Error; err != nil {
+		return nil, &errors.BasicMessageError{Message: "地址不存在或无权限访问"}
+	}
 
 	//如果要设置的地址就是默认地址,直接返回(异常情况)
 	if defaultAddressId == req.AddrId {
