@@ -43,10 +43,13 @@ func DeliverToken(ctx context.Context, req *auth.DeliverTokenReq) (string, error
 	return resp.Token, nil
 }
 
-func VerifyToken(ctx context.Context, req *auth.VerifyTokenReq) (bool, error) {
+func VerifyToken(ctx context.Context, req *auth.VerifyTokenReq) (uint32, string, error) {
 	resp, err := authClient.VerifyTokenByRPC(ctx, req)
 	if err != nil {
-		return false, err
+		return 0, "", err
 	}
-	return resp.Res, nil
+	if resp.Res == false {
+		return 0, "", nil
+	}
+	return resp.UserId, req.Token, nil
 }

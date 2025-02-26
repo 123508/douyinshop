@@ -34,12 +34,12 @@ func initUserRpc() {
 	userClient = c
 }
 
-func Register(ctx context.Context, req *user.RegisterReq) (uint32, error) {
-	resp, err := userClient.Register(ctx, req)
+func Register(ctx context.Context, req *user.RegisterReq) (bool, error) {
+	_, err := userClient.Register(ctx, req)
 	if err != nil {
-		return 0, err
+		return false, err
 	}
-	return resp.UserId, nil
+	return true, nil
 }
 
 func Login(ctx context.Context, req *user.LoginReq) (uint32, error) {
@@ -48,4 +48,33 @@ func Login(ctx context.Context, req *user.LoginReq) (uint32, error) {
 		return 0, err
 	}
 	return resp.UserId, nil
+}
+
+func Delete(ctx context.Context, req *user.DeleteReq) (bool, error) {
+	_, err := userClient.Delete(ctx, req)
+	return err == nil, err
+}
+
+func GetUserInfo(ctx context.Context, req *user.GetUserInfoReq) (*user.GetUserInfoResp, error) {
+	resp, err := userClient.GetUserInfo(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func Update(ctx context.Context, req *user.UpdateReq) (bool, error) {
+	_, err := userClient.Update(ctx, req)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func Logout(ctx context.Context, req *user.LogoutReq) (bool, error) {
+	_, err := userClient.Logout(ctx, req)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

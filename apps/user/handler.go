@@ -48,7 +48,6 @@ func open() *gorm.DB {
 // 如果两个密码不同,则返回0用户
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (resp *user.RegisterResp, err error) {
 	if req.Password != req.ConfirmPassword {
-		klog.Fatal("密码不匹配,请重新输入")
 		return nil, PasswordNotEqual
 	}
 

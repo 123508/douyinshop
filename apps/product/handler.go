@@ -32,7 +32,7 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 				category = append(category, categoryResult.Name)
 			}
 			productList = append(productList, &product.Product{
-				Id:          uint32(productItem.ID),
+				Id:          productItem.Id,
 				Name:        productItem.Name,
 				Description: productItem.Description,
 				Picture:     productItem.Picture,
@@ -52,7 +52,7 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 				category = append(category, categoryResult.Name)
 			}
 			productList = append(productList, &product.Product{
-				Id:          uint32(productItem.ID),
+				Id:          productItem.Id,
 				Name:        productItem.Name,
 				Description: productItem.Description,
 				Picture:     productItem.Picture,
@@ -88,7 +88,7 @@ func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product
 		}
 		resp = &product.GetProductResp{
 			Product: &product.Product{
-				Id:          uint32(result.ID),
+				Id:          result.Id,
 				Name:        result.Name,
 				Description: result.Description,
 				Picture:     result.Picture,
@@ -121,7 +121,7 @@ func (s *ProductCatalogServiceImpl) SearchProducts(ctx context.Context, req *pro
 			category = append(category, categoryResult.Name)
 		}
 		productList = append(productList, &product.Product{
-			Id:          uint32(productResult.ID),
+			Id:          productResult.Id,
 			Name:        productResult.Name,
 			Description: productResult.Description,
 			Picture:     productResult.Picture,
