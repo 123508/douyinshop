@@ -1,7 +1,10 @@
 package client
 
 import (
+	"context"
+	"github.com/123508/douyinshop/kitex_gen/payment"
 	"github.com/123508/douyinshop/kitex_gen/payment/paymentservice"
+	"log"
 
 	"github.com/123508/douyinshop/pkg/config"
 
@@ -31,4 +34,32 @@ func initPaymentRpc() {
 		panic(err)
 	}
 	paymentClient = c
+}
+
+func Charge(ctx context.Context, amount float32, orderId string, userId uint32, payMethod int32) (resp *payment.ChargeResp, err error) {
+	req := &payment.ChargeReq{
+		Amount:    amount,
+		OrderId:   orderId,
+		UserId:    userId,
+		PayMethod: payMethod,
+	}
+	resp, err = paymentClient.Charge(ctx, req)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	return
+}
+
+func Notify(ctx context.Context, orderId string, tracsactionId string) {
+	req := &payment.NotifyReq{
+		OrderId:       orderId,
+		TransactionId: tracsactionId,
+	}
+	_, err := paymentClient.Notify(ctx, req)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	return
 }
