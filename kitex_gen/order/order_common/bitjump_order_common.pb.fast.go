@@ -249,11 +249,6 @@ func (x *OrderResp) FastRead(buf []byte, _type int8, number int32) (offset int, 
 		if err != nil {
 			goto ReadFieldError
 		}
-	case 2:
-		offset, err = x.fastReadField2(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -277,16 +272,6 @@ func (x *OrderResp) fastReadField1(buf []byte, _type int8) (offset int, err erro
 	return offset, nil
 }
 
-func (x *OrderResp) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	var v OrderDetail
-	offset, err = fastpb.ReadMessage(buf, _type, &v)
-	if err != nil {
-		return offset, err
-	}
-	x.List = append(x.List, &v)
-	return offset, nil
-}
-
 func (x *Empty) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	default:
@@ -307,6 +292,11 @@ func (x *OrderReq) FastRead(buf []byte, _type int8, number int32) (offset int, e
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -323,6 +313,16 @@ ReadFieldError:
 func (x *OrderReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
+}
+
+func (x *OrderReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	var v OrderDetail
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.List = append(x.List, &v)
+	return offset, nil
 }
 
 func (x *CancelReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
@@ -559,7 +559,6 @@ func (x *OrderResp) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
-	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -568,16 +567,6 @@ func (x *OrderResp) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteMessage(buf[offset:], 1, x.GetOrder())
-	return offset
-}
-
-func (x *OrderResp) fastWriteField2(buf []byte) (offset int) {
-	if x.List == nil {
-		return offset
-	}
-	for i := range x.GetList() {
-		offset += fastpb.WriteMessage(buf[offset:], 2, x.GetList()[i])
-	}
 	return offset
 }
 
@@ -593,6 +582,7 @@ func (x *OrderReq) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -601,6 +591,16 @@ func (x *OrderReq) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	return offset
+}
+
+func (x *OrderReq) fastWriteField2(buf []byte) (offset int) {
+	if x.List == nil {
+		return offset
+	}
+	for i := range x.GetList() {
+		offset += fastpb.WriteMessage(buf[offset:], 2, x.GetList()[i])
+	}
 	return offset
 }
 
@@ -828,7 +828,6 @@ func (x *OrderResp) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
-	n += x.sizeField2()
 	return n
 }
 
@@ -837,16 +836,6 @@ func (x *OrderResp) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeMessage(1, x.GetOrder())
-	return n
-}
-
-func (x *OrderResp) sizeField2() (n int) {
-	if x.List == nil {
-		return n
-	}
-	for i := range x.GetList() {
-		n += fastpb.SizeMessage(2, x.GetList()[i])
-	}
 	return n
 }
 
@@ -862,6 +851,7 @@ func (x *OrderReq) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
@@ -870,6 +860,16 @@ func (x *OrderReq) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint32(1, x.GetOrderId())
+	return n
+}
+
+func (x *OrderReq) sizeField2() (n int) {
+	if x.List == nil {
+		return n
+	}
+	for i := range x.GetList() {
+		n += fastpb.SizeMessage(2, x.GetList()[i])
+	}
 	return n
 }
 
@@ -926,13 +926,13 @@ var fieldIDToName_OrderDetail = map[int32]string{
 
 var fieldIDToName_OrderResp = map[int32]string{
 	1: "Order",
-	2: "List",
 }
 
 var fieldIDToName_Empty = map[int32]string{}
 
 var fieldIDToName_OrderReq = map[int32]string{
 	1: "OrderId",
+	2: "List",
 }
 
 var fieldIDToName_CancelReq = map[int32]string{
