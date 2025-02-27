@@ -32,13 +32,13 @@ message OrderDetail{
 
 message OrderResp{
   Order order=1;
-  repeated OrderDetail list=2;
 }
 
 message Empty{}
 
 message OrderReq{
   uint32 order_id=1;
+  repeated OrderDetail list=2;
 }
 
 message CancelReq{
