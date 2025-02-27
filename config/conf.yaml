@@ -95,7 +95,12 @@ ai:
   port: 8911
   service_name: "bitjump.douyinshop.ai"
 
-
+volcengine:
+  api_key: "your api_key"  # 从火山引擎控制台获取
+  douyin_model: "DeepSeek-R1-Distill-Qwen-32B"  # 使用的模型版本
+  timeout: 30  # 超时时间（秒）
+  max_tokens: 2048  # 最大token数
+  retry_times: 3  # 
 aliyun:
   oss:
     endpoint: "your endpoint"
