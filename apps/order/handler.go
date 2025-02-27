@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	order_common "github.com/123508/douyinshop/kitex_gen/order/order_common"
-	userOrder "github.com/123508/douyinshop/kitex_gen/order/userOrder"
+	"github.com/123508/douyinshop/kitex_gen/order/order_common"
+	"github.com/123508/douyinshop/kitex_gen/order/userOrder"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/google/uuid"
@@ -40,14 +40,46 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 		Remark:        req.Remark,
 		Amount:        float64(req.Amount),
 	}
-
-	// TODO 构建OrderDetail
-	// TODO 构建 log
-	// TODO 可能的 支付服务对接
-
 	err = DB.Create(&order).Error
 	if err != nil {
 		return nil, err
+	}
+
+	var orderDetails []models.OrderDetail
+	for _, detail := range req.Order.List {
+		orderDetail := models.OrderDetail{
+			Name:      detail.Name,
+			Image:     detail.Image,
+			OrderId:   int(order.ID),
+			ProductId: int(detail.ProductId),
+			Number:    int(detail.Number),
+			Amount:    float64(detail.Amount),
+			Status:    0, // 初始状态为待付款
+		}
+
+		// 将订单详情添加到列表中
+		orderDetails = append(orderDetails, orderDetail)
+	}
+
+	err = DB.Create(&orderDetails).Error
+	if err != nil {
+		return nil, err
+	}
+
+	for _, detail := range orderDetails {
+		orderStatusLog := models.OrderStatusLog{
+			OrderDetailId: int(detail.ID),
+			Status:        0,
+			StartTime:     time.Now(),
+			EndTime:       time.Now(),
+			Description:   "订单创建，待付款",
+		}
+
+		// 保存状态日志
+		err = DB.Create(&orderStatusLog).Error
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 构建返回对象
@@ -86,22 +118,15 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 	for i, order := range orders {
 		// 根据订单号查询订单详情
 		var orderDetails []models.OrderDetail
-		DB.Where("order_number = ?", order.Number).Find(&orderDetails)
+		DB.Where("order_id = ?", order.ID).Find(&orderDetails)
 
 		// 构建订单响应
 		orderResp := &order_common.OrderResp{
 			Order: &order_common.Order{
 				UserId: order.UserId,
 				Number: order.Number,
-				Status: int32(orderDetails[i].Status),
+				Status: int32(order.PayStatus),
 			},
-		}
-
-		// 处理订单详情
-		for _, detail := range orderDetails {
-			orderResp.List = append(orderResp.List, &order_common.OrderDetail{
-				OrderId: uint32(detail.OrderId),
-			})
 		}
 		orderList[i] = orderResp
 	}
@@ -152,24 +177,9 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 		Consignee:     order.Consignee,
 	}
 
-	var orderDetailPtrs []*order_common.OrderDetail
-	for i := range orderDetails {
-		orderDetail := &order_common.OrderDetail{
-			Name:      orderDetails[i].Name,
-			Image:     orderDetails[i].Image,
-			OrderId:   uint32(orderDetails[i].OrderId),
-			ProductId: uint32(orderDetails[i].ProductId),
-			Number:    uint32(orderDetails[i].Number),
-			Amount:    float32(orderDetails[i].Amount),
-		}
-
-		orderDetailPtrs = append(orderDetailPtrs, orderDetail)
-	}
-
 	// 构建并返回响应数据
 	resp = &order_common.OrderResp{
 		Order: orderCommon,
-		List:  orderDetailPtrs,
 	}
 
 	return resp, nil
@@ -215,9 +225,9 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 		}
 
 		// 更新符合条件的日志：如果 StartTime 和 EndTime 不相等，则更新 EndTime 为当前时间
-		for _, log := range statusLogs {
-			log.EndTime = currentTime
-			if err := DB.Save(&log).Error; err != nil {
+		for _, orderStatusLog := range statusLogs {
+			orderStatusLog.EndTime = currentTime
+			if err := DB.Save(&orderStatusLog).Error; err != nil {
 				return nil, err
 			}
 		}
@@ -289,9 +299,9 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 			}
 
 			// 更新所有状态为4的日志的结束时间
-			for _, log := range statusLogs {
-				log.EndTime = currentTime
-				if err := DB.Save(&log).Error; err != nil {
+			for _, orderStatusLog := range statusLogs {
+				orderStatusLog.EndTime = currentTime
+				if err := DB.Save(&orderStatusLog).Error; err != nil {
 					return nil, err
 				}
 			}

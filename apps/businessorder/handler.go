@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	businessOrder "github.com/123508/douyinshop/kitex_gen/order/businessOrder"
-	order_common "github.com/123508/douyinshop/kitex_gen/order/order_common"
+	"github.com/123508/douyinshop/kitex_gen/order/businessOrder"
+	"github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/models"
 	"gorm.io/gorm"
@@ -63,22 +63,6 @@ func (s *OrderBusinessServiceImpl) GetOrderList(ctx context.Context, req *busine
 	// 封装订单响应列表
 	var orderRespList []*order_common.OrderResp
 	for _, order := range orders {
-		// 获取当前订单的所有订单详情，并将其转换为 order_common.OrderDetail 类型
-		var currentOrderDetails []*order_common.OrderDetail
-		for i, detail := range orderDetails {
-			if uint(detail.OrderId) == order.ID {
-				// 类型转换，创建新的 order_common.OrderDetail 并赋值
-				orderDetail := &order_common.OrderDetail{
-					Name:      orderDetails[i].Name,
-					Image:     orderDetails[i].Image,
-					OrderId:   uint32(orderDetails[i].OrderId),
-					ProductId: uint32(orderDetails[i].ProductId),
-					Number:    uint32(orderDetails[i].Number),
-					Amount:    float32(orderDetails[i].Amount),
-				}
-				currentOrderDetails = append(currentOrderDetails, orderDetail)
-			}
-		}
 
 		// 将 models.Order 转换为 order_common.Order
 		orderCommon := &order_common.Order{
@@ -98,7 +82,6 @@ func (s *OrderBusinessServiceImpl) GetOrderList(ctx context.Context, req *busine
 		// 封装每个订单的响应
 		orderResp := &order_common.OrderResp{
 			Order: orderCommon,
-			List:  currentOrderDetails,
 		}
 
 		orderRespList = append(orderRespList, orderResp)
@@ -147,24 +130,9 @@ func (s *OrderBusinessServiceImpl) Detail(ctx context.Context, req *order_common
 		Consignee:     order.Consignee,
 	}
 
-	var orderDetailPtrs []*order_common.OrderDetail
-	for i := range orderDetails {
-		orderDetail := &order_common.OrderDetail{
-			Name:      orderDetails[i].Name,
-			Image:     orderDetails[i].Image,
-			OrderId:   uint32(orderDetails[i].OrderId),
-			ProductId: uint32(orderDetails[i].ProductId),
-			Number:    uint32(orderDetails[i].Number),
-			Amount:    float32(orderDetails[i].Amount),
-		}
-
-		orderDetailPtrs = append(orderDetailPtrs, orderDetail)
-	}
-
 	// 构建并返回响应数据
 	resp = &order_common.OrderResp{
 		Order: orderCommon,
-		List:  orderDetailPtrs,
 	}
 
 	return resp, nil
@@ -239,10 +207,10 @@ func (s *OrderBusinessServiceImpl) Rejection(ctx context.Context, req *businessO
 			}
 
 			// 更新状态日志的 EndTime，判断 StartTime 和 EndTime 不相等时
-			for _, log := range statusLogs {
-				if log.StartTime != log.EndTime { // 只有 StartTime 与 EndTime 不相等时才更新
-					log.EndTime = currentTime
-					if err := DB.Save(&log).Error; err != nil {
+			for _, orderStatusLog := range statusLogs {
+				if orderStatusLog.StartTime != orderStatusLog.EndTime { // 只有 StartTime 与 EndTime 不相等时才更新
+					orderStatusLog.EndTime = currentTime
+					if err := DB.Save(&orderStatusLog).Error; err != nil {
 						return nil, err
 					}
 				}
@@ -306,9 +274,9 @@ func (s *OrderBusinessServiceImpl) Cancel(ctx context.Context, req *order_common
 		}
 
 		// 更新符合条件的日志：如果 StartTime 和 EndTime 不相等，则更新 EndTime 为当前时间
-		for _, log := range statusLogs {
-			log.EndTime = currentTime
-			if err := DB.Save(&log).Error; err != nil {
+		for _, orderStatusLog := range statusLogs {
+			orderStatusLog.EndTime = currentTime
+			if err := DB.Save(&orderStatusLog).Error; err != nil {
 				return nil, err
 			}
 		}
@@ -362,11 +330,11 @@ func (s *OrderBusinessServiceImpl) updateOrderStatus(orderId uint32, status int)
 		}
 
 		// 更新所有状态为 status-1 的日志的结束时间
-		for _, log := range statusLogs {
+		for _, orderStatusLog := range statusLogs {
 			// 只有 StartTime 和 EndTime 不相等时才更新
-			if log.StartTime != log.EndTime {
-				log.EndTime = currentTime
-				if err := DB.Save(&log).Error; err != nil {
+			if orderStatusLog.StartTime != orderStatusLog.EndTime {
+				orderStatusLog.EndTime = currentTime
+				if err := DB.Save(&orderStatusLog).Error; err != nil {
 					return err
 				}
 			}
