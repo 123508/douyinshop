@@ -2,33 +2,37 @@ package ai
 
 import (
 	"context"
-
+	"github.com/123508/douyinshop/apps/api/infras/client"
+	"github.com/123508/douyinshop/pkg/errors"
 	"github.com/cloudwego/hertz/pkg/app"
-	ai "github.com/123508/douyinshop/kitex_gen/ai"
-	"github.com/123508/douyinshop/kitex_gen/ai/aiservice"
 )
 
-// AutoPlaceOrder handles the automatic order placement request
+type AutoPlaceOrderRequest struct {
+	UserId  uint32 `json:"user_id" vd:"$>0"`      // 用户ID
+	Request string `json:"request" vd:"len($)>0"`  // 下单请求描述
+}
+
+// AutoPlaceOrder 自动下单
+// @router /api/ai/order/place [POST]
 func AutoPlaceOrder(ctx context.Context, c *app.RequestContext) {
-	var req ai.AutoPlaceOrderReq
+	var req AutoPlaceOrderRequest
 	if err := c.BindAndValidate(&req); err != nil {
-		c.JSON(400, map[string]interface{}{
-			"code":    400,
-			"message": "参数错误: " + err.Error(),
-		})
+		c.JSON(400, errors.NewValidationError(err))
 		return
 	}
-	
-	// 直接创建客户端并调用
-	client := aiservice.MustNewClient("ai")
-	resp, err := client.AutoPlaceOrder(ctx, &req)
+
+	// 调用AI服务自动下单
+	orderId, err := client.AutoPlaceOrder(ctx, req.UserId, req.Request)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
-			"code":    500,
-			"message": "服务调用失败: " + err.Error(),
-		})
+		c.JSON(500, errors.NewServiceError(err))
 		return
 	}
-	
-	c.JSON(200, resp)
+
+	c.JSON(200, map[string]interface{}{
+		"code": 0,
+		"msg":  "success",
+		"data": map[string]interface{}{
+			"order_id": orderId,
+		},
+	})
 }
