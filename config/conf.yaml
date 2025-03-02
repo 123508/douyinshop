@@ -107,3 +107,10 @@ aliyun:
     accessKeyId: "your accessKeyId"
     accessKeySecret: "your accessKeySecret"
     bucketName: "your bucketName"
+rabbitmq:
+  host: 127.0.0.1 #主机名
+  port: 5672 #端口
+  virtual_host: "/" #虚拟主机
+  username: "your username" #用户名
+  password: "your password" #密码
+  prefetch: 1 #每次只能获取一条消息,处理完后才能获取下一个消息
