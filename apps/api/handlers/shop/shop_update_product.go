@@ -64,6 +64,6 @@ func UpdateProductInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	c.JSON(200, map[string]interface{}{
-		"ok": resp,
+		"ok": resp.Res,
 	})
 }
