@@ -38,6 +38,12 @@ client := arkruntime.NewClientWithApiKey(
 	}
 }
 
+// Close 关闭资源
+func (d *DouyinAI) Close() error {
+	// 如果需要关闭资源，在这里实现
+	return nil
+}
+
 // 分析用户订单需求
 func (d *DouyinAI) AnalyzeOrderRequest(userRequest string) ([]ProductRecommendation, error) {
 	// 构建提示词

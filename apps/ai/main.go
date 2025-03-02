@@ -6,7 +6,7 @@ import (
     "net"
 
     ai "github.com/123508/douyinshop/kitex_gen/ai/aiservice"
-    "github.com/123508/douyinshop/kitex_gen/order/orderservice"
+    "github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
     "github.com/123508/douyinshop/pkg/config"
     "github.com/123508/douyinshop/pkg/db"
     "github.com/cloudwego/kitex/client"
@@ -33,7 +33,7 @@ func main() {
     }
 
     // 创建订单服务客户端
-    orderClient, err := orderservice.NewClient(
+    orderClient, err := orderuserservice.NewClient(
         config.Conf.OrderConfig.ServiceName,
         client.WithResolver(r),
     )
