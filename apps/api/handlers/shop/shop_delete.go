@@ -39,7 +39,8 @@ func Delete(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req := &shop.DeleteProductReq{
-		ShopId: productInfo.ShopID,
+		ShopId:    productInfo.ShopID,
+		ProductId: productInfo.ProductID,
 	}
 	resp, err := client.DeleteProduct(ctx, req)
 	if err != nil {
