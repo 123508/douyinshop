@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/123508/douyinshop/pkg/els"
 	"log"
+	"strconv"
 	"strings"
 
 	ba "github.com/123508/douyinshop/kitex_gen/product"
@@ -22,6 +23,9 @@ type ShopServiceImpl struct {
 
 // Register 注册店铺
 func (s *ShopServiceImpl) Register(ctx context.Context, req *pb.RegisterShopReq) (*pb.RegisterShopResp, error) {
+	if err := s.db.Model(&models.Shop{}).Where("user_id = ?", req.UserId).First(&models.Shop{}).Error; err == nil {
+		return nil, fmt.Errorf("你已注册店铺，请勿重复注册")
+	}
 	shop := models.Shop{
 		UserId:      req.UserId,
 		Name:        req.ShopName,
@@ -201,12 +205,20 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 
 	pbProducts := make([]*ba.Product, len(products))
 	for i, p := range products {
+		category := make([]string, 0)
+		for _, categoryIdStr := range strings.Split(p.Categories, ",") {
+			var categoryResult models.Category
+			categoryId, _ := strconv.Atoi(strings.Trim(categoryIdStr, " "))
+			s.db.First(&categoryResult, categoryId)
+			category = append(category, categoryResult.Name)
+		}
 		pbProducts[i] = &ba.Product{
 			Id:          p.Id,
 			Name:        p.Name,
 			Description: p.Description,
 			Picture:     p.Picture,
 			Price:       float32(p.Price),
+			Categories:  category,
 		}
 	}
 

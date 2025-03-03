@@ -8,7 +8,7 @@ import (
     ai "github.com/123508/douyinshop/kitex_gen/ai"
     "github.com/123508/douyinshop/kitex_gen/order/order_common"
     "github.com/123508/douyinshop/kitex_gen/order/userOrder"
-    "github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
+    "github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice
     aiutil "github.com/123508/douyinshop/pkg/ai"
     "github.com/123508/douyinshop/pkg/errors"
     "github.com/cloudwego/kitex/pkg/klog" 

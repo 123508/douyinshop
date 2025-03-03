@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/123508/douyinshop/apps/api/handlers/address"
 	"github.com/123508/douyinshop/apps/api/handlers/ai"
 	"github.com/123508/douyinshop/apps/api/handlers/cart"
@@ -9,9 +10,8 @@ import (
 	"github.com/123508/douyinshop/apps/api/handlers/product"
 	"github.com/123508/douyinshop/apps/api/handlers/shop"
 	"github.com/123508/douyinshop/apps/api/handlers/user"
+	"github.com/123508/douyinshop/apps/api/middleware"
 	"github.com/123508/douyinshop/pkg/config"
-
-	"fmt"
 	"log"
 
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -25,16 +25,18 @@ func main() {
 	userGrop.POST("/register", user.Register)
 	userGrop.POST("/login", user.Login)
 	userGrop.GET("/logout", user.Logout)
-	userGrop.GET("/info", user.GetInfo)
-	userGrop.POST("/update_info", user.UpdateInfo)
-	userGrop.DELETE("/delete", user.Delete)
+	userGrop.GET("/info", middleware.ParseToken(), user.GetInfo)
+	userGrop.POST("/update_info", middleware.ParseToken(), user.UpdateInfo)
+	userGrop.DELETE("/delete", middleware.ParseToken(), user.Delete)
 
 	productGroup := hz.Group("/product")
+	productGroup.Use(middleware.ParseToken())
 	productGroup.GET("/list", product.List)
 	productGroup.GET("/detail/:product_id", product.Detail)
 	productGroup.GET("/search", product.Search)
 
 	cartGroup := hz.Group("/cart")
+	cartGroup.Use(middleware.ParseToken())
 	cartGroup.GET("/list", cart.List)
 	cartGroup.POST("/add", cart.Add)
 	cartGroup.DELETE("/empty", cart.Empty)
@@ -42,6 +44,7 @@ func main() {
 	cartGroup.POST("/checkout", cart.Checkout)
 
 	shopGroup := hz.Group("/shop")
+	shopGroup.Use(middleware.ParseToken())
 	shopGroup.GET("/info/:shop_id", shop.GetInfo)
 	shopGroup.GET("/getShopId", shop.GetShopId)
 	shopGroup.GET("/list", shop.List)
@@ -52,6 +55,7 @@ func main() {
 	shopGroup.POST("/updateProduct", shop.UpdateProductInfo)
 
 	addressGroup := hz.Group("/address")
+	addressGroup.Use(middleware.ParseToken())
 	addressGroup.GET("/list", address.List)
 	addressGroup.POST("/delete", address.Delete)
 	addressGroup.POST("/add", address.Add)
@@ -59,14 +63,17 @@ func main() {
 	addressGroup.POST("/setDefaultAddr", address.SetDefault)
 
 	paymentGroup := hz.Group("/payment")
+	paymentGroup.Use(middleware.ParseToken())
 	paymentGroup.POST("/charge", payment.Charge)
 	paymentGroup.POST("/notify", payment.Notify)
 
 	aiGroup := hz.Group("/ai")
+	aiGroup.Use(middleware.ParseToken())
 	aiGroup.GET("/orderQuery/:order_id", ai.OrderQuery)
 	aiGroup.POST("/autoPlaceOrder", ai.AutoPlaceOrder)
 
 	orderGroup := hz.Group("/order")
+	orderGroup.Use(middleware.ParseToken())
 	userOrderGroup := orderGroup.Group("/user")
 	userOrderGroup.GET("/detail/:order_id", order.Detail)
 	userOrderGroup.POST("/history", order.History)
@@ -76,6 +83,7 @@ func main() {
 	userOrderGroup.GET("/complete", order.Complete)
 
 	shopOrderGroup := orderGroup.Group("/shop")
+	shopOrderGroup.Use(middleware.ParseToken())
 	shopOrderGroup.GET("/list", order.List)
 	shopOrderGroup.GET("/detail/:shop_id", order.DetailShop)
 	shopOrderGroup.GET("/confirm", order.Confirm)

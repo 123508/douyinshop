@@ -27,6 +27,15 @@ type AppConfig struct {
 	*AIConfig            `mapstructure:"ai"`
 	*VolcengineConfig    `yaml:"volcengine"`
 	*AliyunConfig        `mapstructure:"aliyun"`
+	*RabbitmqConfig      `mapstructure:"rabbitmq"`
+}
+
+type VolcengineConfig struct {
+	ApiKey      string `yaml:"api_key"`
+	DouyinModel string `yaml:"douyin_model"`
+	Timeout     int    `yaml:"timeout"`
+	MaxTokens   int    `yaml:"max_tokens"`
+	RetryTimes  int    `yaml:"retry_times"`
 }
 
 type VolcengineConfig struct {
@@ -160,6 +169,15 @@ type AliOssConfig struct {
 	AccessKeyId     string `mapstructure:"accessKeyId"`
 	AccessKeySecret string `mapstructure:"accessKeySecret"`
 	BucketName      string `mapstructure:"bucketName"`
+}
+
+type RabbitmqConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	VirtualHost string `mapstructure:"virtual_host"`
+	Username    string `mapstructure:"username"`
+	Password    string `mapstructure:"password"`
+	Prefetch    int    `mapstructure:"prefetch"`
 }
 
 var Conf AppConfig

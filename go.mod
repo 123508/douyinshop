@@ -10,12 +10,13 @@ require (
 	github.com/elastic/go-elasticsearch/v8 v8.17.1
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/google/uuid v1.6.0
 	github.com/kitex-contrib/registry-etcd v0.2.5
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/smartwalle/alipay/v3 v3.2.24
-	github.com/smartwalle/xid v1.0.7
 	github.com/spf13/viper v1.19.0
 	go.etcd.io/etcd/client/v3 v3.5.12
+	go.opentelemetry.io/otel v1.28.0
 	google.golang.org/protobuf v1.36.4
 	gorm.io/driver/mysql v1.4.7
 	gorm.io/gorm v1.23.8
@@ -72,6 +73,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/streadway/amqp v1.1.0 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tidwall/gjson v1.17.3 // indirect
@@ -80,7 +82,6 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.12 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.12 // indirect
-	go.opentelemetry.io/otel v1.28.0 // indirect
 	go.opentelemetry.io/otel/metric v1.28.0 // indirect
 	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
