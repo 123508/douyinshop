@@ -28,7 +28,7 @@ func Reduce(ctx context.Context, c *app.RequestContext) {
 	}
 	req.UserId = userId
 
-	resp, err := client.DeleteItem(ctx, &req)
+	_, err := client.DeleteItem(ctx, &req)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": "internal server error",
@@ -37,6 +37,6 @@ func Reduce(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(consts.StatusOK, utils.H{
-		"ok": resp,
+		"ok": true,
 	})
 }

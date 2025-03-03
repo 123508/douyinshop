@@ -17,7 +17,7 @@ func Checkout(ctx context.Context, c *app.RequestContext) {
 		})
 		return
 	}
-	resp, err := client.Checkout(ctx, req)
+	_, err = client.Checkout(ctx, req)
 
 	if err != nil {
 		c.JSON(500, map[string]interface{}{
@@ -27,6 +27,6 @@ func Checkout(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(200, map[string]interface{}{
-		"ok": resp,
+		"ok": true,
 	})
 }

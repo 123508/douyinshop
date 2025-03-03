@@ -28,7 +28,7 @@ func Add(ctx context.Context, c *app.RequestContext) {
 	}
 	req.UserId = userId
 
-	resp, err := client.AddItem(ctx, &req)
+	_, err := client.AddItem(ctx, &req)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": "internal server error",
@@ -37,6 +37,6 @@ func Add(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(consts.StatusOK, utils.H{
-		"ok": resp,
+		"ok": true,
 	})
 }

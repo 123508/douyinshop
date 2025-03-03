@@ -20,7 +20,7 @@ func Empty(ctx context.Context, c *app.RequestContext) {
 	}
 
 	req := &cart.EmptyCartReq{UserId: userId}
-	resp, err := client.EmptyCart(ctx, req)
+	_, err := client.EmptyCart(ctx, req)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": "internal server error",
@@ -29,6 +29,6 @@ func Empty(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(consts.StatusOK, utils.H{
-		"ok": resp,
+		"ok": true,
 	})
 }
