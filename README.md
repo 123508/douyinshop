@@ -133,17 +133,14 @@ go run .
 ├── kitex_gen                     // Kitex生成的代码
 ├── kitex_gen.sh                  // kitex生成脚手架代码脚本
 ├── pkg                           // 项目所依赖的一些公共包
+│   ├── ai                        // AI相关包
 │   ├── config                    // 读取配置文件
 │   ├── db                        // 数据库初始化
 │   ├── models                    // 基本模型定义
+│   ├── els                       // ElasticSearch初始化
+│   ├── errors                    // 错误定义
+│   ├── utils                     // 工具包
 │   └── redis                     // redis初始化
 ├── proto                         // Protobuf
-│   ├── bitjump_auth.proto        // 认证中心接口文档
-│   ├── bitjump_cart.proto        // 购物车服务接口文档
-│   ├── bitjump_checkout.proto    // 结算服务接口文档
-│   ├── bitjump_order.proto       // 订单服务接口文档
-│   ├── bitjump_payment.proto     // 支付服务接口文档
-│   ├── bitjump_product.proto     // 商品服务接口文档
-│   └── bitjump_user.proto        // 用户服务接口文档
 └── README.md
 ```
