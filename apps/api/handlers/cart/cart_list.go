@@ -28,7 +28,15 @@ func List(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	cartItems := make([]map[string]interface{}, 0)
+	for _, item := range resp.Cart.Items {
+		cartItems = append(cartItems, map[string]interface{}{
+			"product_id":  item.ProductId,
+			"product_num": item.Quantity,
+		})
+	}
+
 	c.JSON(consts.StatusOK, utils.H{
-		"data": resp.Cart,
+		"cart": cartItems,
 	})
 }
