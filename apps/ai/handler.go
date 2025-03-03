@@ -6,11 +6,14 @@ import (
     "time" 
     "strings"  
     ai "github.com/123508/douyinshop/kitex_gen/ai"
-    "github.com/123508/douyinshop/kitex_gen/order/orderservice"
+    "github.com/123508/douyinshop/kitex_gen/order/order_common"
+    "github.com/123508/douyinshop/kitex_gen/order/userOrder"
+    "github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice
     aiutil "github.com/123508/douyinshop/pkg/ai"
     "github.com/123508/douyinshop/pkg/errors"
     "github.com/cloudwego/kitex/pkg/klog" 
     "github.com/123508/douyinshop/pkg/config"
+    "strconv"
 )
 
 const (
@@ -21,12 +24,12 @@ const (
 // AiServiceImpl implements the last service interface defined in the IDL.
 type AiServiceImpl struct{
     douyinAI     *aiutil.DouyinAI
-    orderClient  orderservice.Client
+    orderClient  orderuserservice.Client
     timeout      time.Duration
 }
 
 // NewAiServiceImpl 创建服务实现实例
-func NewAiServiceImpl(orderClient orderservice.Client) *AiServiceImpl {
+func NewAiServiceImpl(orderClient orderuserservice.Client) *AiServiceImpl {
     timeout := config.Conf.AiConfig.Timeout
     if timeout <= 0 {
         timeout = defaultTimeout
@@ -61,28 +64,52 @@ func (s *AiServiceImpl) OrderQuery(ctx context.Context, req *ai.OrderQueryReq) (
     ctx, cancel := context.WithTimeout(ctx, s.timeout)
     defer cancel()
 
-    // 调用订单服务
-    orderResp, err := s.orderClient.GetOrder(ctx, &orderservice.GetOrderReq{OrderId: req.OrderId})  
+    // 将字符串订单ID转换为uint32
+    orderID, err := strconv.ParseUint(req.OrderId, 10, 32)
     if err != nil {
-        klog.Errorf("GetOrder failed for orderID %s: %v", req.OrderId, err)
+        klog.Errorf("Invalid order ID format %s: %v", req.OrderId, err)
+        return nil, &errors.BasicMessageError{Message: "订单ID格式不正确"}
+    }
+
+    // 调用订单服务的Detail方法
+    orderResp, err := s.orderClient.Detail(ctx, &order_common.OrderReq{OrderId: uint32(orderID)})  
+    if err != nil {
+        klog.Errorf("Detail failed for orderID %s: %v", req.OrderId, err)
         return nil, errors.WrapWithMessage(err, "获取订单信息失败")
     }
     if orderResp == nil || orderResp.Order == nil {
-        klog.Errorf("GetOrder returned nil for orderID %s", req.OrderId)
+        klog.Errorf("Detail returned nil for orderID %s", req.OrderId)
         return nil, errors.New("订单信息不存在")
     }
 
     // 记录操作日志
     klog.Infof("Processing order query for orderID: %s", req.OrderId)
 
-    // 手动构建orderMap避免序列化开销
+    // 构建orderMap
     orderMap := map[string]interface{}{
-        "id":     orderResp.Order.Id,
-        "status": orderResp.Order.Status,
-        "amount": orderResp.Order.TotalAmount,
-        "create_time":  orderResp.Order.CreateTime,
-        "items":  orderResp.Order.Items,
-        "user_id": orderResp.Order.UserId,
+        "number":     orderResp.Order.Number,
+        "status":     orderResp.Order.Status,
+        "amount":     orderResp.Order.Amount,
+        "user_id":    orderResp.Order.UserId,
+        "consignee":  orderResp.Order.Consignee,
+        "address":    orderResp.Order.Address,
+        "phone":      orderResp.Order.Phone,
+        "remark":     orderResp.Order.Remark,
+    }
+
+    // 添加订单详情
+    if orderResp.List != nil && len(orderResp.List) > 0 {
+        items := make([]map[string]interface{}, 0, len(orderResp.List))
+        for _, item := range orderResp.List {
+            items = append(items, map[string]interface{}{
+                "name":       item.Name,
+                "image":      item.Image,
+                "product_id": item.ProductId,
+                "number":     item.Number,
+                "amount":     item.Amount,
+            })
+        }
+        orderMap["items"] = items
     }
 
     // 调用AI格式化
@@ -122,43 +149,43 @@ func (s *AiServiceImpl) AutoPlaceOrder(ctx context.Context, req *ai.AutoPlaceOrd
         return nil, errors.New("未找到推荐商品")
     }
 
-    // 构建订单项
-    items := make([]*orderservice.OrderItem, 0, len(recommendations))
+    // 计算订单总金额
+    var totalAmount float32 = 0
     for _, rec := range recommendations {
         if err := validateRecommendation(rec); err != nil {
             klog.Warnf("Invalid recommendation for userID %d: %+v, error: %v", req.UserId, rec, err)
             continue
         }
-        items = append(items, &orderservice.OrderItem{
-            ProductId: rec.ProductID,
-            Quantity:  int32(rec.Quantity),
-        })
-    }
-    if len(items) == 0 {
-        return nil, errors.New("没有有效的订单项")
+        totalAmount += float32(rec.Price * float64(rec.Quantity))
     }
 
     // 创建订单
     ctx, cancel := context.WithTimeout(ctx, s.timeout)
     defer cancel()
     
-    orderResp, err := s.orderClient.CreateOrder(ctx, &orderservice.CreateOrderReq{
-        UserId: req.UserId,
-        Items:  items,
+    // 使用Submit方法创建订单
+    orderResp, err := s.orderClient.Submit(ctx, &userOrder.OrderSubmitReq{
+        UserId:    req.UserId,
+        Amount:    totalAmount,
+        // 以下字段可能需要从请求中获取或使用默认值
+        PayMethod: 1, // 默认支付方式
+        Remark:    "AI自动下单: " + req.Request,
     })
     if err != nil {
-        klog.Errorf("CreateOrder failed for userID %d: %v", req.UserId, err)
+        klog.Errorf("Submit order failed for userID %d: %v", req.UserId, err)
         return nil, errors.Wrap(err, "创建订单失败")
     }
     if orderResp == nil {
         return nil, errors.New("创建订单失败：服务返回为空")
     }
 
-    klog.Infof("Successfully created order %s for userID: %d", orderResp.OrderId, req.UserId)
-    return &ai.AutoPlaceOrderResp{OrderId: orderResp.OrderId}, nil
+    // 返回订单ID
+    orderID := strconv.FormatUint(uint64(orderResp.OrderId), 10)
+    klog.Infof("Successfully created order %s for userID: %d", orderID, req.UserId)
+    return &ai.AutoPlaceOrderResp{OrderId: orderID}, nil
 }
 
-func validateRecommendation(rec *aiutil.Recommendation) error {
+func validateRecommendation(rec *aiutil.ProductRecommendation) error {
     if rec == nil {
         return errors.New("推荐信息为空")
     }

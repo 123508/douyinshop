@@ -25,17 +25,17 @@ type AppConfig struct {
 	*BusinessOrderConfig `mapstructure:"business_order"`
 	*ShopConfig          `mapstructure:"shop"`
 	*AIConfig            `mapstructure:"ai"`
-	*VolcengineConfig    `yaml:"volcengine"`
+	*VolcengineConfig    `mapstructure:"volcengine"`
 	*AliyunConfig        `mapstructure:"aliyun"`
 	*RabbitmqConfig      `mapstructure:"rabbitmq"`
 }
 
 type VolcengineConfig struct {
-	ApiKey      string `yaml:"api_key"`
-	DouyinModel string `yaml:"douyin_model"`
-	Timeout     int    `yaml:"timeout"`
-	MaxTokens   int    `yaml:"max_tokens"`
-	RetryTimes  int    `yaml:"retry_times"`
+	ApiKey      string `mapstructure:"api_key"`
+	DouyinModel string `mapstructure:"douyin_model"`
+	Timeout     int    `mapstructure:"timeout"`
+	MaxTokens   int    `mapstructure:"max_tokens"`
+	RetryTimes  int    `mapstructure:"retry_times"`
 }
 
 type MySQLConfig struct {
