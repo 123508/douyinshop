@@ -26,16 +26,21 @@ type ProductRecommendation struct {
 }
 
 // 初始化豆包模型客户端
-func NewDouyinAI() *DouyinAI {
-// pkg/ai/douyin.go 中应该使用配置的超时时间
-client := arkruntime.NewClientWithApiKey(
-    config.Conf.VolcengineConfig.ApiKey,
-    arkruntime.WithTimeout(time.Duration(config.Conf.VolcengineConfig.Timeout) * time.Second),
-)
+func NewDouyinAI() (*DouyinAI, error) {
+	// 验证配置
+	if err := ValidateConfig(config.Conf.VolcengineConfig); err != nil {
+		return nil, fmt.Errorf("配置验证失败: %v", err)
+	}
+
+	// 初始化客户端
+	client := arkruntime.NewClientWithApiKey(
+		config.Conf.VolcengineConfig.ApiKey,
+		arkruntime.WithTimeout(time.Duration(config.Conf.VolcengineConfig.Timeout) * time.Second),
+	)
 	
 	return &DouyinAI{
 		client: client,
-	}
+	}, nil
 }
 
 // Close 关闭资源
@@ -46,6 +51,14 @@ func (d *DouyinAI) Close() error {
 
 // 分析用户订单需求
 func (d *DouyinAI) AnalyzeOrderRequest(userRequest string) ([]ProductRecommendation, error) {
+	if d.client == nil {
+		return nil, fmt.Errorf("AI客户端未初始化")
+	}
+	
+	if userRequest == "" {
+		return nil, fmt.Errorf("用户请求不能为空")
+	}
+
 	// 构建提示词
 	prompt := fmt.Sprintf(`作为一个电商智能助手，请分析以下用户需求并推荐合适的商品：
 用户需求：%s
@@ -107,6 +120,14 @@ func (d *DouyinAI) AnalyzeOrderRequest(userRequest string) ([]ProductRecommendat
 
 // 查询订单详情的格式化
 func (d *DouyinAI) FormatOrderDetails(orderDetails map[string]interface{}) (string, error) {
+	if d.client == nil {
+		return "", fmt.Errorf("AI客户端未初始化")
+	}
+	
+	if orderDetails == nil {
+		return "", fmt.Errorf("订单详情不能为空")
+	}
+
 	// 将订单信息转换为字符串
 	orderJSON, err := json.Marshal(orderDetails)
 	if err != nil {

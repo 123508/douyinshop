@@ -94,6 +94,7 @@ ai:
   host: 127.0.0.1
   port: 8911
   service_name: "bitjump.douyinshop.ai"
+  timeout: 30s                      
 
 volcengine:
   api_key: "your api_key"  # 从火山引擎控制台获取

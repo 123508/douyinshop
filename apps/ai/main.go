@@ -8,7 +8,6 @@ import (
     ai "github.com/123508/douyinshop/kitex_gen/ai/aiservice"
     "github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
     "github.com/123508/douyinshop/pkg/config"
-    "github.com/123508/douyinshop/pkg/db"
     "github.com/cloudwego/kitex/client"
     "github.com/cloudwego/kitex/pkg/rpcinfo"
     "github.com/cloudwego/kitex/server"
@@ -16,12 +15,6 @@ import (
 )
 
 func main() {
-    // 初始化数据库连接
-    database, err := db.InitDB()
-    if err != nil {
-        log.Fatal(err)
-    }
-
     // 创建 etcd 注册器
     r, err := etcd.NewEtcdRegistryWithAuth(
         config.Conf.EtcdConfig.Endpoints,
@@ -29,7 +22,7 @@ func main() {
         config.Conf.EtcdConfig.Password,
     )
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("创建etcd注册器失败: %v", err)
     }
 
     // 创建订单服务客户端
@@ -38,27 +31,36 @@ func main() {
         client.WithResolver(r),
     )
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("创建订单服务客户端失败: %v", err)
     }
 
     // 创建服务地址
-    addr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", 
-        config.Conf.AiConfig.Host, 
-        config.Conf.AiConfig.Port))
+    addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", 
+        config.Conf.AIConfig.Host, 
+        config.Conf.AIConfig.Port))
+    if err != nil {
+        log.Fatalf("解析服务地址失败: %v", err)
+    }
+
+    // 创建服务实现实例
+    impl, err := NewAiServiceImpl(orderClient)
+    if err != nil {
+        log.Fatalf("创建服务实现实例失败: %v", err)
+    }
+    defer impl.Close()
 
     // 创建服务实例
     svr := ai.NewServer(
-        NewAiServiceImpl(orderClient),
+        impl,
         server.WithServiceAddr(addr),
         server.WithRegistry(r),
         server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
-            ServiceName: config.Conf.AiConfig.ServiceName,
+            ServiceName: config.Conf.AIConfig.ServiceName,
         }),
     )
 
     // 启动服务
-    err = svr.Run()
-    if err != nil {
-        log.Println(err.Error())
+    if err := svr.Run(); err != nil {
+        log.Fatalf("服务运行失败: %v", err)
     }
 }
