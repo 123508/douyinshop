@@ -15,9 +15,6 @@ import (
 
 var aiClient aiservice.Client
 
-func init() {
-	initAiRpc()
-}
 
 func initAiRpc() {
 	r, err := etcd.NewEtcdResolverWithAuth(
