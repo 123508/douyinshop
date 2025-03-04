@@ -6,10 +6,19 @@ import (
 	"github.com/123508/douyinshop/kitex_gen/product"
 	"github.com/123508/douyinshop/kitex_gen/shop"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 func UpdateProductInfo(ctx context.Context, c *app.RequestContext) {
-	userID, _ := c.Get("userId")
+	value, exists := c.Get("userId")
+	userId, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
 	type ProductInfo struct {
 		ShopID      uint32   `json:"shop_id"`
 		ProductID   uint32   `json:"product_id"`
@@ -23,23 +32,23 @@ func UpdateProductInfo(ctx context.Context, c *app.RequestContext) {
 	productInfo := &ProductInfo{}
 	err := c.Bind(productInfo)
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "参数错误",
 		})
 		return
 	}
 	getShopIdReq := shop.GetShopIdReq{
-		UserId: userID.(uint32),
+		UserId: userId,
 	}
 	getShopIdResp, err := client.GetShopId(ctx, &getShopIdReq)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
 	}
 	if productInfo.ShopID != getShopIdResp.ShopId {
-		c.JSON(403, map[string]interface{}{
+		c.JSON(consts.StatusForbidden, utils.H{
 			"error": "没有权限",
 		})
 		return
@@ -58,12 +67,12 @@ func UpdateProductInfo(ctx context.Context, c *app.RequestContext) {
 	}
 	resp, err := client.UpdateProduct(ctx, req)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, map[string]interface{}{
+	c.JSON(consts.StatusOK, utils.H{
 		"ok": resp.Res,
 	})
 }

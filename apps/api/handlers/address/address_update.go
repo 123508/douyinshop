@@ -3,28 +3,37 @@ package address
 import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func Update(ctx context.Context, c *app.RequestContext) {
-	userID, _ := c.Get("userId")
+	value, exists := c.Get("userId")
+	userId, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
 	address := &client.AddressItem{}
 	err := c.Bind(address)
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "参数错误",
 		})
 		return
 	}
-	resp, err := client.UpdateAddress(ctx, address, userID.(uint32))
+	resp, err := client.UpdateAddress(ctx, address, userId)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, map[string]interface{}{
+	c.JSON(consts.StatusOK, utils.H{
 		"ok": resp,
 	})
 }

@@ -5,6 +5,8 @@ import (
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/checkout"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 func Checkout(ctx context.Context, c *app.RequestContext) {
@@ -12,7 +14,7 @@ func Checkout(ctx context.Context, c *app.RequestContext) {
 	req := &checkout.CheckoutReq{}
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": err.Error(),
 		})
 		return
@@ -20,13 +22,13 @@ func Checkout(ctx context.Context, c *app.RequestContext) {
 	_, err = client.Checkout(ctx, req)
 
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	c.JSON(200, map[string]interface{}{
+	c.JSON(consts.StatusOK, utils.H{
 		"ok": true,
 	})
 }

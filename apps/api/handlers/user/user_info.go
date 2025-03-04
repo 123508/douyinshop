@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/user"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -13,23 +12,16 @@ import (
 
 func GetInfo(ctx context.Context, c *app.RequestContext) {
 
+	//获取用户id
 	value, exists := c.Get("userId")
-
-	fmt.Println(value)
-
-	if !exists {
-		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": "userId must exist",
-		})
-		return
-	}
 
 	userId, ok := value.(uint32)
 
-	if !ok {
+	if !exists || !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",
 		})
+		return
 	}
 
 	req := &user.GetUserInfoReq{UserId: userId}

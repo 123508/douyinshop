@@ -2,6 +2,8 @@ package shop
 
 import (
 	"context"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/shop"
@@ -10,7 +12,14 @@ import (
 )
 
 func Register(ctx context.Context, c *app.RequestContext) {
-	userID, _ := c.Get("userId")
+	value, exists := c.Get("userId")
+	userId, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
 	type Shop struct {
 		Name        string `json:"name"`
 		Address     string `json:"address"`
@@ -20,13 +29,13 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	var shopInfo Shop
 	err := c.Bind(&shopInfo)
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "参数错误",
 		})
 		return
 	}
 	req := shop.RegisterShopReq{
-		UserId:          userID.(uint32),
+		UserId:          userId,
 		ShopName:        shopInfo.Name,
 		ShopAddress:     shopInfo.Address,
 		ShopDescription: shopInfo.Description,
@@ -34,12 +43,12 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	}
 	resp, err := client.RegisterShop(ctx, &req)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, map[string]interface{}{
+	c.JSON(consts.StatusOK, utils.H{
 		"ok": resp.ShopId != 0,
 	})
 }

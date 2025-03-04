@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/shop"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -13,21 +15,21 @@ import (
 func List(ctx context.Context, c *app.RequestContext) {
 	shopID, err := strconv.Atoi(c.Query("shop_id"))
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "shopID参数错误",
 		})
 		return
 	}
 	page, err := strconv.Atoi(c.Query("page"))
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "page参数错误",
 		})
 		return
 	}
 	pageSize, err := strconv.Atoi(c.Query("pageSize"))
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "pageSize参数错误",
 		})
 		return
@@ -39,7 +41,7 @@ func List(ctx context.Context, c *app.RequestContext) {
 	}
 	resp, err := client.GetProductList(ctx, &req)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
@@ -59,7 +61,7 @@ func List(ctx context.Context, c *app.RequestContext) {
 			"sales":       v.Sales,
 		})
 	}
-	c.JSON(200, map[string]interface{}{
+	c.JSON(consts.StatusOK, utils.H{
 		"products": product,
 	})
 }
