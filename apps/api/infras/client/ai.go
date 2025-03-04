@@ -1,10 +1,11 @@
 package client
 
 import (
+	"context"
 	"github.com/123508/douyinshop/kitex_gen/ai/aiservice"
 	"github.com/123508/douyinshop/kitex_gen/ai"
 	"github.com/123508/douyinshop/pkg/config"
-	"context"
+	"github.com/123508/douyinshop/pkg/errors"
 	"time"
 
 	"github.com/cloudwego/kitex/client"
@@ -14,18 +15,26 @@ import (
 
 var aiClient aiservice.Client
 
+func init() {
+	initAiRpc()
+}
+
 func initAiRpc() {
-	r, err := etcd.NewEtcdResolverWithAuth(config.Conf.EtcdConfig.Endpoints, config.Conf.EtcdConfig.Username, config.Conf.EtcdConfig.Password)
+	r, err := etcd.NewEtcdResolverWithAuth(
+		config.Conf.EtcdConfig.Endpoints,
+		config.Conf.EtcdConfig.Username,
+		config.Conf.EtcdConfig.Password,
+	)
 	if err != nil {
 		panic(err)
 	}
 
 	c, err := aiservice.NewClient(
-		config.Conf.AIConfig.ServiceName,                  // service name
-		client.WithRPCTimeout(3*time.Second),              // rpc timeout
-		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
-		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
-		client.WithResolver(r),                            // resolver
+		config.Conf.AIConfig.ServiceName,
+		client.WithRPCTimeout(config.Conf.AIConfig.Timeout),
+		client.WithConnectTimeout(50*time.Millisecond),
+		client.WithFailureRetry(retry.NewFailurePolicy()),
+		client.WithResolver(r),
 	)
 	if err != nil {
 		panic(err)
@@ -37,6 +46,14 @@ func initAiRpc() {
 // orderId 订单ID
 // 返回AI格式化后的订单信息
 func OrderQuery(ctx context.Context, orderId string) (string, error) {
+	if aiClient == nil {
+		return "", errors.New("AI客户端未初始化")
+	}
+	
+	if orderId == "" {
+		return "", errors.New("订单ID不能为空")
+	}
+
 	req := &ai.OrderQueryReq{
 		OrderId: orderId,
 	}
@@ -52,6 +69,18 @@ func OrderQuery(ctx context.Context, orderId string) (string, error) {
 // request 用户的下单请求描述
 // 返回订单ID
 func AutoPlaceOrder(ctx context.Context, userId uint32, request string) (string, error) {
+	if aiClient == nil {
+		return "", errors.New("AI客户端未初始化")
+	}
+	
+	if userId <= 0 {
+		return "", errors.New("无效的用户ID")
+	}
+	
+	if request == "" {
+		return "", errors.New("下单请求不能为空")
+	}
+
 	req := &ai.AutoPlaceOrderReq{
 		UserId:  userId,
 		Request: request,

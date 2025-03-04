@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -147,9 +148,25 @@ type ShopConfig struct {
 }
 
 type AIConfig struct {
-	Host        string `mapstructure:"host"`
-	Port        int    `mapstructure:"port"`
-	ServiceName string `mapstructure:"service_name"`
+	Host        string        `mapstructure:"host"`
+	Port        int          `mapstructure:"port"`
+	ServiceName string       `mapstructure:"service_name"`
+	Timeout     time.Duration `mapstructure:"timeout"`      // 服务超时时间
+	RetryTimes  int          `mapstructure:"retry_times"`   // 重试次数
+	
+	// AI模型相关配置
+	Model struct {
+		Name       string  `mapstructure:"name"`        // 模型名称
+		MaxTokens  int     `mapstructure:"max_tokens"`  // 最大token数
+		Temperature float32 `mapstructure:"temperature"` // 温度参数
+	} `mapstructure:"model"`
+	
+	// 订单相关配置
+	Order struct {
+		MaxAmount      float32 `mapstructure:"max_amount"`       // 单笔订单最大金额
+		MaxItems       int     `mapstructure:"max_items"`        // 单笔订单最大商品数
+		DefaultPayment int32   `mapstructure:"default_payment"`  // 默认支付方式
+	} `mapstructure:"order"`
 }
 
 type AliyunConfig struct {
