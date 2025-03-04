@@ -4,12 +4,21 @@ import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/shop"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func UpdateShopInfo(ctx context.Context, c *app.RequestContext) {
-	userID, _ := c.Get("userId")
+	value, exists := c.Get("userId")
+	userId, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
 	type Shop struct {
 		ID          uint32 `json:"shop_id"`
 		Name        string `json:"name"`
@@ -20,23 +29,23 @@ func UpdateShopInfo(ctx context.Context, c *app.RequestContext) {
 	shopInfo := &Shop{}
 	err := c.Bind(shopInfo)
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "参数错误",
 		})
 		return
 	}
 	getShopIdReq := shop.GetShopIdReq{
-		UserId: userID.(uint32),
+		UserId: userId,
 	}
 	getShopIdResp, err := client.GetShopId(ctx, &getShopIdReq)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
 	}
 	if shopInfo.ID != getShopIdResp.ShopId {
-		c.JSON(403, map[string]interface{}{
+		c.JSON(consts.StatusForbidden, utils.H{
 			"error": "没有权限",
 		})
 		return
@@ -50,12 +59,12 @@ func UpdateShopInfo(ctx context.Context, c *app.RequestContext) {
 	}
 	resp, err := client.UpdateShopInfo(ctx, &req)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, map[string]interface{}{
+	c.JSON(consts.StatusOK, utils.H{
 		"ok": resp.Res,
 	})
 }

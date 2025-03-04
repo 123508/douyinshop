@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
 )
 
@@ -18,27 +20,34 @@ type Request struct {
 }
 
 func Charge(ctx context.Context, c *app.RequestContext) {
-	userId, _ := c.Get("userId")
+	value, exists := c.Get("userId")
+	userId, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
 	var req Request
 	if err := c.Bind(&req); err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": err.Error(),
 		})
 	}
 	amount, err := strconv.ParseFloat(req.Amount, 32)
 	if err != nil {
-		c.JSON(400, map[string]interface{}{
+		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": err.Error(),
 		})
 	}
-	resp, err := client.Charge(ctx, float32(amount), req.OrderID, userId.(uint32), req.PayMethod)
+	resp, err := client.Charge(ctx, float32(amount), req.OrderID, userId, req.PayMethod)
 	if err != nil {
-		c.JSON(500, map[string]interface{}{
+		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, map[string]interface{}{
+	c.JSON(consts.StatusOK, utils.H{
 		"transaction_id": resp.TransactionId,
 		"pay_url":        resp.PayUrl,
 	})

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 func Notify(ctx context.Context, c *app.RequestContext) {
@@ -15,5 +16,5 @@ func Notify(ctx context.Context, c *app.RequestContext) {
 		client.Notify(ctx, orderId, transactionId)
 	}
 	// 返回 ACK 确认
-	c.String(200, "success")
+	c.String(consts.StatusOK, "success")
 }
