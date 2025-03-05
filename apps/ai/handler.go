@@ -2,15 +2,15 @@ package main
 
 import (
     "context"
-    "encoding/json"
+    "fmt"
+    "errors"
     "time" 
     "strings"  
     ai "github.com/123508/douyinshop/kitex_gen/ai"
     "github.com/123508/douyinshop/kitex_gen/order/order_common"
     "github.com/123508/douyinshop/kitex_gen/order/userOrder"
-    "github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice
+    "github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
     aiutil "github.com/123508/douyinshop/pkg/ai"
-    "github.com/123508/douyinshop/pkg/errors"
     "github.com/cloudwego/kitex/pkg/klog" 
     "github.com/123508/douyinshop/pkg/config"
     "strconv"
@@ -30,7 +30,7 @@ type AiServiceImpl struct{
 
 // NewAiServiceImpl 创建服务实现实例
 func NewAiServiceImpl(orderClient orderuserservice.Client) *AiServiceImpl {
-    timeout := config.Conf.AiConfig.Timeout
+    timeout := time.Duration(config.Conf.VolcengineConfig.Timeout) * time.Second
     if timeout <= 0 {
         timeout = defaultTimeout
     }
@@ -54,10 +54,10 @@ func (s *AiServiceImpl) Close() error {
 func (s *AiServiceImpl) OrderQuery(ctx context.Context, req *ai.OrderQueryReq) (resp *ai.OrderQueryResp, err error) {
     // 参数验证
     if req == nil {
-        return nil, &errors.BasicMessageError{Message: "请求不能为空"}
+        return nil, errors.New("请求不能为空")
     }
     if req.OrderId == "" {
-        return nil, &errors.BasicMessageError{Message: "订单ID不能为空"}
+        return nil, errors.New("订单ID不能为空")
     }
 
     // 设置超时
@@ -68,14 +68,14 @@ func (s *AiServiceImpl) OrderQuery(ctx context.Context, req *ai.OrderQueryReq) (
     orderID, err := strconv.ParseUint(req.OrderId, 10, 32)
     if err != nil {
         klog.Errorf("Invalid order ID format %s: %v", req.OrderId, err)
-        return nil, &errors.BasicMessageError{Message: "订单ID格式不正确"}
+        return nil, errors.New("订单ID格式不正确")
     }
 
     // 调用订单服务的Detail方法
     orderResp, err := s.orderClient.Detail(ctx, &order_common.OrderReq{OrderId: uint32(orderID)})  
     if err != nil {
         klog.Errorf("Detail failed for orderID %s: %v", req.OrderId, err)
-        return nil, errors.WrapWithMessage(err, "获取订单信息失败")
+        return nil, fmt.Errorf("获取订单信息失败: %w", err)
     }
     if orderResp == nil || orderResp.Order == nil {
         klog.Errorf("Detail returned nil for orderID %s", req.OrderId)
@@ -97,26 +97,11 @@ func (s *AiServiceImpl) OrderQuery(ctx context.Context, req *ai.OrderQueryReq) (
         "remark":     orderResp.Order.Remark,
     }
 
-    // 添加订单详情
-    if orderResp.List != nil && len(orderResp.List) > 0 {
-        items := make([]map[string]interface{}, 0, len(orderResp.List))
-        for _, item := range orderResp.List {
-            items = append(items, map[string]interface{}{
-                "name":       item.Name,
-                "image":      item.Image,
-                "product_id": item.ProductId,
-                "number":     item.Number,
-                "amount":     item.Amount,
-            })
-        }
-        orderMap["items"] = items
-    }
-
     // 调用AI格式化
     response, err := s.douyinAI.FormatOrderDetails(orderMap)
     if err != nil {
         klog.Errorf("FormatOrderDetails failed for orderID %s: %v", req.OrderId, err)
-        return nil, errors.Wrap(err, "格式化订单详情失败")
+        return nil, fmt.Errorf("格式化订单详情失败: %w", err)
     }
 
     klog.Infof("Successfully processed order query for orderID: %s", req.OrderId)
@@ -126,15 +111,15 @@ func (s *AiServiceImpl) OrderQuery(ctx context.Context, req *ai.OrderQueryReq) (
 func (s *AiServiceImpl) AutoPlaceOrder(ctx context.Context, req *ai.AutoPlaceOrderReq) (resp *ai.AutoPlaceOrderResp, err error) {
     // 参数验证
     if req == nil {
-        return nil, &errors.BasicMessageError{Message: "请求不能为空"}
+        return nil, errors.New("请求不能为空")
     }
     if req.UserId <= 0 {
-        return nil, &errors.BasicMessageError{Message: "无效的用户ID"}
+        return nil, errors.New("无效的用户ID")
     }
     if request := strings.TrimSpace(req.Request); request == "" {
-        return nil, &errors.BasicMessageError{Message: "请求内容不能为空"}
+        return nil, errors.New("请求内容不能为空")
     } else if len(request) > maxRequestLength {
-        return nil, &errors.BasicMessageError{Message: "请求内容超出长度限制"}
+        return nil, errors.New("请求内容超出长度限制")
     }
 
     klog.Infof("Processing auto place order request for userID: %d", req.UserId)
@@ -143,7 +128,7 @@ func (s *AiServiceImpl) AutoPlaceOrder(ctx context.Context, req *ai.AutoPlaceOrd
     recommendations, err := s.douyinAI.AnalyzeOrderRequest(req.Request)
     if err != nil {
         klog.Errorf("AnalyzeOrderRequest failed for userID %d: %v", req.UserId, err)
-        return nil, errors.Wrap(err, "分析订单请求失败")
+        return nil, fmt.Errorf("分析订单请求失败: %w", err)
     }
     if len(recommendations) == 0 {
         return nil, errors.New("未找到推荐商品")
@@ -152,7 +137,7 @@ func (s *AiServiceImpl) AutoPlaceOrder(ctx context.Context, req *ai.AutoPlaceOrd
     // 计算订单总金额
     var totalAmount float32 = 0
     for _, rec := range recommendations {
-        if err := validateRecommendation(rec); err != nil {
+        if err := validateRecommendation(&rec); err != nil {
             klog.Warnf("Invalid recommendation for userID %d: %+v, error: %v", req.UserId, rec, err)
             continue
         }
@@ -173,7 +158,7 @@ func (s *AiServiceImpl) AutoPlaceOrder(ctx context.Context, req *ai.AutoPlaceOrd
     })
     if err != nil {
         klog.Errorf("Submit order failed for userID %d: %v", req.UserId, err)
-        return nil, errors.Wrap(err, "创建订单失败")
+        return nil, fmt.Errorf("创建订单失败: %w", err)
     }
     if orderResp == nil {
         return nil, errors.New("创建订单失败：服务返回为空")
