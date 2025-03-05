@@ -15,7 +15,6 @@ import (
     "github.com/123508/douyinshop/pkg/config"
     "strconv"
 )
-
 const (
     maxRequestLength = 1000
     defaultTimeout  = 10 * time.Second
@@ -35,11 +34,17 @@ func NewAiServiceImpl(orderClient orderuserservice.Client) *AiServiceImpl {
         timeout = defaultTimeout
     }
     
+    douyinAI, err := aiutil.NewDouyinAI()
+    if err != nil {
+        klog.Errorf("Failed to initialize DouyinAI: %v", err)
+        return nil, errors.Wrap(err, "初始化AI服务失败")
+    }
+    
     return &AiServiceImpl{
-        douyinAI: aiutil.NewDouyinAI(),
+        douyinAI: douyinAI,
         orderClient: orderClient,
         timeout: timeout,
-    }
+    }, nil
 }
 
 // Close 关闭资源
@@ -134,14 +139,27 @@ func (s *AiServiceImpl) AutoPlaceOrder(ctx context.Context, req *ai.AutoPlaceOrd
         return nil, errors.New("未找到推荐商品")
     }
 
-    // 计算订单总金额
+    // 计算订单总金额并创建订单详情
     var totalAmount float32 = 0
+    var orderDetails []*userOrder.OrderDetail
     for _, rec := range recommendations {
         if err := validateRecommendation(&rec); err != nil {
             klog.Warnf("Invalid recommendation for userID %d: %+v, error: %v", req.UserId, rec, err)
             continue
         }
-        totalAmount += float32(rec.Price * float64(rec.Quantity))
+        amount := float32(rec.Price * float64(rec.Quantity))
+        totalAmount += amount
+        
+        orderDetails = append(orderDetails, &userOrder.OrderDetail{
+            ProductId: uint32(rec.ProductID),
+            Name:      rec.Name,
+            Number:    int32(rec.Quantity),
+            Amount:    amount,
+        })
+    }
+
+    if len(orderDetails) == 0 {
+        return nil, errors.New("没有有效的商品可下单")
     }
 
     // 创建订单
@@ -149,13 +167,17 @@ func (s *AiServiceImpl) AutoPlaceOrder(ctx context.Context, req *ai.AutoPlaceOrd
     defer cancel()
     
     // 使用Submit方法创建订单
-    orderResp, err := s.orderClient.Submit(ctx, &userOrder.OrderSubmitReq{
+    orderReq := &userOrder.OrderSubmitReq{
         UserId:    req.UserId,
         Amount:    totalAmount,
-        // 以下字段可能需要从请求中获取或使用默认值
         PayMethod: 1, // 默认支付方式
         Remark:    "AI自动下单: " + req.Request,
-    })
+        Order: &userOrder.OrderSubmitDetail{
+            List: orderDetails,
+        },
+    }
+
+    orderResp, err := s.orderClient.Submit(ctx, orderReq)
     if err != nil {
         klog.Errorf("Submit order failed for userID %d: %v", req.UserId, err)
         return nil, fmt.Errorf("创建订单失败: %w", err)

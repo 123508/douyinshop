@@ -23,7 +23,7 @@ func main() {
         config.Conf.EtcdConfig.Password,
     )
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("创建etcd注册器失败: %v", err)
     }
 
     // 创建订单服务客户端
@@ -32,7 +32,7 @@ func main() {
         client.WithResolver(r.(discovery.Resolver)),
     )
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("创建订单服务客户端失败: %v", err)
     }
 
     // 创建服务地址
@@ -42,7 +42,7 @@ func main() {
 
     // 创建服务实例
     svr := ai.NewServer(
-        NewAiServiceImpl(orderClient),
+        impl,
         server.WithServiceAddr(addr),
         server.WithRegistry(r),
         server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
@@ -51,8 +51,7 @@ func main() {
     )
 
     // 启动服务
-    err = svr.Run()
-    if err != nil {
-        log.Println(err.Error())
+    if err := svr.Run(); err != nil {
+        log.Fatalf("服务运行失败: %v", err)
     }
 }
