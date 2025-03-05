@@ -89,7 +89,7 @@ func (d *DouyinAI) AnalyzeOrderRequest(userRequest string) ([]ProductRecommendat
 			},
 		},
 		// 设置温度为0.7，增加一些创造性
-		Temperature: volcengine.Float64(0.7),
+		Temperature: float32(0.7),
 	}
 
 	// 调用模型
@@ -156,7 +156,7 @@ func (d *DouyinAI) FormatOrderDetails(orderDetails map[string]interface{}) (stri
 			},
 		},
 		// 设置较低的温度，保持输出的一致性
-		Temperature: volcengine.Float64(0.3),
+		Temperature: float32(0.3),
 	}
 
 	resp, err := d.client.CreateChatCompletion(ctx, req)
