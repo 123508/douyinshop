@@ -12,87 +12,114 @@ import (
 	"github.com/123508/douyinshop/apps/api/handlers/user"
 	"github.com/123508/douyinshop/apps/api/middleware"
 	"github.com/123508/douyinshop/pkg/config"
-	"log"
-
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"log"
+	"net/http"
+	"sync"
 )
 
 func main() {
-	hertzAddr := fmt.Sprintf("%s:%d", config.Conf.HertzConfig.Host, config.Conf.HertzConfig.Port)
-	hz := server.New(server.WithHostPorts(hertzAddr))
+	var wg sync.WaitGroup
+	wg.Add(2)
 
-	userGrop := hz.Group("/user")
-	userGrop.POST("/register", user.Register)
-	userGrop.POST("/login", user.Login)
-	userGrop.GET("/logout", user.Logout)
-	userGrop.GET("/info", middleware.ParseToken(), user.GetInfo)
-	userGrop.POST("/update_info", middleware.ParseToken(), user.UpdateInfo)
-	userGrop.DELETE("/delete", middleware.ParseToken(), user.Delete)
+	// 启动 Prometheus metrics 服务器
+	go func() {
+		defer wg.Done()
+		metricsAddr := fmt.Sprintf("%s:%d", config.Conf.HertzConfig.Host, 10000)
+		http.Handle("/metrics", promhttp.Handler())
+		log.Printf("Prometheus metrics server starting on %s", metricsAddr)
+		if err := http.ListenAndServe(metricsAddr, nil); err != nil {
+			log.Printf("Prometheus metrics server error: %v", err)
+		}
+	}()
 
-	productGroup := hz.Group("/product")
-	productGroup.Use(middleware.ParseToken())
-	productGroup.GET("/list", product.List)
-	productGroup.GET("/detail/:product_id", product.Detail)
-	productGroup.GET("/search", product.Search)
+	// 启动主服务
+	go func() {
+		defer wg.Done()
+		hertzAddr := fmt.Sprintf("%s:%d", config.Conf.HertzConfig.Host, config.Conf.HertzConfig.Port)
+		hz := server.New(server.WithHostPorts(hertzAddr))
 
-	cartGroup := hz.Group("/cart")
-	cartGroup.Use(middleware.ParseToken())
-	cartGroup.GET("/list", cart.List)
-	cartGroup.POST("/add", cart.Add)
-	cartGroup.DELETE("/empty", cart.Empty)
-	cartGroup.POST("/reduce", cart.Reduce)
-	cartGroup.POST("/checkout", cart.Checkout)
+		// 注册 Prometheus 中间件
+		middleware.RegisterPrometheus(hz)
 
-	shopGroup := hz.Group("/shop")
-	shopGroup.Use(middleware.ParseToken())
-	shopGroup.GET("/info/:shop_id", shop.GetInfo)
-	shopGroup.GET("/getShopId", shop.GetShopId)
-	shopGroup.GET("/list", shop.List)
-	shopGroup.POST("/register", shop.Register)
-	shopGroup.POST("/add", shop.Add)
-	shopGroup.POST("/updateShop", shop.UpdateShopInfo)
-	shopGroup.DELETE("/delete", shop.Delete)
-	shopGroup.POST("/updateProduct", shop.UpdateProductInfo)
+		userGrop := hz.Group("/user")
+		userGrop.POST("/register", user.Register)
+		userGrop.POST("/login", user.Login)
+		userGrop.GET("/logout", user.Logout)
+		userGrop.GET("/info", middleware.ParseToken(), user.GetInfo)
+		userGrop.POST("/update_info", middleware.ParseToken(), user.UpdateInfo)
+		userGrop.DELETE("/delete", middleware.ParseToken(), user.Delete)
 
-	addressGroup := hz.Group("/address")
-	addressGroup.Use(middleware.ParseToken())
-	addressGroup.GET("/list", address.List)
-	addressGroup.POST("/delete", address.Delete)
-	addressGroup.POST("/add", address.Add)
-	addressGroup.POST("/update", address.Update)
-	addressGroup.POST("/setDefaultAddr", address.SetDefault)
+		productGroup := hz.Group("/product")
+		productGroup.Use(middleware.ParseToken())
+		productGroup.GET("/list", product.List)
+		productGroup.GET("/detail/:product_id", product.Detail)
+		productGroup.GET("/search", product.Search)
 
-	paymentGroup := hz.Group("/payment")
-	paymentGroup.Use(middleware.ParseToken())
-	paymentGroup.POST("/charge", payment.Charge)
-	paymentGroup.POST("/notify", payment.Notify)
+		cartGroup := hz.Group("/cart")
+		cartGroup.Use(middleware.ParseToken())
+		cartGroup.GET("/list", cart.List)
+		cartGroup.POST("/add", cart.Add)
+		cartGroup.DELETE("/empty", cart.Empty)
+		cartGroup.POST("/reduce", cart.Reduce)
+		cartGroup.POST("/checkout", cart.Checkout)
 
-	aiGroup := hz.Group("/ai")
-	aiGroup.Use(middleware.ParseToken())
-	aiGroup.GET("/orderQuery/:order_id", ai.OrderQuery)
-	aiGroup.POST("/autoPlaceOrder", ai.AutoPlaceOrder)
+		shopGroup := hz.Group("/shop")
+		shopGroup.Use(middleware.ParseToken())
+		shopGroup.GET("/info/:shop_id", shop.GetInfo)
+		shopGroup.GET("/getShopId", shop.GetShopId)
+		shopGroup.GET("/list", shop.List)
+		shopGroup.POST("/register", shop.Register)
+		shopGroup.POST("/add", shop.Add)
+		shopGroup.POST("/updateShop", shop.UpdateShopInfo)
+		shopGroup.DELETE("/delete", shop.Delete)
+		shopGroup.POST("/updateProduct", shop.UpdateProductInfo)
 
-	orderGroup := hz.Group("/order")
-	orderGroup.Use(middleware.ParseToken())
-	userOrderGroup := orderGroup.Group("/user")
-	userOrderGroup.GET("/detail/:order_id", order.Detail)
-	userOrderGroup.POST("/history", order.History)
-	userOrderGroup.POST("/submit", order.Submit)
-	userOrderGroup.POST("/cancel", order.Cancel)
-	userOrderGroup.POST("/reminder", order.Reminder)
-	userOrderGroup.GET("/complete", order.Complete)
+		addressGroup := hz.Group("/address")
+		addressGroup.Use(middleware.ParseToken())
+		addressGroup.GET("/list", address.List)
+		addressGroup.POST("/delete", address.Delete)
+		addressGroup.POST("/add", address.Add)
+		addressGroup.POST("/update", address.Update)
+		addressGroup.POST("/setDefaultAddr", address.SetDefault)
 
-	shopOrderGroup := orderGroup.Group("/shop")
-	shopOrderGroup.Use(middleware.ParseToken())
-	shopOrderGroup.GET("/list", order.List)
-	shopOrderGroup.GET("/detail/:shop_id", order.DetailShop)
-	shopOrderGroup.GET("/confirm", order.Confirm)
-	shopOrderGroup.GET("/delivery/:order_id", order.Delivery)
-	shopOrderGroup.GET("/receive/:order_id", order.Receive)
-	shopOrderGroup.POST("/rejection", order.Rejection)
-	shopOrderGroup.POST("/cancel", order.CancelShop)
+		paymentGroup := hz.Group("/payment")
+		paymentGroup.Use(middleware.ParseToken())
+		paymentGroup.POST("/charge", payment.Charge)
+		paymentGroup.POST("/notify", payment.Notify)
 
-	if err := hz.Run(); err != nil {
-		log.Fatal(err)
-	}
+		aiGroup := hz.Group("/ai")
+		aiGroup.Use(middleware.ParseToken())
+		aiGroup.GET("/orderQuery/:order_id", ai.OrderQuery)
+		aiGroup.POST("/autoPlaceOrder", ai.AutoPlaceOrder)
+
+		orderGroup := hz.Group("/order")
+		orderGroup.Use(middleware.ParseToken())
+		userOrderGroup := orderGroup.Group("/user")
+		userOrderGroup.GET("/detail/:order_id", order.Detail)
+		userOrderGroup.POST("/history", order.History)
+		userOrderGroup.POST("/submit", order.Submit)
+		userOrderGroup.POST("/cancel", order.Cancel)
+		userOrderGroup.POST("/reminder", order.Reminder)
+		userOrderGroup.GET("/complete", order.Complete)
+
+		shopOrderGroup := orderGroup.Group("/shop")
+		shopOrderGroup.Use(middleware.ParseToken())
+		shopOrderGroup.GET("/list", order.List)
+		shopOrderGroup.GET("/detail/:shop_id", order.DetailShop)
+		shopOrderGroup.GET("/confirm", order.Confirm)
+		shopOrderGroup.GET("/delivery/:order_id", order.Delivery)
+		shopOrderGroup.GET("/receive/:order_id", order.Receive)
+		shopOrderGroup.POST("/rejection", order.Rejection)
+		shopOrderGroup.POST("/cancel", order.CancelShop)
+
+		log.Printf("Main server starting on %s", hertzAddr)
+		if err := hz.Run(); err != nil {
+			log.Printf("Main server error: %v", err)
+		}
+	}()
+
+	// 等待所有服务启动
+	wg.Wait()
 }

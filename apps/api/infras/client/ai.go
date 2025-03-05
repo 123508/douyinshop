@@ -2,10 +2,9 @@ package client
 
 import (
 	"context"
-	"github.com/123508/douyinshop/kitex_gen/ai/aiservice"
 	"github.com/123508/douyinshop/kitex_gen/ai"
+	"github.com/123508/douyinshop/kitex_gen/ai/aiservice"
 	"github.com/123508/douyinshop/pkg/config"
-	"github.com/123508/douyinshop/pkg/errors"
 	"time"
 
 	"github.com/cloudwego/kitex/client"
@@ -14,7 +13,6 @@ import (
 )
 
 var aiClient aiservice.Client
-
 
 func initAiRpc() {
 	r, err := etcd.NewEtcdResolverWithAuth(
@@ -44,11 +42,11 @@ func initAiRpc() {
 // 返回AI格式化后的订单信息
 func OrderQuery(ctx context.Context, orderId string) (string, error) {
 	if aiClient == nil {
-		return "", errors.New("AI客户端未初始化")
+		//return "", errors.New("AI客户端未初始化")
 	}
-	
+
 	if orderId == "" {
-		return "", errors.New("订单ID不能为空")
+		//return "", errors.New("订单ID不能为空")
 	}
 
 	req := &ai.OrderQueryReq{
@@ -67,15 +65,15 @@ func OrderQuery(ctx context.Context, orderId string) (string, error) {
 // 返回订单ID
 func AutoPlaceOrder(ctx context.Context, userId uint32, request string) (string, error) {
 	if aiClient == nil {
-		return "", errors.New("AI客户端未初始化")
+		//return "", errors.New("AI客户端未初始化")
 	}
-	
+
 	if userId <= 0 {
-		return "", errors.New("无效的用户ID")
+		//return "", errors.New("无效的用户ID")
 	}
-	
+
 	if request == "" {
-		return "", errors.New("下单请求不能为空")
+		//return "", errors.New("下单请求不能为空")
 	}
 
 	req := &ai.AutoPlaceOrderReq{
