@@ -3,7 +3,6 @@ package ai
 import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
-	"github.com/123508/douyinshop/pkg/errors"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -16,14 +15,14 @@ type OrderQueryRequest struct {
 func OrderQuery(ctx context.Context, c *app.RequestContext) {
 	var req OrderQueryRequest
 	if err := c.BindAndValidate(&req); err != nil {
-		c.JSON(400, errors.NewValidationError(err))
+		//c.JSON(400, errors.NewValidationError(err))
 		return
 	}
 
 	// 调用AI服务查询订单
 	response, err := client.OrderQuery(ctx, req.OrderId)
 	if err != nil {
-		c.JSON(500, errors.NewServiceError(err))
+		//c.JSON(500, errors.NewServiceError(err))
 		return
 	}
 
