@@ -14,24 +14,23 @@ redis:
   db: 0
   pool_size: 100
 
-etcd:
-  endpoints: 127.0.0.1:2379
-  username: "root"
-  password: "bitjump"
-
 jwt:
   # 设置jwt签名加密时使用的秘钥
-  admin_secret_key: "ThisServiceIsOfferedByBitJump"
+  admin_secret_key: "your admin_secret_key"
   # 设置jwt过期时间为7天
   admin_ttl: 604800
-  # 令牌存活时间低于该时间令牌自动刷新
   admin_suv: 10800
 
 elasticsearch:
   hosts:
     - "http://127.0.0.1:9200"
-  username: "elastic"
-  password: "123456"
+  username: ""
+  password: ""
+
+etcd:
+  endpoints: 127.0.0.1:2379
+  username: ""
+  password: ""
 
 hertz:
   host: 127.0.0.1
@@ -94,7 +93,7 @@ ai:
   host: 127.0.0.1
   port: 8911
   service_name: "bitjump.douyinshop.ai"
-  timeout: 30s                      
+  timeout: 30s
 
 volcengine:
   api_key: "your api_key"  # 从火山引擎控制台获取
@@ -103,11 +102,14 @@ volcengine:
   max_tokens: 2048  # 最大token数
   retry_times: 3  # 
 aliyun:
+  uploadPath: 1 #1上传到本地服务器,2上传到AliOss服务器
   oss:
     endpoint: "your endpoint"
     accessKeyId: "your accessKeyId"
     accessKeySecret: "your accessKeySecret"
     bucketName: "your bucketName"
+
+
 rabbitmq:
   host: 127.0.0.1 #主机名
   port: 5672 #端口
@@ -115,3 +117,7 @@ rabbitmq:
   username: "your username" #用户名
   password: "your password" #密码
   prefetch: 1 #每次只能获取一条消息,处理完后才能获取下一个消息
+
+logger:
+  level: "error" # 设置日志级别为error
+  output: "./log.txt" # 输出到标准错误，也可以设置为文件路径

@@ -5,6 +5,7 @@ import (
 	"github.com/123508/douyinshop/apps/api/handlers/address"
 	"github.com/123508/douyinshop/apps/api/handlers/ai"
 	"github.com/123508/douyinshop/apps/api/handlers/cart"
+	"github.com/123508/douyinshop/apps/api/handlers/image"
 	"github.com/123508/douyinshop/apps/api/handlers/order"
 	"github.com/123508/douyinshop/apps/api/handlers/payment"
 	"github.com/123508/douyinshop/apps/api/handlers/product"
@@ -113,6 +114,9 @@ func main() {
 		shopOrderGroup.GET("/receive/:order_id", order.Receive)
 		shopOrderGroup.POST("/rejection", order.Rejection)
 		shopOrderGroup.POST("/cancel", order.CancelShop)
+
+		imageGroup := hz.Group("/image")
+		imageGroup.POST("/upload", image.UploadImage)
 
 		log.Printf("Main server starting on %s", hertzAddr)
 		if err := hz.Run(); err != nil {
