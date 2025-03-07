@@ -19,16 +19,26 @@ func Reduce(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	var req cart.DeleteItemReq
-	if err := c.BindAndValidate(&req); err != nil {
+	type Req struct {
+		ProductId uint32 `json:"product_id"`
+		Quantity  uint32 `json:"number"`
+	}
+	var req Req
+	err := c.Bind(&req)
+	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": err.Error(),
+			"error": "参数错误",
 		})
 		return
 	}
-	req.UserId = userId
 
-	_, err := client.DeleteItem(ctx, &req)
+	deleteItemReq := &cart.DeleteItemReq{
+		ProductId: req.ProductId,
+		Num:       req.Quantity,
+		UserId:    userId,
+	}
+
+	_, err = client.DeleteItem(ctx, deleteItemReq)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": "internal server error",
