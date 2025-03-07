@@ -218,8 +218,8 @@ func DownloadImages(file *multipart.FileHeader) (string, error) {
 	// 创建目标文件
 
 	s := uuid.New().String()
-
-	path := "../../static/imageStore/" + s + extractAnySuffix(file.Filename)
+	fileName := s + extractAnySuffix(file.Filename)
+	path := "static/imageStore/" + fileName
 
 	dir := filepath.Dir(path)
 
@@ -234,13 +234,6 @@ func DownloadImages(file *multipart.FileHeader) (string, error) {
 		return "", &errorno.BasicMessageError{Message: "无法创建目标文件,请重试", Code: 500}
 	}
 
-	abs, err := filepath.Abs(dst.Name())
-
-	if err != nil {
-		log.Println("获取文件绝对路径失败")
-		return "", &errorno.BasicMessageError{Message: "获取文件绝对路径失败", Code: 404}
-	}
-
 	defer func(dst *os.File) {
 		err := dst.Close()
 		if err != nil {
@@ -253,6 +246,6 @@ func DownloadImages(file *multipart.FileHeader) (string, error) {
 
 		return "", &errorno.BasicMessageError{Message: "无法复制目标文件,请重试", Code: 500}
 	}
-	return abs, nil
+	return fileName, nil
 
 }
