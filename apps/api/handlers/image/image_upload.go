@@ -25,7 +25,14 @@ func UploadImage(ctx context.Context, c *app.RequestContext) {
 	var result string
 
 	if uploadType == 1 {
-		result, err = util.DownloadImages(file)
+		fileName, err := util.DownloadImages(file)
+		if err != nil {
+			c.JSON(consts.StatusInternalServerError, utils.H{
+				"err": err,
+			})
+			return
+		}
+		result = string(c.Request.Host()) + "/image/get/" + fileName
 	} else {
 		result, err = util.UploadImagesByIO(file)
 	}
