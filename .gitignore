@@ -7,5 +7,9 @@
 */bin
 */log
 
+bin
+static
+apps/api/static
+
 # ignore the data of elasticsearch
 deploy/els/data

@@ -117,6 +117,7 @@ func main() {
 
 		imageGroup := hz.Group("/image")
 		imageGroup.POST("/upload", image.UploadImage)
+		imageGroup.GET("/get/:image", image.GetImage)
 
 		log.Printf("Main server starting on %s", hertzAddr)
 		if err := hz.Run(); err != nil {
