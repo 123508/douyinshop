@@ -19,16 +19,28 @@ func Add(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	var req cart.AddItemReq
-	if err := c.BindAndValidate(&req); err != nil {
+	type Req struct {
+		ProductId uint32 `json:"product_id"`
+		Quantity  int32  `json:"number"`
+	}
+	var req Req
+	err := c.Bind(&req)
+	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": err.Error(),
+			"error": "参数错误",
 		})
 		return
 	}
-	req.UserId = userId
 
-	_, err := client.AddItem(ctx, &req)
+	addItemReq := &cart.AddItemReq{
+		UserId: userId,
+		Item: &cart.CartItem{
+			ProductId: req.ProductId,
+			Quantity:  req.Quantity,
+		},
+	}
+
+	_, err = client.AddItem(ctx, addItemReq)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": "internal server error",
