@@ -5,10 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"github.com/123508/douyinshop/pkg/db"
-	"github.com/123508/douyinshop/pkg/errors"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/123508/douyinshop/pkg/redis"
-	"github.com/123508/douyinshop/pkg/utils"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
 	"log"
@@ -16,6 +15,12 @@ import (
 
 	"github.com/123508/douyinshop/kitex_gen/user"
 )
+
+var UserNotExists = &errorno.BasicMessageError{Code: 401, Message: "用户不存在"}
+
+var PasswordNotEqual = &errorno.BasicMessageError{Code: 400, Message: "密码不匹配,请重新输入"}
+
+var ErrorUsernameOrPassword = &errorno.BasicMessageError{Code: 404, Message: "用户名或密码错误"}
 
 // UserServiceImpl implements the last service interface defined in the IDL.
 type UserServiceImpl struct{}
@@ -31,10 +36,6 @@ func encryption(origin string) string {
 
 var DB = open()
 
-var UserNotExists = &errors.BasicMessageError{Message: "用户不存在"}
-
-var PasswordNotEqual = &errors.BasicMessageError{Message: "密码不匹配,请重新输入"}
-
 func open() *gorm.DB {
 	DB, err := db.InitDB()
 	if err != nil {
@@ -45,9 +46,10 @@ func open() *gorm.DB {
 
 // Register implements the UserServiceImpl interface.
 // 用户注册接口
-// 如果两个密码不同,则返回0用户
+// 如果两个密码不同,则返回空
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (resp *user.RegisterResp, err error) {
 	if req.Password != req.ConfirmPassword {
+		klog.Error("密码和注册密码不一致!")
 		return nil, PasswordNotEqual
 	}
 
@@ -57,7 +59,6 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 	user1.Name = req.Nickname
 	user1.Phone = req.Phone
 	user1.Gender = req.Gender
-	user1.Avatar, _ = utils.UploadImages("", "user", 0)
 	user2 := &models.UserLogin{}
 	user2.Password = encryption(req.Password)
 
@@ -77,6 +78,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 	})
 
 	if err != nil {
+		klog.Error("创建用户对象错误!")
 		return nil, err
 	}
 
@@ -90,8 +92,6 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 // 如果用户被删除也返回user_id=0
 func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *user.LoginResp, err error) {
 
-	//这里加入auth验证token逻辑
-
 	//从users表中读取Email信息
 	var row models.User
 	DB.Model(&models.User{}).Where("email = ?", req.Email).Find(&row)
@@ -102,7 +102,8 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 
 	//如果用户已经被删除也返回空
 	if res.ID == 0 {
-		return &user.LoginResp{UserId: 0}, UserNotExists
+		klog.Error("用户名或密码错误")
+		return &user.LoginResp{UserId: 0}, ErrorUsernameOrPassword
 	}
 
 	//这个方法之后要调用发放token的逻辑
@@ -119,6 +120,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 
 	//如果查询到不存在该用户,返回error
 	if row.Email == "" {
+		klog.Error("用户不存在")
 		return nil, UserNotExists
 	}
 
@@ -141,7 +143,7 @@ func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp
 
 	//如果初始化redis成功则让token失效,否则报错并返回
 	if err != nil {
-		klog.Fatal(err)
+		klog.Error("初始化redis错误")
 		//如果redis初始化错误则返回nil
 		return nil, err
 	} else {
@@ -159,19 +161,17 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 	info, err := s.GetUserInfo(ctx, &user.GetUserInfoReq{UserId: req.UserId})
 
 	if err != nil {
+		klog.Error("用户不存在")
 		return nil, UserNotExists
 	}
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
-		//图片上传并转换为字符串部分
-		images, err := utils.UploadImages(req.Avatar, "user", req.UserId)
-		if err != nil {
-			//有错误就回滚事务
-			return err
-		}
+
 		if req.UserId == 0 {
+			klog.Error("用户不存在")
 			return UserNotExists
 		}
+
 		//更新用户信息部分
 		tx = DB.Model(&models.User{}).Where("id=?", req.UserId)
 
@@ -183,13 +183,11 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 		if req.Phone != "" {
 			updates["phone"] = req.Phone
 		}
-		if req.Avatar != "" {
-			updates["avatar"] = images
-		}
 		if req.Nickname != "" {
 			updates["name"] = req.Nickname
 		}
 		if err := tx.Updates(updates).Error; err != nil {
+			klog.Error("更新用户发生错误")
 			return err
 		}
 
@@ -197,6 +195,7 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 		if req.Password != "" {
 			where := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId)
 			if err = where.Update("password", encryption(req.Password)).Update("updated_at", time.Now()).Error; err != nil {
+				klog.Error("更新用户密码错误")
 				return err
 			}
 		}
@@ -225,6 +224,7 @@ func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp
 		return nil
 	})
 	if err != nil {
+		klog.Error("删除用户异常")
 		return nil, err
 	}
 	return &user.DeleteResp{}, nil
