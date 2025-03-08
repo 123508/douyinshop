@@ -56,14 +56,15 @@ func List(ctx context.Context, c *app.RequestContext) {
 
 		return
 	}
-	product := make([]map[string]interface{}, 0)
+	product := make([]utils.H, 0)
 	for _, v := range resp.Products {
 		categories := make([]string, 0)
 		for _, category := range v.Categories {
 			categories = append(categories, category)
 		}
-		product = append(product, map[string]interface{}{
+		product = append(product, utils.H{
 			"name":        v.Name,
+			"product_id":  v.Id,
 			"description": v.Description,
 			"picture":     v.Picture,
 			"price":       fmt.Sprintf("%.2f", v.Price),
