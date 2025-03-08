@@ -5,9 +5,11 @@ import (
 	"errors"
 	"github.com/123508/douyinshop/kitex_gen/auth"
 	"github.com/123508/douyinshop/pkg/config"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/redis"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/golang-jwt/jwt/v4"
+	"log"
 	"time"
 )
 
@@ -20,6 +22,16 @@ type UserClaims struct {
 	UserId uint32 `json:"user_id"`
 	jwt.RegisteredClaims
 }
+
+var InvalidToken = &errorno.BasicMessageError{Code: 401, Message: "token已过期,请重新登录"}
+
+var ParseTokenError = &errorno.BasicMessageError{Code: 402, Message: "解析token失败"}
+
+var SignFailError = &errorno.BasicMessageError{Code: 500, Message: "token签名失败"}
+
+var RedisError = &errorno.BasicMessageError{Code: 500, Message: "Redis数据库异常"}
+
+var RedisConnectionError = &errorno.BasicMessageError{Code: 404, Message: "Redis数据库连接异常"}
 
 func GenerateJWT(userId uint32) (string, error) {
 
@@ -35,7 +47,8 @@ func GenerateJWT(userId uint32) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString([]byte(secretKey))
 	if err != nil {
-		return "", err
+		log.Println("token签名失败:", err)
+		return "", SignFailError
 	}
 
 	return signedToken, nil
@@ -47,13 +60,15 @@ func ParseJWT(tokenString string) (*UserClaims, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		log.Println("解析token失败:", err)
+		return nil, ParseTokenError
 	}
 
 	if claims, ok := token.Claims.(*UserClaims); ok && token.Valid {
 		return claims, nil
 	} else {
-		return nil, errors.New("invalid token")
+		log.Println("token已过期")
+		return nil, InvalidToken
 	}
 }
 
@@ -83,18 +98,20 @@ func (s *AuthServiceImpl) VerifyTokenByRPC(ctx context.Context, req *auth.Verify
 	rds, err := redis.InitRedis()
 	if err != nil {
 		klog.Fatal(err)
+		return nil, RedisError
 	}
 	//在redis中检查token是否存活
 	result, err := rds.Exists(ctx, req.Token).Result()
 
 	//如果redis连接出错,直接返回错误信息
 	if err != nil {
-		return nil, err
+		log.Println("redis连接错误:", err)
+		return nil, RedisConnectionError
 	} else {
 		//如果在redis中检测到token,则直接返回失败响应
 		if result == 1 {
 			resp = &auth.VerifyResp{Res: false}
-			return resp, errors.New("token已失效,请注意")
+			return resp, InvalidToken
 		}
 	}
 
@@ -113,7 +130,7 @@ func (s *AuthServiceImpl) VerifyTokenByRPC(ctx context.Context, req *auth.Verify
 			newToken, err := GenerateJWT(token.UserId)
 			if err != nil {
 				resp.Res = false
-				return resp, err // 返回错误而不是直接终止程序
+				return resp, err // 返回错误
 			}
 			//将token重新放入
 			resp.Token = newToken

@@ -5,6 +5,7 @@ import (
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/product"
 	"github.com/123508/douyinshop/kitex_gen/shop"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
@@ -42,9 +43,18 @@ func Add(ctx context.Context, c *app.RequestContext) {
 	}
 	getShopIdResp, err := client.GetShopId(ctx, &getShopIdReq)
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, utils.H{
-			"error": err.Error(),
-		})
+		basicErr := errorno.ParseBasicMessageError(err)
+
+		if basicErr.Raw != nil {
+			c.JSON(consts.StatusInternalServerError, utils.H{
+				"err": err,
+			})
+		} else {
+			c.JSON(basicErr.Code, utils.H{
+				"error": basicErr.Message,
+			})
+		}
+
 		return
 	}
 	if productInfo.ShopID != getShopIdResp.ShopId {
@@ -66,9 +76,18 @@ func Add(ctx context.Context, c *app.RequestContext) {
 	}
 	resp, err := client.AddProduct(ctx, req)
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, utils.H{
-			"error": err.Error(),
-		})
+		basicErr := errorno.ParseBasicMessageError(err)
+
+		if basicErr.Raw != nil {
+			c.JSON(consts.StatusInternalServerError, utils.H{
+				"err": err,
+			})
+		} else {
+			c.JSON(basicErr.Code, utils.H{
+				"error": basicErr.Message,
+			})
+		}
+
 		return
 	}
 	c.JSON(consts.StatusOK, utils.H{
