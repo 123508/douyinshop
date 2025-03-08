@@ -5,7 +5,7 @@ import (
 	"fmt"
 	payment "github.com/123508/douyinshop/kitex_gen/payment"
 	"github.com/123508/douyinshop/pkg/config"
-	"github.com/123508/douyinshop/pkg/errors"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/smartwalle/alipay/v3"
 	"log"
@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+var NoShopping = &errorno.BasicMessageError{Message: "没有该购物记录"}
+
+var NotSupportWechatPay = &errorno.BasicMessageError{Code: 400, Message: "暂时不支持微信支付"}
+
 // PaymentServiceImpl implements the last service interface defined in the IDL.
 type PaymentServiceImpl struct{}
 
@@ -21,10 +25,10 @@ type PaymentServiceImpl struct{}
 func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq) (resp *payment.ChargeResp, err error) {
 	var order models.Order
 	if err = database.Model(&models.Order{}).Where("user_id = ? and number = ?", req.UserId, req.OrderId).First(&order).Error; err != nil {
-		return nil, &errors.BasicMessageError{Message: "没有该购物记录"}
+		return nil, NoShopping
 	}
 	if req.PayMethod == 1 {
-		return nil, fmt.Errorf("暂时不支持微信支付")
+		return nil, NotSupportWechatPay
 	} else if req.PayMethod == 2 {
 		// 初始化支付宝
 		var client *alipay.Client

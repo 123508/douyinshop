@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/123508/douyinshop/kitex_gen/address"
 	"github.com/123508/douyinshop/pkg/db"
-	"github.com/123508/douyinshop/pkg/errors"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
@@ -15,6 +15,16 @@ import (
 type AddressServiceImpl struct{}
 
 var DB = open()
+
+var InvalidAddressIdError = &errorno.BasicMessageError{Code: 400, Message: "地址ID无效"}
+
+var ForbiddenDeleteError = &errorno.BasicMessageError{Code: 401, Message: "地址不存在或无权限删除"}
+
+var DeleteAddrError = &errorno.BasicMessageError{Code: 500, Message: "地址删除失败,请联系管理员"}
+
+var ForbiddenAskError = &errorno.BasicMessageError{Code: 401, Message: "无权访问该地址"}
+
+var FailUpdateError = &errorno.BasicMessageError{Code: 500, Message: "更新地址失败,请联系管理员"}
 
 //注意地址类型有Address,AddressItem,AddressBook
 
@@ -139,7 +149,7 @@ func (s *AddressServiceImpl) DeleteAddress(ctx context.Context, req *address.Del
 
 	// 验证地址ID是否有效
 	if req.AddrId == 0 {
-		return nil, &errors.BasicMessageError{Message: "地址ID无效"}
+		return nil, InvalidAddressIdError
 	}
 
 	//默认地址必须存在的逻辑,如果需要可以打开
@@ -159,18 +169,18 @@ func (s *AddressServiceImpl) DeleteAddress(ctx context.Context, req *address.Del
 	var address1 models.AddressBook
 	if err = tx.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&address1).Error; err != nil {
 		tx.Rollback()
-		return &address.DeleteAddressResp{Res: false}, &errors.BasicMessageError{Message: "地址不存在或无权限删除"}
+		return &address.DeleteAddressResp{Res: false}, ForbiddenAskError
 	}
 
 	// 执行删除操作
 	if err = tx.Unscoped().Delete(&address1).Error; err != nil {
 		tx.Rollback()
-		return &address.DeleteAddressResp{Res: false}, &errors.BasicMessageError{Message: "地址删除失败,请联系管理员"}
+		return &address.DeleteAddressResp{Res: false}, DeleteAddrError
 	}
 
 	// 提交事务
 	if err = tx.Commit().Error; err != nil {
-		return &address.DeleteAddressResp{Res: false}, &errors.BasicMessageError{Message: "地址删除失败,请联系管理员"}
+		return &address.DeleteAddressResp{Res: false}, DeleteAddrError
 	}
 
 	// 返回成功响应
@@ -186,13 +196,13 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 	var row models.AddressBook
 	//如果更新地址不存在就直接返回错误(异常状态)
 	if tx.Find(&row); row.ID == 0 {
-		return &address.UpdateAddressResp{Res: false}, &errors.BasicMessageError{Message: "地址不存在,请联系管理员"}
+		return &address.UpdateAddressResp{Res: false}, InvalidAddressIdError
 	}
 
 	// 检查地址是否属于用户
 	var address1 models.AddressBook
 	if err = DB.Model(&models.AddressBook{}).Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&address1).Error; err != nil {
-		return nil, &errors.BasicMessageError{Message: "地址不存在或无权限访问"}
+		return nil, ForbiddenDeleteError
 	}
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
@@ -256,7 +266,7 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 
 	if err != nil {
 		klog.Error(err)
-		return &address.UpdateAddressResp{Res: false}, &errors.BasicMessageError{Message: "更新地址失败,请联系管理员"}
+		return &address.UpdateAddressResp{Res: false}, FailUpdateError
 	}
 
 	return &address.UpdateAddressResp{Res: true}, nil
@@ -270,7 +280,7 @@ func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address
 	// 检查地址是否属于用户
 	var address1 models.AddressBook
 	if err = DB.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&address1).Error; err != nil {
-		return nil, &errors.BasicMessageError{Message: "地址不存在或无权限访问"}
+		return nil, ForbiddenAskError
 	}
 
 	//如果要设置的地址就是默认地址,直接返回(异常情况)
