@@ -64,6 +64,11 @@ func (x *Address) FastRead(buf []byte, _type int8, number int32) (offset int, er
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 11:
+		offset, err = x.fastReadField11(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -124,6 +129,11 @@ func (x *Address) fastReadField9(buf []byte, _type int8) (offset int, err error)
 
 func (x *Address) fastReadField10(buf []byte, _type int8) (offset int, err error) {
 	x.IsDefault, offset, err = fastpb.ReadBool(buf, _type)
+	return offset, err
+}
+
+func (x *Address) fastReadField11(buf []byte, _type int8) (offset int, err error) {
+	x.AddressId, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -496,6 +506,7 @@ func (x *Address) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField8(buf[offset:])
 	offset += x.fastWriteField9(buf[offset:])
 	offset += x.fastWriteField10(buf[offset:])
+	offset += x.fastWriteField11(buf[offset:])
 	return offset
 }
 
@@ -576,6 +587,14 @@ func (x *Address) fastWriteField10(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteBool(buf[offset:], 10, x.GetIsDefault())
+	return offset
+}
+
+func (x *Address) fastWriteField11(buf []byte) (offset int) {
+	if x.AddressId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 11, x.GetAddressId())
 	return offset
 }
 
@@ -825,6 +844,7 @@ func (x *Address) Size() (n int) {
 	n += x.sizeField8()
 	n += x.sizeField9()
 	n += x.sizeField10()
+	n += x.sizeField11()
 	return n
 }
 
@@ -905,6 +925,14 @@ func (x *Address) sizeField10() (n int) {
 		return n
 	}
 	n += fastpb.SizeBool(10, x.GetIsDefault())
+	return n
+}
+
+func (x *Address) sizeField11() (n int) {
+	if x.AddressId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(11, x.GetAddressId())
 	return n
 }
 
@@ -1151,6 +1179,7 @@ var fieldIDToName_Address = map[int32]string{
 	8:  "Phone",
 	9:  "Label",
 	10: "IsDefault",
+	11: "AddressId",
 }
 
 var fieldIDToName_AddressItem = map[int32]string{

@@ -362,3 +362,9 @@ func (s *OrderBusinessServiceImpl) updateOrderStatus(orderId uint32, status int)
 
 	return nil
 }
+
+// GetNotify implements the OrderBusinessServiceImpl interface.
+func (s *OrderBusinessServiceImpl) GetNotify(ctx context.Context, req *businessOrder.GetNotifyReq) (resp *businessOrder.GetNotifyResp, err error) {
+	// TODO: Your code here...
+	return
+}

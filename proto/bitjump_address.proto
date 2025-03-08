@@ -28,6 +28,7 @@ message Address {
     string phone = 8; // 电话
     string Label = 9; // 标签
     bool is_default = 10; // 是否默认地址
+    uint32 address_id = 11; // 地址ID
 }
 
 message AddressItem {
