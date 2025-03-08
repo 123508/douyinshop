@@ -15,7 +15,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 
 	req := &user.LoginReq{}
 
-	if err := c.BindJSON(&req); err != nil {
+	if err := c.BindJSON(req); err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": err,
 		})

@@ -3,11 +3,9 @@ package order
 import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"strconv"
-
-	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func Reminder(ctx context.Context, c *app.RequestContext) {
@@ -21,15 +19,20 @@ func Reminder(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	orderId, err := strconv.Atoi(c.Query("orderId"))
-	if err != nil {
+	type Param struct {
+		Order_id uint32
+	}
+
+	param := &Param{}
+
+	if err := c.BindJSON(param); err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": "orderId 参数错误",
+			"error": "参数错误",
 		})
 		return
 	}
 
-	resp, err := client.UserReminder(ctx, uint32(userId), uint32(orderId))
+	resp, err := client.UserReminder(ctx, userId, param.Order_id)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": "internal server error",
