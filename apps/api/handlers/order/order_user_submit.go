@@ -4,11 +4,10 @@ import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/order/order_common"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
-
-	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func Submit(ctx context.Context, c *app.RequestContext) {
@@ -23,43 +22,33 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 获取并解析 address_book_id 参数
-	addressBookId, err := strconv.Atoi(c.Param("address_book_id"))
-	if err != nil {
-		c.JSON(consts.StatusBadRequest, utils.H{"error": "address_book_id参数错误"})
-		return
+	type ReqParam struct {
+		Address_book_id int
+		Pay_method      int
+		Remark          string
+		Amount          string
 	}
 
-	// 获取并解析 pay_method 参数
-	payMethod, err := strconv.Atoi(c.Param("pay_method"))
-	if err != nil {
-		c.JSON(consts.StatusBadRequest, utils.H{"error": "pay_method参数错误"})
-		return
-	}
+	param := &ReqParam{}
 
-	// 获取 remark 参数，如果没有备注则默认 "无备注"
-	remark := c.Param("remark")
-	if remark == "" {
-		remark = "无备注"
-	}
-
-	// 获取并解析 amount 参数
-	amount, err := strconv.ParseFloat(c.Param("amount"), 32)
-	if err != nil || amount <= 0 {
-		c.JSON(consts.StatusBadRequest, utils.H{"error": "amount参数错误"})
-		return
+	if err := c.Bind(param); err != nil {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"err": err,
+		})
 	}
 
 	// 获取并绑定订单信息
 	order := order_common.OrderReq{}
-	err = c.Bind(&order)
+	err := c.Bind(&order)
 	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{"error": "订单参数错误"})
 		return
 	}
 
+	float, _ := strconv.ParseFloat(param.Amount, 32)
+
 	// 调用 UserSubmit 函数提交订单
-	result, err := client.UserSubmit(ctx, uint(userId), int32(addressBookId), int32(payMethod), remark, float32(amount), &order)
+	result, err := client.UserSubmit(ctx, uint(userId), int32(param.Address_book_id), int32(param.Pay_method), param.Remark, float32(float), &order)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{"error": "提交订单失败"})
 		return
