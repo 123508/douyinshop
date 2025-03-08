@@ -34,6 +34,21 @@ message GetOrderListResp{
   repeated common.OrderResp list=1;
 }
 
+// 提醒消息
+message Notify{
+  uint32 order_id=2;
+  string content=3;
+}
+
+message GetNotifyReq{
+  uint32 shop_id=1;
+  int64 order_id=2;
+}
+
+message GetNotifyResp{
+  repeated Notify list=1;
+}
+
 service OrderBusinessService{
   // 获取订单列表
   rpc GetOrderList(GetOrderListReq) returns (GetOrderListResp);
@@ -49,4 +64,6 @@ service OrderBusinessService{
   rpc Rejection(RejectionReq) returns (common.Empty);
   // 取消订单
   rpc Cancel(common.CancelReq) returns (common.Empty);
+  // 获取提醒消息
+  rpc GetNotify(GetNotifyReq) returns (GetNotifyResp);
 }

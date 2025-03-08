@@ -65,6 +65,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"GetNotify": kitex.NewMethodInfo(
+		getNotifyHandler,
+		newGetNotifyArgs,
+		newGetNotifyResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 }
 
 var (
@@ -1202,6 +1209,159 @@ func (p *CancelResult) GetResult() interface{} {
 	return p.Success
 }
 
+func getNotifyHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(businessOrder.GetNotifyReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(businessOrder.OrderBusinessService).GetNotify(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *GetNotifyArgs:
+		success, err := handler.(businessOrder.OrderBusinessService).GetNotify(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*GetNotifyResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newGetNotifyArgs() interface{} {
+	return &GetNotifyArgs{}
+}
+
+func newGetNotifyResult() interface{} {
+	return &GetNotifyResult{}
+}
+
+type GetNotifyArgs struct {
+	Req *businessOrder.GetNotifyReq
+}
+
+func (p *GetNotifyArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(businessOrder.GetNotifyReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *GetNotifyArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *GetNotifyArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *GetNotifyArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *GetNotifyArgs) Unmarshal(in []byte) error {
+	msg := new(businessOrder.GetNotifyReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var GetNotifyArgs_Req_DEFAULT *businessOrder.GetNotifyReq
+
+func (p *GetNotifyArgs) GetReq() *businessOrder.GetNotifyReq {
+	if !p.IsSetReq() {
+		return GetNotifyArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *GetNotifyArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *GetNotifyArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type GetNotifyResult struct {
+	Success *businessOrder.GetNotifyResp
+}
+
+var GetNotifyResult_Success_DEFAULT *businessOrder.GetNotifyResp
+
+func (p *GetNotifyResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(businessOrder.GetNotifyResp)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *GetNotifyResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *GetNotifyResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *GetNotifyResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *GetNotifyResult) Unmarshal(in []byte) error {
+	msg := new(businessOrder.GetNotifyResp)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *GetNotifyResult) GetSuccess() *businessOrder.GetNotifyResp {
+	if !p.IsSetSuccess() {
+		return GetNotifyResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *GetNotifyResult) SetSuccess(x interface{}) {
+	p.Success = x.(*businessOrder.GetNotifyResp)
+}
+
+func (p *GetNotifyResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *GetNotifyResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -1277,6 +1437,16 @@ func (p *kClient) Cancel(ctx context.Context, Req *order_common.CancelReq) (r *o
 	_args.Req = Req
 	var _result CancelResult
 	if err = p.c.Call(ctx, "Cancel", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetNotify(ctx context.Context, Req *businessOrder.GetNotifyReq) (r *businessOrder.GetNotifyResp, err error) {
+	var _args GetNotifyArgs
+	_args.Req = Req
+	var _result GetNotifyResult
+	if err = p.c.Call(ctx, "GetNotify", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
