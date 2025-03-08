@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/123508/douyinshop/pkg/els"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"log"
 	"strconv"
 	"strings"
@@ -15,6 +15,14 @@ import (
 	"gorm.io/gorm"
 )
 
+var RepeatedShop = &errorno.BasicMessageError{Code: 404, Message: "你已注册店铺，请勿重复注册"}
+
+var ShopNotFound = &errorno.BasicMessageError{Code: 404, Message: "无法找到店铺"}
+
+var ProductLoss = &errorno.BasicMessageError{Code: 404, Message: "商品信息丢失"}
+
+var FailFetchProductList = &errorno.BasicMessageError{Code: 404, Message: "无法获取商品列表"}
+
 type ShopServiceImpl struct {
 	db         *gorm.DB
 	etcdClient *clientv3.Client
@@ -24,7 +32,7 @@ type ShopServiceImpl struct {
 // Register 注册店铺
 func (s *ShopServiceImpl) Register(ctx context.Context, req *pb.RegisterShopReq) (*pb.RegisterShopResp, error) {
 	if err := s.db.Model(&models.Shop{}).Where("user_id = ?", req.UserId).First(&models.Shop{}).Error; err == nil {
-		return nil, fmt.Errorf("你已注册店铺，请勿重复注册")
+		return nil, RepeatedShop
 	}
 	shop := models.Shop{
 		UserId:      req.UserId,
@@ -59,7 +67,7 @@ func (s *ShopServiceImpl) GetShopInfo(ctx context.Context, req *pb.GetShopInfoRe
 	result := s.db.Where("id = ?", req.ShopId).First(&shop)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("shop not found")
+			return nil, ShopNotFound
 		}
 		return nil, result.Error
 	}
@@ -95,7 +103,7 @@ func (s *ShopServiceImpl) UpdateShopInfo(ctx context.Context, req *pb.UpdateShop
 // AddProduct 添加商品
 func (s *ShopServiceImpl) AddProduct(ctx context.Context, req *pb.AddProductReq) (*pb.AddProductResp, error) {
 	if req.Product == nil {
-		return nil, fmt.Errorf("product information is missing")
+		return nil, ProductLoss
 	}
 	categoriesStr := strings.Join(req.Product.Categories, ",")
 	product := models.Product{
@@ -196,7 +204,7 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 
 	if result.Error != nil {
 		log.Printf("Error fetching product list for shop ID %d: %v", req.ShopId, result.Error)
-		return nil, fmt.Errorf("failed to fetch product list: %w", result.Error)
+		return nil, FailFetchProductList
 	}
 	if result.RowsAffected == 0 {
 		log.Printf("No products found for shop ID %d on page %d with page size %d", req.ShopId, req.Page, req.PageSize)
