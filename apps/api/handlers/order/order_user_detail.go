@@ -13,7 +13,7 @@ import (
 
 func Detail(ctx context.Context, c *app.RequestContext) {
 
-	orderId, err := strconv.Atoi(c.Query("orderId"))
+	orderId, err := strconv.Atoi(c.Param("order_id"))
 	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "orderId参数错误",

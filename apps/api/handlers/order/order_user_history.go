@@ -3,11 +3,9 @@ package order
 import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"strconv"
-
-	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func History(ctx context.Context, c *app.RequestContext) {
@@ -21,31 +19,22 @@ func History(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page < 1 {
+	type Param struct {
+		Page     uint32
+		PageSize uint32
+		Status   int32
+	}
+
+	param := &Param{}
+
+	if err := c.BindJSON(param); err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": "page 参数错误",
+			"error": "参数错误",
 		})
 		return
 	}
 
-	pageSize, err := strconv.Atoi(c.Query("pageSize"))
-	if err != nil || pageSize < 1 {
-		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": "pageSize 参数错误",
-		})
-		return
-	}
-
-	status, err := strconv.Atoi(c.Query("status"))
-	if err != nil {
-		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": "status 参数错误",
-		})
-		return
-	}
-
-	historyResp, err := client.UserHistory(ctx, userId, uint32(page), uint32(pageSize), int32(status))
+	historyResp, err := client.UserHistory(ctx, userId, param.Page, param.PageSize, param.Status)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{
 			"error": "internal server error",

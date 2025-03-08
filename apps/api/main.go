@@ -103,7 +103,7 @@ func main() {
 		userOrderGroup.POST("/submit", order.Submit)
 		userOrderGroup.POST("/cancel", order.Cancel)
 		userOrderGroup.POST("/reminder", order.Reminder)
-		userOrderGroup.GET("/complete", order.Complete)
+		userOrderGroup.GET("/complete/:order_id", order.Complete)
 
 		shopOrderGroup := orderGroup.Group("/shop")
 		shopOrderGroup.Use(middleware.ParseToken())
