@@ -3,7 +3,7 @@ package order
 import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
-	"github.com/123508/douyinshop/pkg/models"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
@@ -20,14 +20,20 @@ func Detail(ctx context.Context, c *app.RequestContext) {
 		})
 		return
 	}
-	var orderDetails []models.OrderDetail
 
-	orderResp, err := client.UserDetail(ctx, uint32(orderId), orderDetails)
+	orderResp, err := client.UserDetail(ctx, uint32(orderId))
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, utils.H{
-			"error": "internal server error",
-		})
-		return
+		basicErr := errorno.ParseBasicMessageError(err)
+
+		if basicErr.Raw != nil {
+			c.JSON(consts.StatusInternalServerError, utils.H{
+				"err": err,
+			})
+		} else {
+			c.JSON(basicErr.Code, utils.H{
+				"error": basicErr.Message,
+			})
+		}
 	}
 
 	c.JSON(consts.StatusOK, utils.H{

@@ -5,6 +5,7 @@ import (
 	"github.com/123508/douyinshop/kitex_gen/order/businessOrder"
 	"github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/pkg/db"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
 	"gorm.io/gorm"
 	"log"
@@ -23,6 +24,8 @@ func open() *gorm.DB {
 	}
 	return DB
 }
+
+var NoOrderIdError = &errorno.BasicMessageError{Code: 404, Message: "没有用户id"}
 
 // GetOrderList implements the OrderBusinessServiceImpl interface.
 // 获取订单
@@ -365,6 +368,11 @@ func (s *OrderBusinessServiceImpl) updateOrderStatus(orderId uint32, status int)
 
 // GetNotify implements the OrderBusinessServiceImpl interface.
 func (s *OrderBusinessServiceImpl) GetNotify(ctx context.Context, req *businessOrder.GetNotifyReq) (resp *businessOrder.GetNotifyResp, err error) {
-	// TODO: Your code here...
-	return
+	if req.OrderId == 0 {
+		return nil, NoOrderIdError
+	}
+
+	n := &businessOrder.Notify{OrderId: req.OrderId, Content: "用户提醒发货"}
+
+	return &businessOrder.GetNotifyResp{Notify: n}, nil
 }

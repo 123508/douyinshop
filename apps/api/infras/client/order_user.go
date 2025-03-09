@@ -2,12 +2,11 @@ package client
 
 import (
 	"context"
+	"github.com/123508/douyinshop/kitex_gen/address"
 	"github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
 	"github.com/123508/douyinshop/pkg/config"
-	"github.com/123508/douyinshop/pkg/models"
-
 	"time"
 
 	"github.com/cloudwego/kitex/client"
@@ -44,10 +43,10 @@ func initOrderUserRpc() {
 // amount 产品数量
 // order 订单信息
 // 返回订单提交resp
-func UserSubmit(ctx context.Context, userId uint, addressBookId int32, payMethod int32, remark string, amount float32, order *order_common.OrderReq) (*userOrder.OrderSubmitResp, error) {
+func UserSubmit(ctx context.Context, userId uint32, addressBookId int32, payMethod int32, remark string, amount float32, order *order_common.OrderReq) (*userOrder.OrderSubmitResp, error) {
 
 	req := &userOrder.OrderSubmitReq{
-		UserId:        uint32(userId),
+		UserId:        userId,
 		AddressBookId: addressBookId,
 		PayMethod:     payMethod,
 		Remark:        remark,
@@ -98,11 +97,13 @@ func UserHistory(ctx context.Context, userId uint32, page uint32, pageSize uint3
 		List:     make([]*order_common.OrderResp, len(resp.List)),
 	}
 	for i, order := range resp.List {
+
 		historyResp.List[i] = &order_common.OrderResp{
 			Order: &order_common.Order{
-				UserId: order.Order.UserId,
+				ID:     order.Order.ID,
 				Number: order.Order.Number,
 				Status: order.Order.Status,
+				Amount: order.Order.Amount,
 			},
 		}
 	}
@@ -115,27 +116,21 @@ func UserHistory(ctx context.Context, userId uint32, page uint32, pageSize uint3
 // orderId 订单ID
 // List 订单详细信息列表
 // 返回订单详情 OrderResp
-func UserDetail(ctx context.Context, orderId uint32, List []models.OrderDetail) (*order_common.OrderResp, error) {
+func UserDetail(ctx context.Context, orderId uint32) (*order_common.OrderResp, error) {
 
-	var orderDetails []*order_common.OrderDetail
-	for _, detail := range List {
-		orderDetails = append(orderDetails, &order_common.OrderDetail{
-			Name:      detail.Name,
-			Image:     detail.Image,
-			OrderId:   orderId,
-			ProductId: uint32(detail.ProductId),
-			Number:    uint32(detail.Number),
-			Amount:    float32(detail.Amount),
-		})
-	}
-
-	req := &order_common.OrderReq{
-		OrderId: orderId,
-		List:    orderDetails,
-	}
+	req := &order_common.OrderReq{OrderId: orderId}
 
 	// 调用订单服务的详情查询接口
 	resp, err := orderUserClient.Detail(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	r, err := addressClient.GetAddressInfo(ctx, &address.GetAddressInfoReq{
+		UserId: resp.Order.UserId,
+		AddrId: resp.Order.AddressBookId,
+	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -151,10 +146,10 @@ func UserDetail(ctx context.Context, orderId uint32, List []models.OrderDetail) 
 			Amount:        resp.Order.Amount,
 			Remark:        resp.Order.Remark,
 			Phone:         resp.Order.Phone,
-			Address:       resp.Order.Address,
 			Username:      resp.Order.Username,
-			Consignee:     resp.Order.Consignee,
+			Consignee:     r.Addr.Consignee,
 		},
+		OrderDetails: resp.OrderDetails,
 	}
 
 	return orderResp, nil

@@ -3,39 +3,42 @@ package order
 import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
+	"github.com/123508/douyinshop/pkg/errorno"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"strconv"
-
-	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func CancelShop(ctx context.Context, c *app.RequestContext) {
 
-	orderId, err := strconv.Atoi(c.Query("orderId"))
-	if err != nil {
+	type Param struct {
+		Order_id      uint32
+		Cancel_reason string
+	}
+
+	param := &Param{}
+
+	if err := c.BindJSON(param); err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": "orderId 参数错误",
+			"error": "参数错误",
 		})
 		return
 	}
 
-	cancelReason := c.Query("cancelReason")
-	if cancelReason == "" {
-		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": "取消原因不能为空",
-		})
-		return
-	}
-
-	resp, err := client.ShopCancel(ctx, uint32(orderId), cancelReason)
+	resp, err := client.ShopCancel(ctx, param.Order_id, param.Cancel_reason)
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, utils.H{
-			"error": "订单取消失败",
-		})
-		return
-	}
+		basicErr := errorno.ParseBasicMessageError(err)
 
+		if basicErr.Raw != nil {
+			c.JSON(consts.StatusInternalServerError, utils.H{
+				"err": err,
+			})
+		} else {
+			c.JSON(basicErr.Code, utils.H{
+				"error": basicErr.Message,
+			})
+		}
+	}
 	c.JSON(consts.StatusOK, utils.H{
 		"message": "订单取消成功",
 		"data":    resp,
