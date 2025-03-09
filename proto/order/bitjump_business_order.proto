@@ -36,17 +36,16 @@ message GetOrderListResp{
 
 // 提醒消息
 message Notify{
-  uint32 order_id=2;
-  string content=3;
+  uint32 order_id=1;
+  string content=2;
 }
 
 message GetNotifyReq{
-  uint32 shop_id=1;
-  int64 order_id=2;
+  uint32 order_id=2;
 }
 
 message GetNotifyResp{
-  repeated Notify list=1;
+  Notify notify=1;
 }
 
 service OrderBusinessService{

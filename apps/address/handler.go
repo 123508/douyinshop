@@ -306,3 +306,30 @@ func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address
 
 	return &address.SetDefaultAddressResp{Res: true}, nil
 }
+
+// GetAddressInfo implements the AddressServiceImpl interface.
+func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.GetAddressInfoReq) (resp *address.GetAddressInfoResp, err error) {
+	var addr models.AddressBook
+
+	if err = DB.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&addr).Error; err != nil {
+		return nil, ForbiddenAskError
+	}
+
+	if addr.ID == 0 {
+		return nil, InvalidAddressIdError
+	}
+
+	return &address.GetAddressInfoResp{Addr: &address.Address{
+		StreetAddress: addr.StressAddress,
+		City:          addr.City,
+		State:         addr.State,
+		Country:       addr.Country,
+		ZipCode:       addr.ZipCode,
+		Consignee:     addr.Consignee,
+		Gender:        addr.Gender,
+		Phone:         addr.Phone,
+		Label:         addr.Label,
+		IsDefault:     addr.IsDefault,
+		AddressId:     uint32(addr.ID),
+	}}, nil
+}
