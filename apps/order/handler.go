@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-//订单状态 0待付款 1待接单 2已接单 3运输中 4待收货 5已完成 6已取消 7退款中 8已退款 9商家拒单
+//订单状态 0待付款 1待接单 2已接单 3运输中 4待收货 5已完成 6已取消 7退款中 8已退款 9商家拒单 10取消退款(然后继续回到上一步)
 
 // OrderUserServiceImpl implements the last service interface defined in the IDL.
 type OrderUserServiceImpl struct{}
@@ -252,6 +252,7 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 // Cancel implements the OrderUserServiceImpl interface.
 // 取消订单
 // TODO 需要修改
+// 步骤:查询要取消的订单->查询不到，返回错误，否则继续->判断该订单的status是否<5,否返回错误,是继续->修改订单日志存储状态，如果报错就返回错误->返回正确响应
 func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.CancelReq) (resp *order_common.Empty, err error) {
 
 	_, err = GetOrderInfo(req.OrderId)
@@ -312,6 +313,7 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 // Reminder implements the OrderUserServiceImpl interface.
 // 提醒商家发货
 // TODO 需要修改
+// 步骤:查询订单是否属于用户->判断status==2,不是就返回错误,是继续(增加健壮性)->通过订单查询商家id,查不到就报错,否则继续->发送信息
 func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.ReminderReq) (resp *order_common.Empty, err error) {
 
 	// 查询该用户的订单信息
@@ -343,6 +345,7 @@ func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.Remi
 // Complete implements the OrderUserServiceImpl interface.
 // 确认收货
 // TODO 需要修改
+// 步骤:查询要完成的订单->查询不到，返回错误，否则继续->判断该订单的status是否为4,否返回错误,是继续->修改订单日志存储状态，如果报错就返回错误->返回正确响应
 func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.CompleteReq) (resp *order_common.Empty, err error) {
 
 	// 查询订单信息

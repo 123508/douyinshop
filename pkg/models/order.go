@@ -7,6 +7,7 @@ import (
 type Order struct {
 	gorm.Model
 	UserId        uint32  `gorm:"comment '用户Id'"`
+	ShopId        uint32  `gorm:"comment  '商家Id'"`
 	Number        string  `gorm:"type:varchar(50) comment '订单号'"`
 	AddressBookId int     `gorm:"comment '地址id'"`
 	PayMethod     int     `gorm:"comment '支付方式 1微信 2支付宝 3银行卡'"`
