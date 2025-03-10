@@ -208,6 +208,96 @@ func (x *GetOrderListResp) fastReadField1(buf []byte, _type int8) (offset int, e
 	return offset, nil
 }
 
+func (x *Notify) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_Notify[number], err)
+}
+
+func (x *Notify) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *Notify) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.Content, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *GetNotifyReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetNotifyReq[number], err)
+}
+
+func (x *GetNotifyReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *GetNotifyResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetNotifyResp[number], err)
+}
+
+func (x *GetNotifyResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	var v Notify
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.Notify = &v
+	return offset, nil
+}
+
 func (x *ConfirmReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -339,6 +429,63 @@ func (x *GetOrderListResp) fastWriteField1(buf []byte) (offset int) {
 	for i := range x.GetList() {
 		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetList()[i])
 	}
+	return offset
+}
+
+func (x *Notify) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *Notify) fastWriteField1(buf []byte) (offset int) {
+	if x.OrderId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	return offset
+}
+
+func (x *Notify) fastWriteField2(buf []byte) (offset int) {
+	if x.Content == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetContent())
+	return offset
+}
+
+func (x *GetNotifyReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *GetNotifyReq) fastWriteField2(buf []byte) (offset int) {
+	if x.OrderId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetOrderId())
+	return offset
+}
+
+func (x *GetNotifyResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *GetNotifyResp) fastWriteField1(buf []byte) (offset int) {
+	if x.Notify == nil {
+		return offset
+	}
+	offset += fastpb.WriteMessage(buf[offset:], 1, x.GetNotify())
 	return offset
 }
 
@@ -476,6 +623,63 @@ func (x *GetOrderListResp) sizeField1() (n int) {
 	return n
 }
 
+func (x *Notify) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *Notify) sizeField1() (n int) {
+	if x.OrderId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(1, x.GetOrderId())
+	return n
+}
+
+func (x *Notify) sizeField2() (n int) {
+	if x.Content == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetContent())
+	return n
+}
+
+func (x *GetNotifyReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField2()
+	return n
+}
+
+func (x *GetNotifyReq) sizeField2() (n int) {
+	if x.OrderId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(2, x.GetOrderId())
+	return n
+}
+
+func (x *GetNotifyResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *GetNotifyResp) sizeField1() (n int) {
+	if x.Notify == nil {
+		return n
+	}
+	n += fastpb.SizeMessage(1, x.GetNotify())
+	return n
+}
+
 var fieldIDToName_ConfirmReq = map[int32]string{
 	1: "OrderId",
 	2: "Status",
@@ -502,6 +706,19 @@ var fieldIDToName_GetOrderListReq = map[int32]string{
 
 var fieldIDToName_GetOrderListResp = map[int32]string{
 	1: "List",
+}
+
+var fieldIDToName_Notify = map[int32]string{
+	1: "OrderId",
+	2: "Content",
+}
+
+var fieldIDToName_GetNotifyReq = map[int32]string{
+	2: "OrderId",
+}
+
+var fieldIDToName_GetNotifyResp = map[int32]string{
+	1: "Notify",
 }
 
 var _ = order_common.File_order_bitjump_order_common_proto

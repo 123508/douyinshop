@@ -84,6 +84,16 @@ func (x *Order) FastRead(buf []byte, _type int8, number int32) (offset int, err 
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 15:
+		offset, err = x.fastReadField15(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 16:
+		offset, err = x.fastReadField16(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -113,7 +123,7 @@ func (x *Order) fastReadField3(buf []byte, _type int8) (offset int, err error) {
 }
 
 func (x *Order) fastReadField4(buf []byte, _type int8) (offset int, err error) {
-	x.AddressBookId, offset, err = fastpb.ReadInt32(buf, _type)
+	x.AddressBookId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -164,6 +174,16 @@ func (x *Order) fastReadField13(buf []byte, _type int8) (offset int, err error) 
 
 func (x *Order) fastReadField14(buf []byte, _type int8) (offset int, err error) {
 	x.RejectionReason, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *Order) fastReadField15(buf []byte, _type int8) (offset int, err error) {
+	x.ID, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *Order) fastReadField16(buf []byte, _type int8) (offset int, err error) {
+	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -249,6 +269,11 @@ func (x *OrderResp) FastRead(buf []byte, _type int8, number int32) (offset int, 
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -269,6 +294,16 @@ func (x *OrderResp) fastReadField1(buf []byte, _type int8) (offset int, err erro
 		return offset, err
 	}
 	x.Order = &v
+	return offset, nil
+}
+
+func (x *OrderResp) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	var v OrderDetail
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.OrderDetails = append(x.OrderDetails, &v)
 	return offset, nil
 }
 
@@ -378,6 +413,8 @@ func (x *Order) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField12(buf[offset:])
 	offset += x.fastWriteField13(buf[offset:])
 	offset += x.fastWriteField14(buf[offset:])
+	offset += x.fastWriteField15(buf[offset:])
+	offset += x.fastWriteField16(buf[offset:])
 	return offset
 }
 
@@ -409,7 +446,7 @@ func (x *Order) fastWriteField4(buf []byte) (offset int) {
 	if x.AddressBookId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteInt32(buf[offset:], 4, x.GetAddressBookId())
+	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetAddressBookId())
 	return offset
 }
 
@@ -493,6 +530,22 @@ func (x *Order) fastWriteField14(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *Order) fastWriteField15(buf []byte) (offset int) {
+	if x.ID == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 15, x.GetID())
+	return offset
+}
+
+func (x *Order) fastWriteField16(buf []byte) (offset int) {
+	if x.ShopId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 16, x.GetShopId())
+	return offset
+}
+
 func (x *OrderDetail) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -559,6 +612,7 @@ func (x *OrderResp) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -567,6 +621,16 @@ func (x *OrderResp) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteMessage(buf[offset:], 1, x.GetOrder())
+	return offset
+}
+
+func (x *OrderResp) fastWriteField2(buf []byte) (offset int) {
+	if x.OrderDetails == nil {
+		return offset
+	}
+	for i := range x.GetOrderDetails() {
+		offset += fastpb.WriteMessage(buf[offset:], 2, x.GetOrderDetails()[i])
+	}
 	return offset
 }
 
@@ -647,6 +711,8 @@ func (x *Order) Size() (n int) {
 	n += x.sizeField12()
 	n += x.sizeField13()
 	n += x.sizeField14()
+	n += x.sizeField15()
+	n += x.sizeField16()
 	return n
 }
 
@@ -678,7 +744,7 @@ func (x *Order) sizeField4() (n int) {
 	if x.AddressBookId == 0 {
 		return n
 	}
-	n += fastpb.SizeInt32(4, x.GetAddressBookId())
+	n += fastpb.SizeUint64(4, x.GetAddressBookId())
 	return n
 }
 
@@ -762,6 +828,22 @@ func (x *Order) sizeField14() (n int) {
 	return n
 }
 
+func (x *Order) sizeField15() (n int) {
+	if x.ID == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(15, x.GetID())
+	return n
+}
+
+func (x *Order) sizeField16() (n int) {
+	if x.ShopId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(16, x.GetShopId())
+	return n
+}
+
 func (x *OrderDetail) Size() (n int) {
 	if x == nil {
 		return n
@@ -828,6 +910,7 @@ func (x *OrderResp) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
@@ -836,6 +919,16 @@ func (x *OrderResp) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeMessage(1, x.GetOrder())
+	return n
+}
+
+func (x *OrderResp) sizeField2() (n int) {
+	if x.OrderDetails == nil {
+		return n
+	}
+	for i := range x.GetOrderDetails() {
+		n += fastpb.SizeMessage(2, x.GetOrderDetails()[i])
+	}
 	return n
 }
 
@@ -913,6 +1006,8 @@ var fieldIDToName_Order = map[int32]string{
 	12: "Consignee",
 	13: "CancelReason",
 	14: "RejectionReason",
+	15: "ID",
+	16: "ShopId",
 }
 
 var fieldIDToName_OrderDetail = map[int32]string{
@@ -926,6 +1021,7 @@ var fieldIDToName_OrderDetail = map[int32]string{
 
 var fieldIDToName_OrderResp = map[int32]string{
 	1: "Order",
+	2: "OrderDetails",
 }
 
 var fieldIDToName_Empty = map[int32]string{}

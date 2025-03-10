@@ -19,6 +19,7 @@ type Client interface {
 	Receive(ctx context.Context, Req *businessOrder.ReceiveReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
 	Rejection(ctx context.Context, Req *businessOrder.RejectionReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
 	Cancel(ctx context.Context, Req *order_common.CancelReq, callOptions ...callopt.Option) (r *order_common.Empty, err error)
+	GetNotify(ctx context.Context, Req *businessOrder.GetNotifyReq, callOptions ...callopt.Option) (r *businessOrder.GetNotifyResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -83,4 +84,9 @@ func (p *kOrderBusinessServiceClient) Rejection(ctx context.Context, Req *busine
 func (p *kOrderBusinessServiceClient) Cancel(ctx context.Context, Req *order_common.CancelReq, callOptions ...callopt.Option) (r *order_common.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Cancel(ctx, Req)
+}
+
+func (p *kOrderBusinessServiceClient) GetNotify(ctx context.Context, Req *businessOrder.GetNotifyReq, callOptions ...callopt.Option) (r *businessOrder.GetNotifyResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetNotify(ctx, Req)
 }

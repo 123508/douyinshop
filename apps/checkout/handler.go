@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"github.com/123508/douyinshop/kitex_gen/cart"
 	"github.com/123508/douyinshop/kitex_gen/cart/cartservice"
 	_ "github.com/123508/douyinshop/kitex_gen/cart/cartservice"
@@ -14,6 +12,7 @@ import (
 	"github.com/123508/douyinshop/kitex_gen/payment/paymentservice"
 	"github.com/123508/douyinshop/kitex_gen/product"
 	"github.com/123508/douyinshop/kitex_gen/product/productcatalogservice"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
 	_ "go.opentelemetry.io/otel"
@@ -41,19 +40,25 @@ var (
 	commonSuite   client.Option
 )
 
+var GetCartError = &errorno.BasicMessageError{Code: 404, Message: "获取购物车错误"}
+
+var CartNotExistError = &errorno.BasicMessageError{Code: 404, Message: "购物车不存在"}
+
+var SubmitError = &errorno.BasicMessageError{Code: 500, Message: "提交错误"}
+
+var ChargeError = &errorno.BasicMessageError{Code: 417, Message: "支付异常"}
+
 // Checkout implements the CheckoutServiceImpl interface.
 func (s *CheckoutServiceImpl) Checkout(ctx context.Context, req *checkout.CheckoutReq) (resp *checkout.CheckoutResp, err error) {
-	// TODO: Your code here...
 	//get cart
 	cartResult, err := CartClient.GetCart(s.ctx, &cart.GetCartReq{UserId: req.UserId})
 	if err != nil {
-		klog.Error(err)
-		err = fmt.Errorf("GetCart.err:%v", err)
-		return
+		klog.Error("获取购物车错误:", err)
+		return nil, GetCartError
 	}
 	if cartResult == nil || cartResult.Cart == nil || len(cartResult.Cart.Items) == 0 {
-		err = errors.New("cart is empty")
-		return
+		klog.Error("购物车不存在")
+		return nil, CartNotExistError
 	}
 	var (
 		//oi    []*order_common.Order
@@ -63,8 +68,7 @@ func (s *CheckoutServiceImpl) Checkout(ctx context.Context, req *checkout.Checko
 		productResp, resultErr := ProductClient.GetProduct(s.ctx, &product.GetProductReq{Id: cartItem.ProductId})
 		if resultErr != nil {
 			klog.Error(resultErr)
-			err = resultErr
-			return
+			return nil, resultErr
 		}
 		if productResp.Product == nil {
 			continue
@@ -88,15 +92,15 @@ func (s *CheckoutServiceImpl) Checkout(ctx context.Context, req *checkout.Checko
 	}
 	orderResult, err := OrderClient.Submit(s.ctx, orderReq)
 	if err != nil {
-		err = fmt.Errorf("Submit.err:%v", err)
-		return
+		klog.Error("提交错误:", err)
+		return nil, SubmitError
 	}
 	klog.Info("orderResult", orderResult)
 	// empty cart
 	emptyResult, err := CartClient.EmptyCart(s.ctx, &cart.EmptyCartReq{UserId: req.UserId})
 	if err != nil {
-		err = fmt.Errorf("EmptyCart.err:%v", err)
-		return
+		klog.Error("购物车不存在:", err)
+		return nil, CartNotExistError
 	}
 	klog.Info(emptyResult)
 	// charge
@@ -117,8 +121,8 @@ func (s *CheckoutServiceImpl) Checkout(ctx context.Context, req *checkout.Checko
 	}
 	paymentResult, err := PaymentClient.Charge(s.ctx, payReq)
 	if err != nil {
-		err = fmt.Errorf("Charge.err:%v", err)
-		return
+		klog.Error("支付异常:", err)
+		return nil, ChargeError
 	}
 
 	// otel inject

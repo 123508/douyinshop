@@ -5,6 +5,7 @@ import (
 	"github.com/123508/douyinshop/apps/api/handlers/address"
 	"github.com/123508/douyinshop/apps/api/handlers/ai"
 	"github.com/123508/douyinshop/apps/api/handlers/cart"
+	"github.com/123508/douyinshop/apps/api/handlers/image"
 	"github.com/123508/douyinshop/apps/api/handlers/order"
 	"github.com/123508/douyinshop/apps/api/handlers/payment"
 	"github.com/123508/douyinshop/apps/api/handlers/product"
@@ -102,17 +103,21 @@ func main() {
 		userOrderGroup.POST("/submit", order.Submit)
 		userOrderGroup.POST("/cancel", order.Cancel)
 		userOrderGroup.POST("/reminder", order.Reminder)
-		userOrderGroup.GET("/complete", order.Complete)
+		userOrderGroup.GET("/complete/:order_id", order.Complete)
 
 		shopOrderGroup := orderGroup.Group("/shop")
 		shopOrderGroup.Use(middleware.ParseToken())
 		shopOrderGroup.GET("/list", order.List)
-		shopOrderGroup.GET("/detail/:shop_id", order.DetailShop)
-		shopOrderGroup.GET("/confirm", order.Confirm)
+		shopOrderGroup.GET("/detail/:order_id", order.DetailShop)
+		shopOrderGroup.POST("/confirm", order.Confirm)
 		shopOrderGroup.GET("/delivery/:order_id", order.Delivery)
 		shopOrderGroup.GET("/receive/:order_id", order.Receive)
 		shopOrderGroup.POST("/rejection", order.Rejection)
 		shopOrderGroup.POST("/cancel", order.CancelShop)
+
+		imageGroup := hz.Group("/image")
+		imageGroup.POST("/upload", image.UploadImage)
+		imageGroup.GET("/get/:image", image.GetImage)
 
 		log.Printf("Main server starting on %s", hertzAddr)
 		if err := hz.Run(); err != nil {

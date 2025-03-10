@@ -335,6 +335,11 @@ func (x *AddProductReq) FastRead(buf []byte, _type int8, number int32) (offset i
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -361,6 +366,11 @@ func (x *AddProductReq) fastReadField2(buf []byte, _type int8) (offset int, err 
 	}
 	x.Product = &v
 	return offset, nil
+}
+
+func (x *AddProductReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.Status, offset, err = fastpb.ReadBool(buf, _type)
+	return offset, err
 }
 
 func (x *AddProductResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
@@ -821,6 +831,7 @@ func (x *AddProductReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -837,6 +848,14 @@ func (x *AddProductReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteMessage(buf[offset:], 2, x.GetProduct())
+	return offset
+}
+
+func (x *AddProductReq) fastWriteField3(buf []byte) (offset int) {
+	if !x.Status {
+		return offset
+	}
+	offset += fastpb.WriteBool(buf[offset:], 3, x.GetStatus())
 	return offset
 }
 
@@ -1223,6 +1242,7 @@ func (x *AddProductReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -1239,6 +1259,14 @@ func (x *AddProductReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeMessage(2, x.GetProduct())
+	return n
+}
+
+func (x *AddProductReq) sizeField3() (n int) {
+	if !x.Status {
+		return n
+	}
+	n += fastpb.SizeBool(3, x.GetStatus())
 	return n
 }
 
@@ -1438,6 +1466,7 @@ var fieldIDToName_GetShopInfoResp = map[int32]string{
 var fieldIDToName_AddProductReq = map[int32]string{
 	1: "ShopId",
 	2: "Product",
+	3: "Status",
 }
 
 var fieldIDToName_AddProductResp = map[int32]string{

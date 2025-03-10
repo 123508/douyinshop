@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/cart"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -19,23 +20,43 @@ func Add(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	var req cart.AddItemReq
-	if err := c.BindAndValidate(&req); err != nil {
-		c.JSON(consts.StatusBadRequest, utils.H{
-			"error": err.Error(),
-		})
-		return
+	type Req struct {
+		ProductId uint32 `json:"product_id"`
+		Quantity  int32  `json:"number"`
 	}
-	req.UserId = userId
-
-	_, err := client.AddItem(ctx, &req)
+	var req Req
+	err := c.Bind(&req)
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, utils.H{
-			"error": "internal server error",
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "参数错误",
 		})
 		return
 	}
 
+	addItemReq := &cart.AddItemReq{
+		UserId: userId,
+		Item: &cart.CartItem{
+			ProductId: req.ProductId,
+			Quantity:  req.Quantity,
+		},
+	}
+
+	_, err = client.AddItem(ctx, addItemReq)
+	if err != nil {
+		basicErr := errorno.ParseBasicMessageError(err)
+
+		if basicErr.Raw != nil {
+			c.JSON(consts.StatusInternalServerError, utils.H{
+				"err": err,
+			})
+		} else {
+			c.JSON(basicErr.Code, utils.H{
+				"error": basicErr.Message,
+			})
+		}
+
+		return
+	}
 	c.JSON(consts.StatusOK, utils.H{
 		"ok": true,
 	})

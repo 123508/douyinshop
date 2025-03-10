@@ -1,4 +1,4 @@
-package utils
+package util
 
 import (
 	"fmt"
@@ -113,7 +113,7 @@ func SendMessage(exchange, routingKey, message string, number int) error {
 	return nil
 }
 
-// 请给出一个处理函数
+// Handler 请给出一个处理函数
 type Handler interface {
 	HandlerMessage(msg amqp.Delivery)
 }
