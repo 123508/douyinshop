@@ -44,13 +44,13 @@ func main() {
 		// 注册 Prometheus 中间件
 		middleware.RegisterPrometheus(hz)
 
-		userGrop := hz.Group("/user")
-		userGrop.POST("/register", user.Register)
-		userGrop.POST("/login", user.Login)
-		userGrop.GET("/logout", user.Logout)
-		userGrop.GET("/info", middleware.ParseToken(), user.GetInfo)
-		userGrop.POST("/update_info", middleware.ParseToken(), user.UpdateInfo)
-		userGrop.DELETE("/delete", middleware.ParseToken(), user.Delete)
+		userGroup := hz.Group("/user")
+		userGroup.POST("/register", user.Register)
+		userGroup.POST("/login", user.Login)
+		userGroup.GET("/logout", user.Logout)
+		userGroup.GET("/info", middleware.ParseToken(), user.GetInfo)
+		userGroup.POST("/update_info", middleware.ParseToken(), user.UpdateInfo)
+		userGroup.DELETE("/delete", middleware.ParseToken(), user.Delete)
 
 		productGroup := hz.Group("/product")
 		productGroup.Use(middleware.ParseToken())

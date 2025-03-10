@@ -5,7 +5,6 @@ package order_common
 import (
 	fmt "fmt"
 	fastpb "github.com/cloudwego/fastpb"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
@@ -234,23 +233,13 @@ ReadFieldError:
 }
 
 func (x *Status) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	var v timestamppb.Timestamp
-	offset, err = fastpb.ReadMessage(buf, _type, &v)
-	if err != nil {
-		return offset, err
-	}
-	x.StartTime = &v
-	return offset, nil
+	x.StartTime, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
 }
 
 func (x *Status) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	var v timestamppb.Timestamp
-	offset, err = fastpb.ReadMessage(buf, _type, &v)
-	if err != nil {
-		return offset, err
-	}
-	x.EndTime = &v
-	return offset, nil
+	x.EndTime, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
 }
 
 func (x *Status) fastReadField3(buf []byte, _type int8) (offset int, err error) {
@@ -659,18 +648,18 @@ func (x *Status) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *Status) fastWriteField1(buf []byte) (offset int) {
-	if x.StartTime == nil {
+	if x.StartTime == "" {
 		return offset
 	}
-	offset += fastpb.WriteMessage(buf[offset:], 1, x.GetStartTime())
+	offset += fastpb.WriteString(buf[offset:], 1, x.GetStartTime())
 	return offset
 }
 
 func (x *Status) fastWriteField2(buf []byte) (offset int) {
-	if x.EndTime == nil {
+	if x.EndTime == "" {
 		return offset
 	}
-	offset += fastpb.WriteMessage(buf[offset:], 2, x.GetEndTime())
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetEndTime())
 	return offset
 }
 
@@ -1020,18 +1009,18 @@ func (x *Status) Size() (n int) {
 }
 
 func (x *Status) sizeField1() (n int) {
-	if x.StartTime == nil {
+	if x.StartTime == "" {
 		return n
 	}
-	n += fastpb.SizeMessage(1, x.GetStartTime())
+	n += fastpb.SizeString(1, x.GetStartTime())
 	return n
 }
 
 func (x *Status) sizeField2() (n int) {
-	if x.EndTime == nil {
+	if x.EndTime == "" {
 		return n
 	}
-	n += fastpb.SizeMessage(2, x.GetEndTime())
+	n += fastpb.SizeString(2, x.GetEndTime())
 	return n
 }
 
@@ -1261,5 +1250,3 @@ var fieldIDToName_CancelReq = map[int32]string{
 	1: "OrderId",
 	2: "CancelReason",
 }
-
-var _ = timestamppb.File_google_protobuf_timestamp_proto

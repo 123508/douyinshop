@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 package order.common;
-import "google/protobuf/timestamp.proto";
 
 option go_package="order/order_common";
 
@@ -26,8 +25,8 @@ message Order{
 }
 
 message Status{
-  google.protobuf.Timestamp StartTime=1;
-  google.protobuf.Timestamp EndTime=2;
+  string StartTime=1;
+  string EndTime=2;
   uint32 Status=3;
 }
 

@@ -23,18 +23,7 @@ func List(ctx context.Context, c *app.RequestContext) {
 	req := &cart.GetCartReq{UserId: userId}
 	resp, err := client.GetCart(ctx, req)
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
-
+		errorno.DealWithError(err, c)
 		return
 	}
 

@@ -10,7 +10,6 @@ import (
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/123508/douyinshop/pkg/util"
 	"github.com/google/uuid"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"log"
 	"strconv"
@@ -232,9 +231,9 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 
 	for _, k := range orderLogs {
 		statusList = append(statusList, &order_common.Status{
-			StartTime: timestamppb.New(k.StartTime),
+			StartTime: k.StartTime.String(),
 			Status:    uint32(k.Status),
-			EndTime:   timestamppb.New(k.EndTime),
+			EndTime:   k.EndTime.String(),
 		})
 	}
 
@@ -323,7 +322,7 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 	newStatus := models.OrderStatusLog{
 		StartTime:   currentTime,
 		Status:      Status,
-		EndTime:     time.Now().Add(8760 * 9999 * time.Hour),
+		EndTime:     time.Now().Add(8760 * 100 * time.Hour),
 		Description: Description,
 	}
 
@@ -438,7 +437,7 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 	newStatus := models.OrderStatusLog{
 		StartTime:   currentTime,
 		Status:      5,
-		EndTime:     time.Now().Add(8760 * 9999 * time.Hour),
+		EndTime:     time.Now().Add(8760 * 100 * time.Hour),
 		Description: "已完成",
 	}
 

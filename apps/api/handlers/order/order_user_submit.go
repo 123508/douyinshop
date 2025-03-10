@@ -56,6 +56,7 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 			c.JSON(400, utils.H{
 				"err": "参数错误",
 			})
+			return
 		}
 
 		order.List = append(order.List, &order_common.OrderDetail{
@@ -68,28 +69,28 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 		})
 	}
 
+	if len(order.List) == 0 {
+		c.JSON(400, utils.H{
+			"err": "参数错误",
+		})
+		return
+	}
+
 	float, err := strconv.ParseFloat(param.Amount, 32)
 
 	if err != nil {
 		c.JSON(400, utils.H{
 			"err": "参数错误",
 		})
+		return
 	}
 
 	// 调用 UserSubmit 函数提交订单
 	result, err := client.UserSubmit(ctx, userId, int32(param.AddressBookId), int32(param.PayMethod), param.Remark, float32(float), &order)
-	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
 
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
+	if err != nil {
+		errorno.DealWithError(err, c)
+		return
 	}
 
 	// 返回订单提交成功的结果

@@ -37,18 +37,7 @@ func Reduce(ctx context.Context, c *app.RequestContext) {
 
 	_, err = client.DeleteItem(ctx, deleteItemReq)
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
-
+		errorno.DealWithError(err, c)
 		return
 	}
 

@@ -2,11 +2,10 @@ package user
 
 import (
 	"context"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"strings"
-
 	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/user"
+	"github.com/123508/douyinshop/pkg/errorno"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -24,16 +23,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 
 	resp, err := client.Register(ctx, req)
 	if err != nil {
-		split := strings.Split(err.Error(), ":")
-		if split[len(split)-1] == " 密码不匹配,请重新输入" {
-			c.JSON(consts.StatusBadRequest, utils.H{
-				"error": "密码不匹配,请重新输入",
-			})
-		} else {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"error": "internal server error",
-			})
-		}
+		errorno.DealWithError(err, c)
 		return
 	}
 

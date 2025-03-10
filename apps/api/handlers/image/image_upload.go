@@ -17,6 +17,7 @@ func UploadImage(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"err": err,
 		})
+		return
 	}
 
 	//读取配置文件中的上传类型
@@ -38,19 +39,7 @@ func UploadImage(ctx context.Context, c *app.RequestContext) {
 	}
 
 	if err != nil {
-		messageError := errorno.ParseBasicMessageError(err)
-
-		if messageError.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-			return
-		} else {
-			c.JSON(messageError.Code, utils.H{
-				"err": messageError.Message,
-			})
-		}
-
+		errorno.DealWithError(err, c)
 		return
 	}
 

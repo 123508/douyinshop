@@ -8,6 +8,7 @@ import (
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
 	"github.com/123508/douyinshop/kitex_gen/product"
 	"github.com/123508/douyinshop/pkg/config"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"time"
 
 	"github.com/cloudwego/kitex/client"
@@ -45,6 +46,10 @@ func initOrderUserRpc() {
 // order 订单信息
 // 返回订单提交resp
 func UserSubmit(ctx context.Context, userId uint32, addressBookId int32, payMethod int32, remark string, amount float32, order *order_common.OrderReq) (*userOrder.OrderSubmitResp, error) {
+
+	if order == nil || len(order.List) == 0 {
+		return nil, &errorno.BasicMessageError{Code: 400, Message: "参数不足,无法产生订单"}
+	}
 
 	productResp, err := productClient.GetProduct(ctx, &product.GetProductReq{Id: order.List[0].ProductId})
 
