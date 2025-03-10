@@ -12,8 +12,8 @@ import (
 func Confirm(ctx context.Context, c *app.RequestContext) {
 
 	type Param struct {
-		Order_id uint32
-		Status   int32
+		OrderId uint32 `json:"order_id"`
+		Status  int32
 	}
 
 	param := &Param{}
@@ -25,7 +25,7 @@ func Confirm(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := client.ShopConfirm(ctx, param.Order_id, param.Status)
+	resp, err := client.ShopConfirm(ctx, param.OrderId, param.Status)
 
 	if err != nil {
 		basicErr := errorno.ParseBasicMessageError(err)

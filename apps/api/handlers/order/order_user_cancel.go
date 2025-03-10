@@ -12,8 +12,8 @@ import (
 func Cancel(ctx context.Context, c *app.RequestContext) {
 
 	type Param struct {
-		Cancel_reason string
-		Order_id      uint32
+		CancelReason string `json:"cancel_reason"`
+		OrderId      uint32 `json:"order_id"`
 	}
 
 	param := &Param{}
@@ -25,7 +25,7 @@ func Cancel(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := client.UserCancel(ctx, param.Order_id, param.Cancel_reason)
+	resp, err := client.UserCancel(ctx, param.OrderId, param.CancelReason)
 	if err != nil {
 		basicErr := errorno.ParseBasicMessageError(err)
 

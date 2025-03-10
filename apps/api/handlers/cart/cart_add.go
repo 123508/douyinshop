@@ -20,11 +20,8 @@ func Add(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	type Req struct {
-		ProductId uint32 `json:"product_id"`
-		Quantity  int32  `json:"number"`
-	}
-	var req Req
+	var req client.CartReq
+
 	err := c.Bind(&req)
 	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
@@ -37,7 +34,7 @@ func Add(ctx context.Context, c *app.RequestContext) {
 		UserId: userId,
 		Item: &cart.CartItem{
 			ProductId: req.ProductId,
-			Quantity:  req.Quantity,
+			Quantity:  int32(req.Quantity),
 		},
 	}
 

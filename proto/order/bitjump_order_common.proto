@@ -1,13 +1,14 @@
 syntax = "proto3";
 
 package order.common;
+import "google/protobuf/timestamp.proto";
 
 option go_package="order/order_common";
 
 message Order{
   uint32 user_id=1;
   string number=2; // 订单号
-  int32  status=3;
+  repeated Status  status=3;
   uint64 address_book_id=4; // 收货地址
   int32 pay_method=5;
   int32 pay_status=6;
@@ -21,6 +22,13 @@ message Order{
   string rejection_reason=14;
   uint32 ID=15;
   uint32 shopId=16;
+  uint32 finalStatus=17;
+}
+
+message Status{
+  google.protobuf.Timestamp StartTime=1;
+  google.protobuf.Timestamp EndTime=2;
+  uint32 Status=3;
 }
 
 message OrderDetail{
@@ -34,14 +42,16 @@ message OrderDetail{
 
 message OrderResp{
   Order order=1;
-  repeated OrderDetail orderDetails=2;
+  uint32 ShopId=2;
+  repeated OrderDetail orderDetails=3;
 }
 
 message Empty{}
 
 message OrderReq{
   uint32 order_id=1;
-  repeated OrderDetail list=2;
+  uint32 ShopId=2;
+  repeated OrderDetail list=3;
 }
 
 message CancelReq{

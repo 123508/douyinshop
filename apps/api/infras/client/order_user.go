@@ -6,6 +6,7 @@ import (
 	"github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
+	"github.com/123508/douyinshop/kitex_gen/product"
 	"github.com/123508/douyinshop/pkg/config"
 	"time"
 
@@ -44,6 +45,14 @@ func initOrderUserRpc() {
 // order 订单信息
 // 返回订单提交resp
 func UserSubmit(ctx context.Context, userId uint32, addressBookId int32, payMethod int32, remark string, amount float32, order *order_common.OrderReq) (*userOrder.OrderSubmitResp, error) {
+
+	productResp, err := productClient.GetProduct(ctx, &product.GetProductReq{Id: order.List[0].ProductId})
+
+	if err != nil {
+		return nil, err
+	}
+
+	order.ShopId = productResp.Product.ShopId
 
 	req := &userOrder.OrderSubmitReq{
 		UserId:        userId,
@@ -148,6 +157,7 @@ func UserDetail(ctx context.Context, orderId uint32) (*order_common.OrderResp, e
 			Phone:         resp.Order.Phone,
 			Username:      resp.Order.Username,
 			Consignee:     r.Addr.Consignee,
+			ShopId:        resp.Order.ShopId,
 		},
 		OrderDetails: resp.OrderDetails,
 	}

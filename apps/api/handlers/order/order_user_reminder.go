@@ -21,7 +21,7 @@ func Reminder(ctx context.Context, c *app.RequestContext) {
 	}
 
 	type Param struct {
-		Order_id uint32
+		OrderId uint32 `json:"order_id"`
 	}
 
 	param := &Param{}
@@ -33,7 +33,7 @@ func Reminder(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := client.UserReminder(ctx, userId, param.Order_id)
+	resp, err := client.UserReminder(ctx, userId, param.OrderId)
 	if err != nil {
 		basicErr := errorno.ParseBasicMessageError(err)
 

@@ -10,13 +10,12 @@ import (
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/123508/douyinshop/pkg/util"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"log"
 	"strconv"
 	"time"
 )
-
-//订单状态 0待付款 1待接单 2已接单 3运输中 4待收货 5已完成 6已取消 7退款中 8已退款 9商家拒单 10取消退款(然后继续回到上一步)
 
 // OrderUserServiceImpl implements the last service interface defined in the IDL.
 type OrderUserServiceImpl struct{}
@@ -52,6 +51,26 @@ var SearchOrderLogError = &errorno.BasicMessageError{Code: 404, Message: "查询
 
 var SaveLogError = &errorno.BasicMessageError{Code: 500, Message: "保存日志失败"}
 
+var CancelOrderError = &errorno.BasicMessageError{Code: 500, Message: "取消订单失败"}
+
+var UnableChangeStatusError = &errorno.BasicMessageError{Code: 400, Message: "更新状态失败,该状态不允许被更新"}
+
+var NotPayReminderError = &errorno.BasicMessageError{Code: 400, Message: "没有支付订单,无法提醒发货"}
+
+var DeliveredReminderError = &errorno.BasicMessageError{Code: 400, Message: "商家已经发货,无需提醒"}
+
+var CancelReminderError = &errorno.BasicMessageError{Code: 400, Message: "订单已经取消,无法提醒发货"}
+
+var RefundingReminderError = &errorno.BasicMessageError{Code: 400, Message: "退款中,无法提醒发货"}
+
+var RefundedReminderError = &errorno.BasicMessageError{Code: 400, Message: "已经退款,无法提醒发货"}
+
+var RejectionReminderError = &errorno.BasicMessageError{Code: 400, Message: "商家拒绝发货,无法提醒"}
+
+var StatusError = &errorno.BasicMessageError{Code: 400, Message: "不允许的行为"}
+
+var CompletionOrderError = &errorno.BasicMessageError{Code: 400, Message: "无法确认收货"}
+
 // Submit implements the OrderUserServiceImpl interface.
 // 用户提交订单
 func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderSubmitReq) (resp *userOrder.OrderSubmitResp, err error) {
@@ -67,6 +86,7 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 		order.PayMethod = int(req.PayMethod)
 		order.Remark = req.Remark
 		order.Amount = float64(req.Amount)
+		order.ShopId = req.Order.ShopId
 
 		if err = DB.Create(&order).Error; err != nil {
 			return err
@@ -91,20 +111,19 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 			return err
 		}
 
-		for _, detail := range orderDetails {
-			orderStatusLog := models.OrderStatusLog{
-				OrderDetailId: int(detail.ID),
-				Status:        0, // 初始状态为待付款
-				StartTime:     time.Now(),
-				EndTime:       time.Now().Add(15 * time.Minute),
-				Description:   "订单创建，待付款",
-			}
-
-			// 保存状态日志
-			if err = DB.Create(&orderStatusLog).Error; err != nil {
-				return err
-			}
+		orderStatusLog := models.OrderStatusLog{
+			OrderId:     int(req.Order.OrderId),
+			Status:      0, // 初始状态为待付款
+			StartTime:   time.Now(),
+			EndTime:     time.Now().Add(15 * time.Minute),
+			Description: "订单创建，待付款",
 		}
+
+		// 保存状态日志
+		if err = DB.Create(&orderStatusLog).Error; err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -156,9 +175,9 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 			return nil, SearchOrderError
 		}
 
-		var orderLogs models.OrderStatusLog
+		var orderLog models.OrderStatusLog
 
-		if err = DB.Where("order_id = ?", order.ID).Last(&orderLogs).Error; err != nil {
+		if err = DB.Where("order_id = ?", order.ID).Last(&orderLog).Error; err != nil {
 			log.Println(err)
 			return nil, SearchOrderLogError
 		}
@@ -166,11 +185,11 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 		// 构建订单响应
 		orderResp := &order_common.OrderResp{
 			Order: &order_common.Order{
-				ID:        uint32(order.ID),
-				Number:    order.Number,
-				PayStatus: int32(order.PayStatus),
-				Amount:    float32(order.Amount),
-				Status:    int32(orderLogs.Status),
+				ID:          uint32(order.ID),
+				Number:      order.Number,
+				PayStatus:   int32(order.PayStatus),
+				Amount:      float32(order.Amount),
+				FinalStatus: uint32(orderLog.Status),
 			},
 		}
 		orderList[i] = orderResp
@@ -204,11 +223,21 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 		return nil, SearchOrderError
 	}
 
-	var orderLogs models.OrderStatusLog
+	var orderLogs []models.OrderStatusLog
 
-	if err = DB.Where("order_id = ?", order.ID).Last(&orderLogs).Error; err != nil {
+	if err = DB.Where("order_id = ?", order.ID).Find(&orderLogs).Error; err != nil {
 		log.Println(err)
 		return nil, SearchOrderLogError
+	}
+
+	var statusList []*order_common.Status
+
+	for _, k := range orderLogs {
+		statusList = append(statusList, &order_common.Status{
+			StartTime: timestamppb.New(k.StartTime),
+			Status:    uint32(k.Status),
+			EndTime:   timestamppb.New(k.EndTime),
+		})
 	}
 
 	// 处理类型
@@ -224,7 +253,7 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 		Address:       order.Address,
 		Username:      order.UserName,
 		Consignee:     order.Consignee,
-		Status:        int32(orderLogs.Status),
+		Status:        statusList,
 	}
 
 	var orderDetail []*order_common.OrderDetail
@@ -251,60 +280,74 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 
 // Cancel implements the OrderUserServiceImpl interface.
 // 取消订单
-// TODO 需要修改
 // 步骤:查询要取消的订单->查询不到，返回错误，否则继续->判断该订单的status是否<5,否返回错误,是继续->修改订单日志存储状态，如果报错就返回错误->返回正确响应
 func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.CancelReq) (resp *order_common.Empty, err error) {
 
+	//查询要取消的订单
 	_, err = GetOrderInfo(req.OrderId)
 
+	//查询要取消的订单失败
 	if err != nil {
 		return nil, err
 	}
 
-	// 查询订单详情（OrderDetails）
-	var orderDetails []models.OrderDetail
+	//查询订单状态
+	var status models.OrderStatusLog
 
-	if err = DB.Where("order_id = ?", req.OrderId).Find(&orderDetails).Error; err != nil {
-		return nil, err
+	//查询订单日志异常
+	if err = DB.Where("order_id = ?", req.OrderId).Last(&status).Error; err != nil {
+		log.Println(err)
+		return nil, SearchOrderLogError
 	}
 
 	// 当前时间，用于记录日志
 	currentTime := time.Now()
 
+	//订单状态错误
+	if status.Status > 5 {
+		return nil, UnableChangeStatusError
+	}
+
+	//决定下一个状态
+	var Status uint
+
+	var Description string
+
+	if status.Status == 0 {
+		Status = 6
+		Description = "已取消"
+	} else {
+		Status = 7
+		Description = "退款中"
+	}
+
+	//创建新状态
+	newStatus := models.OrderStatusLog{
+		StartTime:   currentTime,
+		Status:      Status,
+		EndTime:     time.Now().Add(8760 * 9999 * time.Hour),
+		Description: Description,
+	}
+
 	// 更新订单详情的状态为“已取消”并记录到 OrderStatusLog
-	for _, detail := range orderDetails {
+	err = DB.Transaction(func(tx *gorm.DB) error {
 
-		if err = DB.Save(&detail).Error; err != nil {
-			return nil, err
+		//将原有状态的结束时间修改
+		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Error; err != nil {
+			return err
 		}
 
-		// 查找并更新与当前 OrderDetailId 匹配的日志的 EndTime
-		var statusLogs []models.OrderStatusLog
-		statusLogResult := DB.Where("order_detail_id = ? AND start_time != end_time", detail.ID).Find(&statusLogs)
-
-		if statusLogResult.Error != nil {
-			return nil, statusLogResult.Error
+		//插入新的状态
+		if err = DB.Create(&newStatus).Error; err != nil {
+			return err
 		}
 
-		// 更新符合条件的日志：如果 StartTime 和 EndTime 不相等，则更新 EndTime 为当前时间
-		for _, orderStatusLog := range statusLogs {
-			orderStatusLog.EndTime = currentTime
-			if err = DB.Save(&orderStatusLog).Error; err != nil {
-				return nil, err
-			}
-		}
+		return nil
+	})
 
-		// 创建并记录取消状态的日志
-		statusLog := &models.OrderStatusLog{
-			OrderDetailId: int(detail.ID),
-			Status:        6,
-			StartTime:     currentTime,
-			Description:   req.CancelReason,
-		}
-
-		if err = DB.Create(&statusLog).Error; err != nil {
-			return nil, err
-		}
+	if err != nil {
+		log.Println(err)
+		return nil, CancelOrderError
 	}
 
 	return &order_common.Empty{}, nil
@@ -312,32 +355,62 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 
 // Reminder implements the OrderUserServiceImpl interface.
 // 提醒商家发货
-// TODO 需要修改
 // 步骤:查询订单是否属于用户->判断status==2,不是就返回错误,是继续(增加健壮性)->通过订单查询商家id,查不到就报错,否则继续->发送信息
 func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.ReminderReq) (resp *order_common.Empty, err error) {
 
 	// 查询该用户的订单信息
 	var order models.Order
 
+	//查询订单失败,返回异常
 	if err = DB.Where("id = ? AND user_id = ?", req.OrderId, req.UserId).First(&order).Error; err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, SearchOrderError
 	}
 
-	var orderDetail models.OrderDetail
+	//查询订单状态信息
+	var status models.OrderStatusLog
 
-	if err = DB.Where("order_id = ?", req.OrderId).First(&orderDetail).Error; err != nil {
-		return nil, err
+	//查询失败,返回异常
+	if err = DB.Where("order_id = ?", req.OrderId).Last(&status).Error; err != nil {
+		log.Println(err)
+		return nil, SearchOrderLogError
 	}
 
-	var product models.Product
+	//如果状态不是商家已接单就返回错误
 
-	if err = DB.Where("id = ?", orderDetail.ProductId).First(&product).Error; err != nil {
-		return nil, err
+	switch status.Status {
+	case 0:
+		return nil, NotPayReminderError
+		break
+
+	case 1, 2: //只允许这两个状态通行
+		break
+	case 3, 4, 5:
+		return nil, DeliveredReminderError
+		break
+	case 6:
+		return nil, CancelReminderError
+		break
+	case 7:
+		return nil, RefundingReminderError
+		break
+	case 8:
+		return nil, RefundedReminderError
+		break
+	case 9:
+		return nil, RejectionReminderError
+		break
+	default:
+		return nil, StatusError
+		break
 	}
 
 	//提醒商家发货逻辑
-	util.SendMessage("order.direct", "message", "orderId:"+strconv.Itoa(int(req.OrderId))+",shopId"+strconv.Itoa(int(product.ShopId)), 1)
+	err = util.SendMessage("order.direct", "message", "orderId:"+strconv.Itoa(int(req.OrderId))+",shopId"+strconv.Itoa(int(order.ShopId)), 1)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &order_common.Empty{}, nil
 }
@@ -345,65 +418,60 @@ func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.Remi
 // Complete implements the OrderUserServiceImpl interface.
 // 确认收货
 // TODO 需要修改
+// 订单状态 0待付款 1待接单 2已接单 3运输中 4待收货 5已完成 6已取消 7退款中 8已退款 9商家拒单 取消退款(直接回到上一步即可)
 // 步骤:查询要完成的订单->查询不到，返回错误，否则继续->判断该订单的status是否为4,否返回错误,是继续->修改订单日志存储状态，如果报错就返回错误->返回正确响应
 func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.CompleteReq) (resp *order_common.Empty, err error) {
-
 	// 查询订单信息
-	var order models.Order
-	orderResult := DB.Where("id = ?", req.OrderId).First(&order)
+	_, err = GetOrderInfo(req.OrderId)
 
-	if orderResult.Error != nil {
-		return nil, orderResult.Error
+	//查询不到订单信息,返回异常
+	if err != nil {
+		return nil, err
 	}
 
-	// 更新订单的状态为“已完成”
-	var orderDetails []models.OrderDetail
-	detailResult := DB.Where("order_id = ?", req.OrderId).Find(&orderDetails)
+	//查询订单状态信息
+	var status models.OrderStatusLog
 
-	if detailResult.Error != nil {
-		return nil, detailResult.Error
+	//查询订单日志失败,返回异常
+	if err = DB.Where("order_id = ?", req.OrderId).Last(status).Error; err != nil {
+		log.Println(err)
+		return nil, SearchOrderLogError
+	}
+
+	//如果订单状态不为待派送就无法收货
+	if status.Status != 4 && status.Status != 3 {
+		return nil, UnableChangeStatusError
 	}
 
 	// 当前时间，用于记录日志
 	currentTime := time.Now()
 
-	for _, detail := range orderDetails {
+	//创建完成状态
+	newStatus := models.OrderStatusLog{
+		StartTime:   currentTime,
+		Status:      5,
+		EndTime:     time.Now().Add(8760 * 9999 * time.Hour),
+		Description: "已完成",
+	}
 
-		// 查找并更新所有状态为 4 的日志记录
-		var statusLogs []models.OrderStatusLog
+	err = DB.Transaction(func(tx *gorm.DB) error {
 
-		if err = DB.Where("order_detail_id = ? AND status = ?", detail.ID, 4).Find(&statusLogs).Error; err != nil {
-			log.Println(err)
-			return nil, SearchOrderLogError
+		//将原有状态的结束时间修改
+		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Error; err != nil {
+			return err
 		}
 
-		// 更新所有状态为4的日志的结束时间
-		for _, orderStatusLog := range statusLogs {
-			orderStatusLog.EndTime = currentTime
-			if err = DB.Save(&orderStatusLog).Error; err != nil {
-				log.Println(err)
-				return nil, SaveLogError
-			}
+		//插入新的状态
+		if err = DB.Create(&newStatus).Error; err != nil {
+			return err
 		}
 
-		// 更新订单详情状态为“已完成”
+		return nil
+	})
 
-		if err = DB.Save(&detail).Error; err != nil {
-			return nil, err
-		}
-
-		// 记录新的状态变更到 OrderStatusLog
-		statusLog := &models.OrderStatusLog{
-			OrderDetailId: int(detail.ID),
-			Status:        5, // 已完成
-			StartTime:     currentTime,
-			EndTime:       currentTime,
-			Description:   "订单已完成",
-		}
-
-		if err = DB.Create(&statusLog).Error; err != nil {
-			return nil, err
-		}
+	if err != nil {
+		log.Println(err)
+		return nil, CompletionOrderError
 	}
 
 	return &order_common.Empty{}, nil

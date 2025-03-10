@@ -23,7 +23,7 @@ func DetailShop(ctx context.Context, c *app.RequestContext) {
 	}
 
 	var orderDetails []order_common.OrderDetail
-	if err := c.Bind(&orderDetails); err != nil {
+	if err = c.Bind(&orderDetails); err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "订单详情解析失败",
 		})

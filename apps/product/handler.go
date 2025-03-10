@@ -39,6 +39,7 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 				Price:       productItem.Price,
 				Categories:  category,
 				Sales:       productItem.Sales,
+				ShopId:      uint32(productItem.ShopId),
 			})
 		}
 	} else { // 分类名不为空时，返回指定类型商品
@@ -59,6 +60,7 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 				Price:       productItem.Price,
 				Categories:  category,
 				Sales:       productItem.Sales,
+				ShopId:      uint32(productItem.ShopId),
 			})
 		}
 	}
@@ -95,6 +97,7 @@ func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product
 				Price:       result.Price,
 				Categories:  category,
 				Sales:       result.Sales,
+				ShopId:      uint32(result.ShopId),
 			},
 		}
 	}
@@ -128,6 +131,7 @@ func (s *ProductCatalogServiceImpl) SearchProducts(ctx context.Context, req *pro
 			Price:       productResult.Price,
 			Categories:  category,
 			Sales:       productResult.Sales,
+			ShopId:      uint32(productResult.ShopId),
 		})
 	}
 	resp = &product.SearchProductsResp{

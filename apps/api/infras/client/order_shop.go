@@ -49,6 +49,7 @@ func GetOrderList(ctx context.Context, ShopId uint32, Page uint32, PageSize uint
 	}
 
 	resp, err := orderShopClient.GetOrderList(ctx, req)
+
 	if err != nil {
 		return nil, err
 	}
@@ -71,6 +72,7 @@ func GetOrderList(ctx context.Context, ShopId uint32, Page uint32, PageSize uint
 				Address:       order.Order.Address,
 				Username:      order.Order.Username,
 				Consignee:     order.Order.Consignee,
+				ShopId:        order.Order.ShopId,
 			},
 		}
 	}

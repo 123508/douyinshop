@@ -26,11 +26,10 @@ message Product {
     string description = 3;
     string picture = 4;
     float price = 5;
-
-    repeated string categories = 6;
-
-    uint64 sales = 7; // 销量
-    bool status = 8; // 是否出售
+    uint32 shopId=6;
+    repeated string categories = 7;
+    uint64 sales = 8; // 销量
+    bool status = 9; // 是否出售
 }
 
 message ListProductsResp {

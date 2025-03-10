@@ -24,19 +24,19 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 	}
 
 	type Detail struct {
-		Product_id uint32
-		Name       string
-		Image      string
-		Number     uint32
-		Amount     string
+		ProductId uint32 `json:"product_id"`
+		Name      string
+		Image     string
+		Number    uint32
+		Amount    string
 	}
 
 	type ReqParam struct {
-		Address_book_id int
-		Pay_method      int
-		Remark          string
-		Amount          string
-		List            []Detail
+		AddressBookId int `json:"address_book_id"`
+		PayMethod     int `json:"pay_method"`
+		Remark        string
+		Amount        string
+		List          []Detail
 	}
 
 	param := &ReqParam{}
@@ -62,7 +62,7 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 			Name:      k.Name,
 			Image:     k.Image,
 			OrderId:   0,
-			ProductId: k.Product_id,
+			ProductId: k.ProductId,
 			Number:    k.Number,
 			Amount:    float32(float),
 		})
@@ -77,7 +77,7 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用 UserSubmit 函数提交订单
-	result, err := client.UserSubmit(ctx, userId, int32(param.Address_book_id), int32(param.Pay_method), param.Remark, float32(float), &order)
+	result, err := client.UserSubmit(ctx, userId, int32(param.AddressBookId), int32(param.PayMethod), param.Remark, float32(float), &order)
 	if err != nil {
 		basicErr := errorno.ParseBasicMessageError(err)
 

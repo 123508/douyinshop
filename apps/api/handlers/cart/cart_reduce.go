@@ -20,11 +20,7 @@ func Reduce(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	type Req struct {
-		ProductId uint32 `json:"product_id"`
-		Quantity  uint32 `json:"number"`
-	}
-	var req Req
+	var req client.CartReq
 	err := c.Bind(&req)
 	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
