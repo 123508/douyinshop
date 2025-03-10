@@ -49,8 +49,6 @@ var SearchOrderError = &errorno.BasicMessageError{Code: 404, Message: "查询订
 
 var SearchOrderLogError = &errorno.BasicMessageError{Code: 404, Message: "查询订单日志错误"}
 
-var SaveLogError = &errorno.BasicMessageError{Code: 500, Message: "保存日志失败"}
-
 var CancelOrderError = &errorno.BasicMessageError{Code: 500, Message: "取消订单失败"}
 
 var UnableChangeStatusError = &errorno.BasicMessageError{Code: 400, Message: "更新状态失败,该状态不允许被更新"}
@@ -381,28 +379,19 @@ func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.Remi
 	switch status.Status {
 	case 0:
 		return nil, NotPayReminderError
-		break
-
 	case 1, 2: //只允许这两个状态通行
-		break
 	case 3, 4, 5:
 		return nil, DeliveredReminderError
-		break
 	case 6:
 		return nil, CancelReminderError
-		break
 	case 7:
 		return nil, RefundingReminderError
-		break
 	case 8:
 		return nil, RefundedReminderError
-		break
 	case 9:
 		return nil, RejectionReminderError
-		break
 	default:
 		return nil, StatusError
-		break
 	}
 
 	//提醒商家发货逻辑
@@ -417,7 +406,6 @@ func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.Remi
 
 // Complete implements the OrderUserServiceImpl interface.
 // 确认收货
-// TODO 需要修改
 // 订单状态 0待付款 1待接单 2已接单 3运输中 4待收货 5已完成 6已取消 7退款中 8已退款 9商家拒单 取消退款(直接回到上一步即可)
 // 步骤:查询要完成的订单->查询不到，返回错误，否则继续->判断该订单的status是否为4,否返回错误,是继续->修改订单日志存储状态，如果报错就返回错误->返回正确响应
 func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.CompleteReq) (resp *order_common.Empty, err error) {
