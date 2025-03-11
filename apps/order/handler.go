@@ -82,15 +82,17 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 		order.AddressBookId = int(req.AddressBookId)
 		order.PayMethod = int(req.PayMethod)
 		order.Remark = req.Remark
-		order.Amount = float64(req.Amount)
 		order.ShopId = req.Order.ShopId
 
 		if err = DB.Create(&order).Error; err != nil {
 			return err
 		}
 
+		var total float32
+
 		var orderDetails []models.OrderDetail
 		for _, detail := range req.Order.List {
+
 			orderDetail := models.OrderDetail{
 				Name:      detail.Name,
 				Image:     detail.Image,
@@ -100,8 +102,15 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 				Amount:    float64(detail.Amount),
 			}
 
+			total += detail.Amount * float32(detail.Number)
+
 			// 将订单详情添加到列表中
 			orderDetails = append(orderDetails, orderDetail)
+		}
+
+		//如果创建失败就返回错误
+		if err = DB.Model(&models.Order{}).Where("id = ?", order.ID).Update("amount = ?", total).Error; err != nil {
+			return err
 		}
 
 		if err = DB.Create(&orderDetails).Error; err != nil {

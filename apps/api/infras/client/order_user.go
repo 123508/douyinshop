@@ -3,12 +3,12 @@ package client
 import (
 	"context"
 	"github.com/123508/douyinshop/kitex_gen/address"
+	"github.com/123508/douyinshop/kitex_gen/cart"
 	"github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
 	"github.com/123508/douyinshop/kitex_gen/product"
 	"github.com/123508/douyinshop/pkg/config"
-	"github.com/123508/douyinshop/pkg/errorno"
 	"time"
 
 	"github.com/cloudwego/kitex/client"
@@ -45,26 +45,44 @@ func initOrderUserRpc() {
 // amount 产品数量
 // order 订单信息
 // 返回订单提交resp
-func UserSubmit(ctx context.Context, userId uint32, addressBookId int32, payMethod int32, remark string, amount float32, order *order_common.OrderReq) (*userOrder.OrderSubmitResp, error) {
+func UserSubmit(ctx context.Context, userId uint32, addressBookId int32, payMethod int32, remark string) (*userOrder.OrderSubmitResp, error) {
 
-	if order == nil || len(order.List) == 0 {
-		return nil, &errorno.BasicMessageError{Code: 400, Message: "参数不足,无法产生订单"}
-	}
+	// 获取并绑定订单信息
+	order := &order_common.OrderReq{}
 
-	productResp, err := productClient.GetProduct(ctx, &product.GetProductReq{Id: order.List[0].ProductId})
+	cartResp, err := cartClient.GetCart(ctx, &cart.GetCartReq{UserId: userId})
 
 	if err != nil {
 		return nil, err
 	}
 
-	order.ShopId = productResp.Product.ShopId
+	for _, item := range cartResp.Cart.Items {
+
+		productResp, err := productClient.GetProduct(ctx, &product.GetProductReq{Id: item.ProductId})
+
+		if err != nil {
+			return nil, err
+		}
+
+		order.ShopId = productResp.Product.ShopId
+
+		itemPrice := productResp.Product.Price * float32(item.Quantity)
+
+		order.List = append(order.List, &order_common.OrderDetail{
+			Name:      productResp.Product.Name,
+			Image:     "  ",
+			OrderId:   0,
+			ProductId: productResp.Product.Id,
+			Number:    uint32(item.Quantity),
+			Amount:    itemPrice,
+		})
+	}
 
 	req := &userOrder.OrderSubmitReq{
 		UserId:        userId,
 		AddressBookId: addressBookId,
 		PayMethod:     payMethod,
 		Remark:        remark,
-		Amount:        amount,
 		Order:         order,
 	}
 

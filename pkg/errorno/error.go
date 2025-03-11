@@ -22,14 +22,6 @@ func (e *BasicMessageError) Error() string {
 // ParseBasicMessageError 从错误字符串中解析 BasicMessageError
 func ParseBasicMessageError(err error) *BasicMessageError {
 
-	re0 := regexp.MustCompile(`remote or network error`)
-	match := re0.FindStringSubmatch(err.Error())
-
-	if len(match) == 1 {
-		fmt.Println(err.Error())
-		return &BasicMessageError{Code: 500, Message: "服务出错"}
-	}
-
 	// 定义匹配 "code:XXX message:XXX" 的正则表达式
 	re := regexp.MustCompile(`code:(\d+)\s+message:(.+)`)
 	matches := re.FindStringSubmatch(err.Error())
