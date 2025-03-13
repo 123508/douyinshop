@@ -43,6 +43,7 @@ type ProductItem struct {
 	Price        string   `json:"price"`
 	CategoryName []string `json:"categories"`
 	Sales        int      `json:"sales"`
+	ShopId       uint32   `json:"shop_id"`
 }
 
 // ListProducts 获取商品列表
@@ -69,6 +70,7 @@ func ListProducts(ctx context.Context, page int, size int, category string) ([]P
 			Description:  p.Description,
 			CategoryName: p.Categories,
 			Picture:      p.Picture,
+			ShopId:       p.ShopId,
 		})
 	}
 	return products, nil
@@ -93,6 +95,7 @@ func GetProductDetail(ctx context.Context, productId int) (*ProductItem, error) 
 		CategoryName: resp.Product.Categories,
 		Picture:      resp.Product.Picture,
 		Sales:        int(resp.Product.Sales),
+		ShopId:       resp.Product.ShopId,
 	}
 	return result, nil
 }
@@ -121,6 +124,7 @@ func SearchProducts(ctx context.Context, keyword string, page int, pageSize int)
 			Description:  p.Description,
 			CategoryName: p.Categories,
 			Picture:      p.Picture,
+			ShopId:       p.ShopId,
 		})
 	}
 	return products, nil

@@ -99,6 +99,11 @@ func (x *Product) FastRead(buf []byte, _type int8, number int32) (offset int, er
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 9:
+		offset, err = x.fastReadField9(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -138,6 +143,11 @@ func (x *Product) fastReadField5(buf []byte, _type int8) (offset int, err error)
 }
 
 func (x *Product) fastReadField6(buf []byte, _type int8) (offset int, err error) {
+	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *Product) fastReadField7(buf []byte, _type int8) (offset int, err error) {
 	var v string
 	v, offset, err = fastpb.ReadString(buf, _type)
 	if err != nil {
@@ -147,12 +157,12 @@ func (x *Product) fastReadField6(buf []byte, _type int8) (offset int, err error)
 	return offset, err
 }
 
-func (x *Product) fastReadField7(buf []byte, _type int8) (offset int, err error) {
+func (x *Product) fastReadField8(buf []byte, _type int8) (offset int, err error) {
 	x.Sales, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
-func (x *Product) fastReadField8(buf []byte, _type int8) (offset int, err error) {
+func (x *Product) fastReadField9(buf []byte, _type int8) (offset int, err error) {
 	x.Status, offset, err = fastpb.ReadBool(buf, _type)
 	return offset, err
 }
@@ -363,6 +373,7 @@ func (x *Product) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField6(buf[offset:])
 	offset += x.fastWriteField7(buf[offset:])
 	offset += x.fastWriteField8(buf[offset:])
+	offset += x.fastWriteField9(buf[offset:])
 	return offset
 }
 
@@ -407,28 +418,36 @@ func (x *Product) fastWriteField5(buf []byte) (offset int) {
 }
 
 func (x *Product) fastWriteField6(buf []byte) (offset int) {
-	if len(x.Categories) == 0 {
+	if x.ShopId == 0 {
 		return offset
 	}
-	for i := range x.GetCategories() {
-		offset += fastpb.WriteString(buf[offset:], 6, x.GetCategories()[i])
-	}
+	offset += fastpb.WriteUint32(buf[offset:], 6, x.GetShopId())
 	return offset
 }
 
 func (x *Product) fastWriteField7(buf []byte) (offset int) {
-	if x.Sales == 0 {
+	if len(x.Categories) == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 7, x.GetSales())
+	for i := range x.GetCategories() {
+		offset += fastpb.WriteString(buf[offset:], 7, x.GetCategories()[i])
+	}
 	return offset
 }
 
 func (x *Product) fastWriteField8(buf []byte) (offset int) {
+	if x.Sales == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 8, x.GetSales())
+	return offset
+}
+
+func (x *Product) fastWriteField9(buf []byte) (offset int) {
 	if !x.Status {
 		return offset
 	}
-	offset += fastpb.WriteBool(buf[offset:], 8, x.GetStatus())
+	offset += fastpb.WriteBool(buf[offset:], 9, x.GetStatus())
 	return offset
 }
 
@@ -580,6 +599,7 @@ func (x *Product) Size() (n int) {
 	n += x.sizeField6()
 	n += x.sizeField7()
 	n += x.sizeField8()
+	n += x.sizeField9()
 	return n
 }
 
@@ -624,28 +644,36 @@ func (x *Product) sizeField5() (n int) {
 }
 
 func (x *Product) sizeField6() (n int) {
-	if len(x.Categories) == 0 {
+	if x.ShopId == 0 {
 		return n
 	}
-	for i := range x.GetCategories() {
-		n += fastpb.SizeString(6, x.GetCategories()[i])
-	}
+	n += fastpb.SizeUint32(6, x.GetShopId())
 	return n
 }
 
 func (x *Product) sizeField7() (n int) {
-	if x.Sales == 0 {
+	if len(x.Categories) == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(7, x.GetSales())
+	for i := range x.GetCategories() {
+		n += fastpb.SizeString(7, x.GetCategories()[i])
+	}
 	return n
 }
 
 func (x *Product) sizeField8() (n int) {
+	if x.Sales == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(8, x.GetSales())
+	return n
+}
+
+func (x *Product) sizeField9() (n int) {
 	if !x.Status {
 		return n
 	}
-	n += fastpb.SizeBool(8, x.GetStatus())
+	n += fastpb.SizeBool(9, x.GetStatus())
 	return n
 }
 
@@ -763,9 +791,10 @@ var fieldIDToName_Product = map[int32]string{
 	3: "Description",
 	4: "Picture",
 	5: "Price",
-	6: "Categories",
-	7: "Sales",
-	8: "Status",
+	6: "ShopId",
+	7: "Categories",
+	8: "Sales",
+	9: "Status",
 }
 
 var fieldIDToName_ListProductsResp = map[int32]string{

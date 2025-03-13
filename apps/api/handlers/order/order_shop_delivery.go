@@ -13,6 +13,16 @@ import (
 
 func Delivery(ctx context.Context, c *app.RequestContext) {
 
+	// 获取并解析 user_id 参数
+	value, exists := c.Get("userId")
+	_, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
+
 	orderId, err := strconv.Atoi(c.Param("order_id"))
 	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
@@ -23,17 +33,8 @@ func Delivery(ctx context.Context, c *app.RequestContext) {
 
 	resp, err := client.ShopDelivery(ctx, uint32(orderId))
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
+		errorno.DealWithError(err, c)
+		return
 	}
 
 	c.JSON(consts.StatusOK, utils.H{

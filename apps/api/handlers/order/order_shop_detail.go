@@ -14,6 +14,16 @@ import (
 
 func DetailShop(ctx context.Context, c *app.RequestContext) {
 
+	// 获取并解析 user_id 参数
+	value, exists := c.Get("userId")
+	_, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
+
 	orderId, err := strconv.Atoi(c.Param("order_id"))
 	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
@@ -23,7 +33,7 @@ func DetailShop(ctx context.Context, c *app.RequestContext) {
 	}
 
 	var orderDetails []order_common.OrderDetail
-	if err := c.Bind(&orderDetails); err != nil {
+	if err = c.Bind(&orderDetails); err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "订单详情解析失败",
 		})
@@ -32,17 +42,8 @@ func DetailShop(ctx context.Context, c *app.RequestContext) {
 
 	orderResp, err := client.ShopDetail(ctx, uint32(orderId), orderDetails)
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
+		errorno.DealWithError(err, c)
+		return
 	}
 
 	c.JSON(consts.StatusOK, utils.H{

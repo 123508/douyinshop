@@ -43,18 +43,7 @@ func UpdateProductInfo(ctx context.Context, c *app.RequestContext) {
 	}
 	getShopIdResp, err := client.GetShopId(ctx, &getShopIdReq)
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
-
+		errorno.DealWithError(err, c)
 		return
 	}
 	if productInfo.ShopID != getShopIdResp.ShopId {
@@ -77,18 +66,7 @@ func UpdateProductInfo(ctx context.Context, c *app.RequestContext) {
 	}
 	resp, err := client.UpdateProduct(ctx, req)
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
-
+		errorno.DealWithError(err, c)
 		return
 	}
 	c.JSON(consts.StatusOK, utils.H{

@@ -10,7 +10,6 @@ import (
 )
 
 func Reminder(ctx context.Context, c *app.RequestContext) {
-
 	value, exists := c.Get("userId")
 	userId, ok := value.(uint32)
 	if !exists || !ok {
@@ -21,7 +20,7 @@ func Reminder(ctx context.Context, c *app.RequestContext) {
 	}
 
 	type Param struct {
-		Order_id uint32
+		OrderId uint32 `json:"order_id"`
 	}
 
 	param := &Param{}
@@ -33,19 +32,11 @@ func Reminder(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := client.UserReminder(ctx, userId, param.Order_id)
-	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
+	resp, err := client.UserReminder(ctx, userId, param.OrderId)
 
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
+	if err != nil {
+		errorno.DealWithError(err, c)
+		return
 	}
 
 	c.JSON(consts.StatusOK, utils.H{

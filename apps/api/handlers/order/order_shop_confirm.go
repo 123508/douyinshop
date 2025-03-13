@@ -11,9 +11,19 @@ import (
 
 func Confirm(ctx context.Context, c *app.RequestContext) {
 
+	// 获取并解析 user_id 参数
+	value, exists := c.Get("userId")
+	_, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
+
 	type Param struct {
-		Order_id uint32
-		Status   int32
+		OrderId uint32 `json:"order_id"`
+		Status  int32
 	}
 
 	param := &Param{}
@@ -25,20 +35,11 @@ func Confirm(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := client.ShopConfirm(ctx, param.Order_id, param.Status)
+	resp, err := client.ShopConfirm(ctx, param.OrderId, param.Status)
 
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Raw,
-			})
-		}
+		errorno.DealWithError(err, c)
+		return
 	}
 
 	c.JSON(consts.StatusOK, utils.H{

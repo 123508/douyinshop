@@ -11,9 +11,19 @@ import (
 
 func Rejection(ctx context.Context, c *app.RequestContext) {
 
+	// 获取并解析 user_id 参数
+	value, exists := c.Get("userId")
+	_, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
+
 	type Param struct {
-		Order_id         uint32
-		Rejection_reason string
+		OrderId         uint32 `json:"order_id"`
+		RejectionReason string `json:"rejection_reason"`
 	}
 
 	param := &Param{}
@@ -25,19 +35,10 @@ func Rejection(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := client.ShopRejection(ctx, param.Order_id, param.Rejection_reason)
+	resp, err := client.ShopRejection(ctx, param.OrderId, param.RejectionReason)
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
+		errorno.DealWithError(err, c)
+		return
 	}
 
 	c.JSON(consts.StatusOK, utils.H{

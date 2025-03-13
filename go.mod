@@ -21,7 +21,7 @@ require (
 	github.com/volcengine/volcengine-go-sdk v1.0.184
 	go.etcd.io/etcd/client/v3 v3.5.12
 	go.opentelemetry.io/otel v1.28.0
-	google.golang.org/protobuf v1.36.4
+	google.golang.org/protobuf v1.36.5
 	gorm.io/driver/mysql v1.4.7
 	gorm.io/gorm v1.23.8
 )

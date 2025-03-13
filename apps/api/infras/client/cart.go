@@ -35,6 +35,11 @@ func initCartRpc() {
 	cartClient = c
 }
 
+type CartReq struct {
+	ProductId uint32 `json:"product_id"`
+	Quantity  uint32 `json:"number"`
+}
+
 // AddItem 添加商品到购物车
 func AddItem(ctx context.Context, req *cart.AddItemReq) (*cart.AddItemResp, error) {
 	resp, err := cartClient.AddItem(ctx, req)

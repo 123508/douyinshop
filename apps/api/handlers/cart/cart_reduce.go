@@ -20,11 +20,7 @@ func Reduce(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	type Req struct {
-		ProductId uint32 `json:"product_id"`
-		Quantity  uint32 `json:"number"`
-	}
-	var req Req
+	var req client.CartReq
 	err := c.Bind(&req)
 	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
@@ -41,18 +37,7 @@ func Reduce(ctx context.Context, c *app.RequestContext) {
 
 	_, err = client.DeleteItem(ctx, deleteItemReq)
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
-
+		errorno.DealWithError(err, c)
 		return
 	}
 

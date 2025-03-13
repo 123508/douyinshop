@@ -33,7 +33,7 @@ func Update(ctx context.Context, c *app.RequestContext) {
 
 		if basicErr.Raw != nil {
 			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
+				"err": basicErr.Raw,
 			})
 		} else {
 			c.JSON(basicErr.Code, utils.H{

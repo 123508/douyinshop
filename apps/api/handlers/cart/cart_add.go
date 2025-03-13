@@ -20,11 +20,8 @@ func Add(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	type Req struct {
-		ProductId uint32 `json:"product_id"`
-		Quantity  int32  `json:"number"`
-	}
-	var req Req
+	var req client.CartReq
+
 	err := c.Bind(&req)
 	if err != nil {
 		c.JSON(consts.StatusBadRequest, utils.H{
@@ -37,24 +34,13 @@ func Add(ctx context.Context, c *app.RequestContext) {
 		UserId: userId,
 		Item: &cart.CartItem{
 			ProductId: req.ProductId,
-			Quantity:  req.Quantity,
+			Quantity:  int32(req.Quantity),
 		},
 	}
 
 	_, err = client.AddItem(ctx, addItemReq)
 	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
-
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
-
+		errorno.DealWithError(err, c)
 		return
 	}
 	c.JSON(consts.StatusOK, utils.H{

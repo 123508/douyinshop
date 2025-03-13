@@ -3,12 +3,10 @@ package order
 import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
-	"github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"strconv"
 )
 
 func Submit(ctx context.Context, c *app.RequestContext) {
@@ -23,20 +21,10 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	type Detail struct {
-		Product_id uint32
-		Name       string
-		Image      string
-		Number     uint32
-		Amount     string
-	}
-
 	type ReqParam struct {
-		Address_book_id int
-		Pay_method      int
-		Remark          string
-		Amount          string
-		List            []Detail
+		AddressBookId int `json:"address_book_id"`
+		PayMethod     int `json:"pay_method"`
+		Remark        string
 	}
 
 	param := &ReqParam{}
@@ -47,49 +35,12 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 		})
 	}
 
-	// 获取并绑定订单信息
-	order := order_common.OrderReq{}
-
-	for _, k := range param.List {
-		float, err := strconv.ParseFloat(k.Amount, 32)
-		if err != nil {
-			c.JSON(400, utils.H{
-				"err": "参数错误",
-			})
-		}
-
-		order.List = append(order.List, &order_common.OrderDetail{
-			Name:      k.Name,
-			Image:     k.Image,
-			OrderId:   0,
-			ProductId: k.Product_id,
-			Number:    k.Number,
-			Amount:    float32(float),
-		})
-	}
-
-	float, err := strconv.ParseFloat(param.Amount, 32)
-
-	if err != nil {
-		c.JSON(400, utils.H{
-			"err": "参数错误",
-		})
-	}
-
 	// 调用 UserSubmit 函数提交订单
-	result, err := client.UserSubmit(ctx, userId, int32(param.Address_book_id), int32(param.Pay_method), param.Remark, float32(float), &order)
-	if err != nil {
-		basicErr := errorno.ParseBasicMessageError(err)
+	result, err := client.UserSubmit(ctx, userId, int32(param.AddressBookId), int32(param.PayMethod), param.Remark)
 
-		if basicErr.Raw != nil {
-			c.JSON(consts.StatusInternalServerError, utils.H{
-				"err": err,
-			})
-		} else {
-			c.JSON(basicErr.Code, utils.H{
-				"error": basicErr.Message,
-			})
-		}
+	if err != nil {
+		errorno.DealWithError(err, c)
+		return
 	}
 
 	// 返回订单提交成功的结果
