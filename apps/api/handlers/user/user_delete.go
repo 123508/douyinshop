@@ -12,11 +12,8 @@ import (
 )
 
 func Delete(ctx context.Context, c *app.RequestContext) {
-	value, exists := c.Get("userId")
-
-	userId, ok := value.(uint32)
-
-	if !exists || !ok {
+	userId, ok := ctx.Value("userId").(uint32)
+	if !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",
 		})

@@ -24,9 +24,6 @@ func ParseToken() app.HandlerFunc {
 			return
 		}
 
-		// 设置userId的值为解析出来的userId
-		c.Set("userId", userId)
-
 		// 如果token发生变化，更新cookie
 		if token != newToken {
 			c.SetCookie(
@@ -40,6 +37,6 @@ func ParseToken() app.HandlerFunc {
 				true,
 			)
 		}
-		c.Next(ctx)
+		c.Next(context.WithValue(ctx, "userId", userId))
 	}
 }
