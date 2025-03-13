@@ -83,6 +83,7 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 		order.PayMethod = int(req.PayMethod)
 		order.Remark = req.Remark
 		order.ShopId = req.Order.ShopId
+		order.Status = 0
 
 		var total float64
 
@@ -119,13 +120,11 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 
 		current := time.Now()
 
-		task := time.Now().Add(15 * time.Minute)
-
 		orderStatusLog := models.OrderStatusLog{
 			OrderId:     int(order.ID),
 			Status:      0, // 初始状态为待付款
 			StartTime:   &current,
-			EndTime:     &task,
+			EndTime:     nil,
 			Description: "订单创建，待付款",
 		}
 
@@ -197,9 +196,8 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 			Order: &order_common.Order{
 				ID:          uint32(order.ID),
 				Number:      order.Number,
-				PayStatus:   int32(order.PayStatus),
 				Amount:      float32(order.Amount),
-				FinalStatus: uint32(orderLog.Status),
+				FinalStatus: uint32(order.Status),
 			},
 		}
 		orderList[i] = orderResp
@@ -255,7 +253,6 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 		Number:        order.Number,
 		UserId:        order.UserId,
 		PayMethod:     int32(order.PayMethod),
-		PayStatus:     int32(order.PayStatus),
 		AddressBookId: uint64(order.AddressBookId),
 		Amount:        float32(order.Amount),
 		Remark:        order.Remark,
@@ -343,10 +340,9 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
 		//将原有状态的结束时间修改
-		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Error; err != nil {
+		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Update("status", Status).Error; err != nil {
 			return err
 		}
-
 		//插入新的状态
 		if err = DB.Create(&newStatus).Error; err != nil {
 			return err
@@ -456,7 +452,7 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
 		//将原有状态的结束时间修改
-		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Error; err != nil {
+		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Update("status", 5).Error; err != nil {
 			return err
 		}
 
