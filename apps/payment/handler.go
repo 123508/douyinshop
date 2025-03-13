@@ -88,10 +88,12 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 		if result.Error != nil {
 			log.Println(result.Error)
 		}
+
+		current := time.Now()
+
 		result = database.Create(&models.OrderStatusLog{
-			OrderDetailId: int(Id),
-			Status:        1,
-			StartTime:     time.Now(),
+			Status:    1,
+			StartTime: &current,
 		})
 		if result.Error != nil {
 			log.Println(result.Error)
@@ -133,10 +135,12 @@ func (s *PaymentServiceImpl) Notify(ctx context.Context, req *payment.NotifyReq)
 	if result.Error != nil {
 		log.Println(result.Error)
 	}
+
+	current := time.Now()
+
 	result = database.Create(&models.OrderStatusLog{
-		OrderDetailId: int(Id),
-		Status:        1,
-		StartTime:     time.Now(),
+		Status:    1,
+		StartTime: &current,
 	})
 	if result.Error != nil {
 		log.Println(result.Error)

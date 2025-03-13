@@ -11,6 +11,16 @@ import (
 
 func CancelShop(ctx context.Context, c *app.RequestContext) {
 
+	// 获取并解析 user_id 参数
+	value, exists := c.Get("userId")
+	_, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
+
 	type Param struct {
 		OrderId      uint32 `json:"order_id"`
 		CancelReason string `json:"cancel_reason"`

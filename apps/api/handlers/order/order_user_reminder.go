@@ -10,7 +10,6 @@ import (
 )
 
 func Reminder(ctx context.Context, c *app.RequestContext) {
-
 	value, exists := c.Get("userId")
 	userId, ok := value.(uint32)
 	if !exists || !ok {

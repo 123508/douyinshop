@@ -92,6 +92,12 @@ func UserSubmit(ctx context.Context, userId uint32, addressBookId int32, payMeth
 		return nil, err
 	}
 
+	_, err = cartClient.EmptyCart(ctx, &cart.EmptyCartReq{})
+
+	if err != nil {
+		return nil, err
+	}
+
 	result := &userOrder.OrderSubmitResp{
 		OrderId:     resp.OrderId,
 		Number:      resp.Number,

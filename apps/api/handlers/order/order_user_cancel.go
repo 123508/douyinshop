@@ -11,6 +11,16 @@ import (
 
 func Cancel(ctx context.Context, c *app.RequestContext) {
 
+	// 获取并解析 user_id 参数
+	value, exists := c.Get("userId")
+	_, ok := value.(uint32)
+	if !exists || !ok {
+		c.JSON(consts.StatusBadRequest, utils.H{
+			"error": "userId must be a number",
+		})
+		return
+	}
+
 	type Param struct {
 		CancelReason string `json:"cancel_reason"`
 		OrderId      uint32 `json:"order_id"`
@@ -25,7 +35,9 @@ func Cancel(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := client.UserCancel(ctx, param.OrderId, param.CancelReason)
+	childCxt := context.WithValue(ctx, "user_id", 1)
+
+	resp, err := client.UserCancel(childCxt, param.OrderId, param.CancelReason)
 	if err != nil {
 		errorno.DealWithError(err, c)
 		return

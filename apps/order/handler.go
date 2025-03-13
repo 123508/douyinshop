@@ -84,11 +84,17 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 		order.Remark = req.Remark
 		order.ShopId = req.Order.ShopId
 
+		var total float64
+
+		for _, detail := range req.Order.List {
+			total += float64(detail.Amount) * float64(detail.Number)
+		}
+
+		order.Amount = total
+
 		if err = DB.Create(&order).Error; err != nil {
 			return err
 		}
-
-		var total float32
 
 		var orderDetails []models.OrderDetail
 		for _, detail := range req.Order.List {
@@ -102,26 +108,24 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 				Amount:    float64(detail.Amount),
 			}
 
-			total += detail.Amount * float32(detail.Number)
-
 			// 将订单详情添加到列表中
 			orderDetails = append(orderDetails, orderDetail)
 		}
 
 		//如果创建失败就返回错误
-		if err = DB.Model(&models.Order{}).Where("id = ?", order.ID).Update("amount = ?", total).Error; err != nil {
-			return err
-		}
-
 		if err = DB.Create(&orderDetails).Error; err != nil {
 			return err
 		}
 
+		current := time.Now()
+
+		task := time.Now().Add(15 * time.Minute)
+
 		orderStatusLog := models.OrderStatusLog{
-			OrderId:     int(req.Order.OrderId),
+			OrderId:     int(order.ID),
 			Status:      0, // 初始状态为待付款
-			StartTime:   time.Now(),
-			EndTime:     time.Now().Add(15 * time.Minute),
+			StartTime:   &current,
+			EndTime:     &task,
 			Description: "订单创建，待付款",
 		}
 
@@ -329,9 +333,9 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 
 	//创建新状态
 	newStatus := models.OrderStatusLog{
-		StartTime:   currentTime,
+		StartTime:   &currentTime,
 		Status:      Status,
-		EndTime:     time.Now().Add(8760 * 100 * time.Hour),
+		EndTime:     nil,
 		Description: Description,
 	}
 
@@ -403,7 +407,7 @@ func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.Remi
 	}
 
 	//提醒商家发货逻辑
-	err = util.SendMessage("order.direct", "message", "orderId:"+strconv.Itoa(int(req.OrderId))+",shopId"+strconv.Itoa(int(order.ShopId)), 1)
+	err = util.SendMessage("order.direct", "message", "orderId:"+strconv.Itoa(int(req.OrderId))+",shopId:"+strconv.Itoa(int(order.ShopId)), 1)
 
 	if err != nil {
 		return nil, err
@@ -429,7 +433,7 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 	var status models.OrderStatusLog
 
 	//查询订单日志失败,返回异常
-	if err = DB.Where("order_id = ?", req.OrderId).Last(status).Error; err != nil {
+	if err = DB.Where("order_id = ?", req.OrderId).Last(&status).Error; err != nil {
 		log.Println(err)
 		return nil, SearchOrderLogError
 	}
@@ -444,12 +448,11 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 
 	//创建完成状态
 	newStatus := models.OrderStatusLog{
-		StartTime:   currentTime,
+		StartTime:   &currentTime,
 		Status:      5,
-		EndTime:     time.Now().Add(8760 * 100 * time.Hour),
+		EndTime:     nil,
 		Description: "已完成",
 	}
-
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
 		//将原有状态的结束时间修改
