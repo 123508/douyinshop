@@ -57,6 +57,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"GetDefaultAddress": kitex.NewMethodInfo(
+		getDefaultAddressHandler,
+		newGetDefaultAddressArgs,
+		newGetDefaultAddressResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 }
 
 var (
@@ -1041,6 +1048,159 @@ func (p *GetAddressInfoResult) GetResult() interface{} {
 	return p.Success
 }
 
+func getDefaultAddressHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(address.GetDefaultAddressReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(address.AddressService).GetDefaultAddress(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *GetDefaultAddressArgs:
+		success, err := handler.(address.AddressService).GetDefaultAddress(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*GetDefaultAddressResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newGetDefaultAddressArgs() interface{} {
+	return &GetDefaultAddressArgs{}
+}
+
+func newGetDefaultAddressResult() interface{} {
+	return &GetDefaultAddressResult{}
+}
+
+type GetDefaultAddressArgs struct {
+	Req *address.GetDefaultAddressReq
+}
+
+func (p *GetDefaultAddressArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(address.GetDefaultAddressReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *GetDefaultAddressArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *GetDefaultAddressArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *GetDefaultAddressArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *GetDefaultAddressArgs) Unmarshal(in []byte) error {
+	msg := new(address.GetDefaultAddressReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var GetDefaultAddressArgs_Req_DEFAULT *address.GetDefaultAddressReq
+
+func (p *GetDefaultAddressArgs) GetReq() *address.GetDefaultAddressReq {
+	if !p.IsSetReq() {
+		return GetDefaultAddressArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *GetDefaultAddressArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *GetDefaultAddressArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type GetDefaultAddressResult struct {
+	Success *address.GetDefaultAddressResp
+}
+
+var GetDefaultAddressResult_Success_DEFAULT *address.GetDefaultAddressResp
+
+func (p *GetDefaultAddressResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(address.GetDefaultAddressResp)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *GetDefaultAddressResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *GetDefaultAddressResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *GetDefaultAddressResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *GetDefaultAddressResult) Unmarshal(in []byte) error {
+	msg := new(address.GetDefaultAddressResp)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *GetDefaultAddressResult) GetSuccess() *address.GetDefaultAddressResp {
+	if !p.IsSetSuccess() {
+		return GetDefaultAddressResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *GetDefaultAddressResult) SetSuccess(x interface{}) {
+	p.Success = x.(*address.GetDefaultAddressResp)
+}
+
+func (p *GetDefaultAddressResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *GetDefaultAddressResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -1106,6 +1266,16 @@ func (p *kClient) GetAddressInfo(ctx context.Context, Req *address.GetAddressInf
 	_args.Req = Req
 	var _result GetAddressInfoResult
 	if err = p.c.Call(ctx, "GetAddressInfo", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetDefaultAddress(ctx context.Context, Req *address.GetDefaultAddressReq) (r *address.GetDefaultAddressResp, err error) {
+	var _args GetDefaultAddressArgs
+	_args.Req = Req
+	var _result GetDefaultAddressResult
+	if err = p.c.Call(ctx, "GetDefaultAddress", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -9,6 +9,8 @@ service AiService {
     rpc OrderQuery(OrderQueryReq) returns (OrderQueryResp) {}
     // 根据用户id和用户要求自动创建订单并返回订单号
     rpc AutoPlaceOrder(AutoPlaceOrderReq) returns (AutoPlaceOrderResp) {}
+    // AI聊天
+    rpc AIChat(AIChatReq) returns (AIChatResp) {}
 }
 
 message OrderQueryReq {
@@ -26,4 +28,12 @@ message AutoPlaceOrderReq {
 
 message AutoPlaceOrderResp {
     string order_id = 1;
+}
+
+message AIChatReq {
+    string question = 1;
+}
+
+message AIChatResp {
+    string answer = 1;
 }
