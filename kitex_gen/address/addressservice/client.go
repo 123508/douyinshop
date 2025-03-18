@@ -17,6 +17,7 @@ type Client interface {
 	UpdateAddress(ctx context.Context, Req *address.UpdateAddressReq, callOptions ...callopt.Option) (r *address.UpdateAddressResp, err error)
 	SetDefaultAddress(ctx context.Context, Req *address.SetDefaultAddressReq, callOptions ...callopt.Option) (r *address.SetDefaultAddressResp, err error)
 	GetAddressInfo(ctx context.Context, Req *address.GetAddressInfoReq, callOptions ...callopt.Option) (r *address.GetAddressInfoResp, err error)
+	GetDefaultAddress(ctx context.Context, Req *address.GetDefaultAddressReq, callOptions ...callopt.Option) (r *address.GetDefaultAddressResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -76,4 +77,9 @@ func (p *kAddressServiceClient) SetDefaultAddress(ctx context.Context, Req *addr
 func (p *kAddressServiceClient) GetAddressInfo(ctx context.Context, Req *address.GetAddressInfoReq, callOptions ...callopt.Option) (r *address.GetAddressInfoResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetAddressInfo(ctx, Req)
+}
+
+func (p *kAddressServiceClient) GetDefaultAddress(ctx context.Context, Req *address.GetDefaultAddressReq, callOptions ...callopt.Option) (r *address.GetDefaultAddressResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetDefaultAddress(ctx, Req)
 }

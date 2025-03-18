@@ -13,6 +13,7 @@ import (
 type Client interface {
 	OrderQuery(ctx context.Context, Req *ai.OrderQueryReq, callOptions ...callopt.Option) (r *ai.OrderQueryResp, err error)
 	AutoPlaceOrder(ctx context.Context, Req *ai.AutoPlaceOrderReq, callOptions ...callopt.Option) (r *ai.AutoPlaceOrderResp, err error)
+	AIChat(ctx context.Context, Req *ai.AIChatReq, callOptions ...callopt.Option) (r *ai.AIChatResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -52,4 +53,9 @@ func (p *kAiServiceClient) OrderQuery(ctx context.Context, Req *ai.OrderQueryReq
 func (p *kAiServiceClient) AutoPlaceOrder(ctx context.Context, Req *ai.AutoPlaceOrderReq, callOptions ...callopt.Option) (r *ai.AutoPlaceOrderResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.AutoPlaceOrder(ctx, Req)
+}
+
+func (p *kAiServiceClient) AIChat(ctx context.Context, Req *ai.AIChatReq, callOptions ...callopt.Option) (r *ai.AIChatResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.AIChat(ctx, Req)
 }

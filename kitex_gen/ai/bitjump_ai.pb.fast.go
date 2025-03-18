@@ -122,6 +122,56 @@ func (x *AutoPlaceOrderResp) fastReadField1(buf []byte, _type int8) (offset int,
 	return offset, err
 }
 
+func (x *AIChatReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_AIChatReq[number], err)
+}
+
+func (x *AIChatReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Question, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *AIChatResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_AIChatResp[number], err)
+}
+
+func (x *AIChatResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Answer, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
 func (x *OrderQueryReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -192,6 +242,38 @@ func (x *AutoPlaceOrderResp) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 1, x.GetOrderId())
+	return offset
+}
+
+func (x *AIChatReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *AIChatReq) fastWriteField1(buf []byte) (offset int) {
+	if x.Question == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 1, x.GetQuestion())
+	return offset
+}
+
+func (x *AIChatResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *AIChatResp) fastWriteField1(buf []byte) (offset int) {
+	if x.Answer == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 1, x.GetAnswer())
 	return offset
 }
 
@@ -268,6 +350,38 @@ func (x *AutoPlaceOrderResp) sizeField1() (n int) {
 	return n
 }
 
+func (x *AIChatReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *AIChatReq) sizeField1() (n int) {
+	if x.Question == "" {
+		return n
+	}
+	n += fastpb.SizeString(1, x.GetQuestion())
+	return n
+}
+
+func (x *AIChatResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *AIChatResp) sizeField1() (n int) {
+	if x.Answer == "" {
+		return n
+	}
+	n += fastpb.SizeString(1, x.GetAnswer())
+	return n
+}
+
 var fieldIDToName_OrderQueryReq = map[int32]string{
 	1: "OrderId",
 }
@@ -283,4 +397,12 @@ var fieldIDToName_AutoPlaceOrderReq = map[int32]string{
 
 var fieldIDToName_AutoPlaceOrderResp = map[int32]string{
 	1: "OrderId",
+}
+
+var fieldIDToName_AIChatReq = map[int32]string{
+	1: "Question",
+}
+
+var fieldIDToName_AIChatResp = map[int32]string{
+	1: "Answer",
 }

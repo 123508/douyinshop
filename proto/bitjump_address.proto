@@ -17,6 +17,8 @@ service AddressService {
     rpc SetDefaultAddress(SetDefaultAddressReq) returns (SetDefaultAddressResp) {}
     // 获取指定地址
     rpc GetAddressInfo(GetAddressInfoReq) returns (GetAddressInfoResp){}
+    // 获取默认地址
+    rpc GetDefaultAddress(GetDefaultAddressReq) returns (GetDefaultAddressResp){}
 }
 
 message Address {
@@ -89,5 +91,13 @@ message GetAddressInfoReq{
 }
 
 message GetAddressInfoResp{
+    Address addr=1;
+}
+
+message GetDefaultAddressReq{
+    uint32 user_id=1;
+}
+
+message GetDefaultAddressResp{
     Address addr=1;
 }

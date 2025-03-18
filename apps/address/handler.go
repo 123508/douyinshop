@@ -333,3 +333,9 @@ func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.Ge
 		AddressId:     uint32(addr.ID),
 	}}, nil
 }
+
+// GetDefaultAddress implements the AddressServiceImpl interface.
+func (s *AddressServiceImpl) GetDefaultAddress(ctx context.Context, req *address.GetDefaultAddressReq) (resp *address.GetDefaultAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}

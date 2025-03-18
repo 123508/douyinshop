@@ -223,3 +223,9 @@ func validateRecommendation(rec *aiutil.ProductRecommendation) error {
 	//return nil
 	return nil
 }
+
+// AIChat implements the AiServiceImpl interface.
+func (s *AiServiceImpl) AIChat(ctx context.Context, req *ai.AIChatReq) (resp *ai.AIChatResp, err error) {
+	// TODO: Your code here...
+	return
+}

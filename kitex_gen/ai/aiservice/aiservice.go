@@ -29,6 +29,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"AIChat": kitex.NewMethodInfo(
+		aIChatHandler,
+		newAIChatArgs,
+		newAIChatResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 }
 
 var (
@@ -401,6 +408,159 @@ func (p *AutoPlaceOrderResult) GetResult() interface{} {
 	return p.Success
 }
 
+func aIChatHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(ai.AIChatReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(ai.AiService).AIChat(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *AIChatArgs:
+		success, err := handler.(ai.AiService).AIChat(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*AIChatResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newAIChatArgs() interface{} {
+	return &AIChatArgs{}
+}
+
+func newAIChatResult() interface{} {
+	return &AIChatResult{}
+}
+
+type AIChatArgs struct {
+	Req *ai.AIChatReq
+}
+
+func (p *AIChatArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(ai.AIChatReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *AIChatArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *AIChatArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *AIChatArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *AIChatArgs) Unmarshal(in []byte) error {
+	msg := new(ai.AIChatReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var AIChatArgs_Req_DEFAULT *ai.AIChatReq
+
+func (p *AIChatArgs) GetReq() *ai.AIChatReq {
+	if !p.IsSetReq() {
+		return AIChatArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *AIChatArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *AIChatArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type AIChatResult struct {
+	Success *ai.AIChatResp
+}
+
+var AIChatResult_Success_DEFAULT *ai.AIChatResp
+
+func (p *AIChatResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(ai.AIChatResp)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *AIChatResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *AIChatResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *AIChatResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *AIChatResult) Unmarshal(in []byte) error {
+	msg := new(ai.AIChatResp)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *AIChatResult) GetSuccess() *ai.AIChatResp {
+	if !p.IsSetSuccess() {
+		return AIChatResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *AIChatResult) SetSuccess(x interface{}) {
+	p.Success = x.(*ai.AIChatResp)
+}
+
+func (p *AIChatResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *AIChatResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -426,6 +586,16 @@ func (p *kClient) AutoPlaceOrder(ctx context.Context, Req *ai.AutoPlaceOrderReq)
 	_args.Req = Req
 	var _result AutoPlaceOrderResult
 	if err = p.c.Call(ctx, "AutoPlaceOrder", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) AIChat(ctx context.Context, Req *ai.AIChatReq) (r *ai.AIChatResp, err error) {
+	var _args AIChatArgs
+	_args.Req = Req
+	var _result AIChatResult
+	if err = p.c.Call(ctx, "AIChat", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
