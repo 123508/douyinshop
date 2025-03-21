@@ -8,26 +8,24 @@ message Order{
   uint32 user_id=1;
   string number=2; // 订单号
   repeated Status  status=3;
-  uint64 address_book_id=4; // 收货地址
+  uint32 address_book_id=4; // 收货地址
   int32 pay_method=5;
-  int32 pay_status=6;
   float amount=7;
   string remark=8;
   string phone=9;
   string address=10; // 发货地址
   string username=11;
   string consignee=12;
-  string cancel_reason=13;
-  string rejection_reason=14;
-  uint32 ID=15;
-  uint32 shopId=16;
-  uint32 finalStatus=17;
+  uint32 ID=13;
+  uint32 shopId=14;
+  uint32 finalStatus=15;
 }
 
 message Status{
   string StartTime=1;
   string EndTime=2;
   uint32 Status=3;
+  string Description=4;
 }
 
 message OrderDetail{

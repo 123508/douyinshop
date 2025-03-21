@@ -36,7 +36,7 @@ func GetOrderInfo(orderId uint32) (*models.Order, error) {
 
 	// 如果没有找到对应订单，返回错误信息
 	if err := DB.Where("id = ?", orderId).First(&order).Error; err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil, SearchOrderError
 	}
 	return &order, nil
@@ -71,23 +71,23 @@ var CompletionOrderError = &errorno.BasicMessageError{Code: 400, Message: "无�
 // Submit implements the OrderUserServiceImpl interface.
 // 用户提交订单
 func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderSubmitReq) (resp *userOrder.OrderSubmitResp, err error) {
-
 	// 创建订单对象
 	var order models.Order
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
 		order.Number = uuid.New().String() // 使用 UUID 生成唯一的订单号
-		order.UserId = req.UserId
-		order.AddressBookId = int(req.AddressBookId)
-		order.PayMethod = int(req.PayMethod)
+		order.UserId = ctx.Value("userId").(uint32)
+		order.AddressBookId = req.AddressBookId
+		order.PayMethod = req.PayMethod
 		order.Remark = req.Remark
 		order.ShopId = req.Order.ShopId
+		order.FinalStatus = 0
 
-		var total float64
+		var total float32
 
 		for _, detail := range req.Order.List {
-			total += float64(detail.Amount) * float64(detail.Number)
+			total += detail.Amount * float32(detail.Number)
 		}
 
 		order.Amount = total
@@ -102,10 +102,10 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 			orderDetail := models.OrderDetail{
 				Name:      detail.Name,
 				Image:     detail.Image,
-				OrderId:   int(order.ID),
-				ProductId: int(detail.ProductId),
-				Number:    int(detail.Number),
-				Amount:    float64(detail.Amount),
+				OrderId:   order.ID,
+				ProductId: detail.ProductId,
+				Number:    detail.Number,
+				Amount:    detail.Amount,
 			}
 
 			// 将订单详情添加到列表中
@@ -122,7 +122,7 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 		task := time.Now().Add(15 * time.Minute)
 
 		orderStatusLog := models.OrderStatusLog{
-			OrderId:     int(order.ID),
+			OrderId:     order.ID,
 			Status:      0, // 初始状态为待付款
 			StartTime:   &current,
 			EndTime:     &task,
@@ -144,9 +144,9 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 
 	// 构建返回对象
 	resp = &userOrder.OrderSubmitResp{
-		OrderId:     uint32(order.ID),
+		OrderId:     order.ID,
 		Number:      order.Number,
-		OrderAmount: float32(order.Amount),
+		OrderAmount: order.Amount,
 	}
 
 	return resp, nil
@@ -164,7 +164,7 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 
 	// 查询用户订单数据
 	var orders []models.Order
-	err = DB.Where("user_id = ?", req.UserId).
+	err = DB.Where("user_id = ?", ctx.Value("userId").(uint32)).
 		Offset(int(offset)).
 		Limit(int(req.PageSize)).
 		Find(&orders).Error
@@ -177,29 +177,13 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 	// 构建订单响应数据
 	orderList := make([]*order_common.OrderResp, len(orders))
 	for i, order := range orders {
-		// 根据订单号查询订单详情
-		var orderDetails []models.OrderDetail
-
-		if err = DB.Where("order_id = ?", order.ID).Find(&orderDetails).Error; err != nil {
-			log.Println(err)
-			return nil, SearchOrderError
-		}
-
-		var orderLog models.OrderStatusLog
-
-		if err = DB.Where("order_id = ?", order.ID).Last(&orderLog).Error; err != nil {
-			log.Println(err)
-			return nil, SearchOrderLogError
-		}
-
 		// 构建订单响应
 		orderResp := &order_common.OrderResp{
 			Order: &order_common.Order{
-				ID:          uint32(order.ID),
+				ID:          order.ID,
 				Number:      order.Number,
-				PayStatus:   int32(order.PayStatus),
-				Amount:      float32(order.Amount),
-				FinalStatus: uint32(orderLog.Status),
+				Amount:      order.Amount,
+				FinalStatus: order.FinalStatus,
 			},
 		}
 		orderList[i] = orderResp
@@ -244,9 +228,10 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 
 	for _, k := range orderLogs {
 		statusList = append(statusList, &order_common.Status{
-			StartTime: k.StartTime.String(),
-			Status:    uint32(k.Status),
-			EndTime:   k.EndTime.String(),
+			StartTime:   k.StartTime.String(),
+			Status:      k.Status,
+			EndTime:     k.EndTime.String(),
+			Description: k.Description,
 		})
 	}
 
@@ -254,10 +239,9 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 	orderCommon := &order_common.Order{
 		Number:        order.Number,
 		UserId:        order.UserId,
-		PayMethod:     int32(order.PayMethod),
-		PayStatus:     int32(order.PayStatus),
-		AddressBookId: uint64(order.AddressBookId),
-		Amount:        float32(order.Amount),
+		PayMethod:     order.PayMethod,
+		AddressBookId: order.AddressBookId,
+		Amount:        order.Amount,
 		Remark:        order.Remark,
 		Phone:         order.Phone,
 		Address:       order.Address,
@@ -272,10 +256,10 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 		orderDetail = append(orderDetail, &order_common.OrderDetail{
 			Name:      k.Name,
 			Image:     k.Image,
-			OrderId:   uint32(k.OrderId),
-			ProductId: uint32(k.ProductId),
-			Number:    uint32(k.Number),
-			Amount:    float32(k.Amount),
+			OrderId:   k.OrderId,
+			ProductId: k.ProductId,
+			Number:    k.Number,
+			Amount:    k.Amount,
 		})
 	}
 
@@ -294,7 +278,7 @@ func (s *OrderUserServiceImpl) Detail(ctx context.Context, req *order_common.Ord
 func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.CancelReq) (resp *order_common.Empty, err error) {
 
 	//查询要取消的订单
-	_, err = GetOrderInfo(req.OrderId)
+	order, err := GetOrderInfo(req.OrderId)
 
 	//查询要取消的订单失败
 	if err != nil {
@@ -314,16 +298,16 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 	currentTime := time.Now()
 
 	//订单状态错误
-	if status.Status > 5 {
+	if order.FinalStatus > 5 {
 		return nil, UnableChangeStatusError
 	}
 
 	//决定下一个状态
-	var Status uint
+	var Status uint32
 
 	var Description string
 
-	if status.Status == 0 {
+	if order.FinalStatus == 0 {
 		Status = 6
 		Description = "已取消"
 	} else {
@@ -352,6 +336,11 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 			return err
 		}
 
+		//为修改订单为取消状态
+		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", newStatus.Status).Error; err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -372,23 +361,13 @@ func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.Remi
 	var order models.Order
 
 	//查询订单失败,返回异常
-	if err = DB.Where("id = ? AND user_id = ?", req.OrderId, req.UserId).First(&order).Error; err != nil {
+	if err = DB.Where("id = ? AND user_id = ?", req.OrderId, ctx.Value("userId").(uint32)).First(&order).Error; err != nil {
 		log.Println(err)
 		return nil, SearchOrderError
 	}
 
-	//查询订单状态信息
-	var status models.OrderStatusLog
-
-	//查询失败,返回异常
-	if err = DB.Where("order_id = ?", req.OrderId).Last(&status).Error; err != nil {
-		log.Println(err)
-		return nil, SearchOrderLogError
-	}
-
 	//如果状态不是商家已接单就返回错误
-
-	switch status.Status {
+	switch order.FinalStatus {
 	case 0:
 		return nil, NotPayReminderError
 	case 1, 2: //只允许这两个状态通行
@@ -422,7 +401,7 @@ func (s *OrderUserServiceImpl) Reminder(ctx context.Context, req *userOrder.Remi
 // 步骤:查询要完成的订单->查询不到，返回错误，否则继续->判断该订单的status是否为4,否返回错误,是继续->修改订单日志存储状态，如果报错就返回错误->返回正确响应
 func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.CompleteReq) (resp *order_common.Empty, err error) {
 	// 查询订单信息
-	_, err = GetOrderInfo(req.OrderId)
+	order, err := GetOrderInfo(req.OrderId)
 
 	//查询不到订单信息,返回异常
 	if err != nil {
@@ -439,7 +418,7 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 	}
 
 	//如果订单状态不为待派送就无法收货
-	if status.Status != 4 && status.Status != 3 {
+	if order.FinalStatus != 4 && order.FinalStatus != 3 {
 		return nil, UnableChangeStatusError
 	}
 
@@ -462,6 +441,11 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 
 		//插入新的状态
 		if err = DB.Create(&newStatus).Error; err != nil {
+			return err
+		}
+
+		//为修改订单为完成状态
+		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", newStatus.Status).Error; err != nil {
 			return err
 		}
 

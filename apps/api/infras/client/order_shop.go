@@ -61,18 +61,11 @@ func GetOrderList(ctx context.Context, ShopId uint32, Page uint32, PageSize uint
 	for i, order := range resp.List {
 		orderListResp.List[i] = &order_common.OrderResp{
 			Order: &order_common.Order{
-				UserId:        order.Order.UserId,
-				Number:        order.Order.Number,
-				Status:        order.Order.Status,
-				PayMethod:     order.Order.PayMethod,
-				Amount:        order.Order.Amount,
-				AddressBookId: order.Order.AddressBookId,
-				Remark:        order.Order.Remark,
-				Phone:         order.Order.Phone,
-				Address:       order.Order.Address,
-				Username:      order.Order.Username,
-				Consignee:     order.Order.Consignee,
-				ShopId:        order.Order.ShopId,
+				Number:      order.Order.Number,
+				PayMethod:   order.Order.PayMethod,
+				FinalStatus: order.Order.FinalStatus,
+				Amount:      order.Order.Amount,
+				Phone:       order.Order.Phone,
 			},
 		}
 	}

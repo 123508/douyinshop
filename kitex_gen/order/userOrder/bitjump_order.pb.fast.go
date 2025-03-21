@@ -64,7 +64,7 @@ func (x *OrderSubmitReq) fastReadField1(buf []byte, _type int8) (offset int, err
 }
 
 func (x *OrderSubmitReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.AddressBookId, offset, err = fastpb.ReadInt32(buf, _type)
+	x.AddressBookId, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -338,7 +338,7 @@ func (x *OrderSubmitReq) fastWriteField2(buf []byte) (offset int) {
 	if x.AddressBookId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteInt32(buf[offset:], 2, x.GetAddressBookId())
+	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetAddressBookId())
 	return offset
 }
 
@@ -562,7 +562,7 @@ func (x *OrderSubmitReq) sizeField2() (n int) {
 	if x.AddressBookId == 0 {
 		return n
 	}
-	n += fastpb.SizeInt32(2, x.GetAddressBookId())
+	n += fastpb.SizeUint32(2, x.GetAddressBookId())
 	return n
 }
 

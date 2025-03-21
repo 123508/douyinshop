@@ -39,11 +39,6 @@ func (x *Order) FastRead(buf []byte, _type int8, number int32) (offset int, err 
 		if err != nil {
 			goto ReadFieldError
 		}
-	case 6:
-		offset, err = x.fastReadField6(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
 	case 7:
 		offset, err = x.fastReadField7(buf, _type)
 		if err != nil {
@@ -71,16 +66,6 @@ func (x *Order) FastRead(buf []byte, _type int8, number int32) (offset int, err 
 		}
 	case 12:
 		offset, err = x.fastReadField12(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	case 13:
-		offset, err = x.fastReadField13(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	case 14:
-		offset, err = x.fastReadField14(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -133,17 +118,12 @@ func (x *Order) fastReadField3(buf []byte, _type int8) (offset int, err error) {
 }
 
 func (x *Order) fastReadField4(buf []byte, _type int8) (offset int, err error) {
-	x.AddressBookId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.AddressBookId, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
 func (x *Order) fastReadField5(buf []byte, _type int8) (offset int, err error) {
 	x.PayMethod, offset, err = fastpb.ReadInt32(buf, _type)
-	return offset, err
-}
-
-func (x *Order) fastReadField6(buf []byte, _type int8) (offset int, err error) {
-	x.PayStatus, offset, err = fastpb.ReadInt32(buf, _type)
 	return offset, err
 }
 
@@ -174,16 +154,6 @@ func (x *Order) fastReadField11(buf []byte, _type int8) (offset int, err error) 
 
 func (x *Order) fastReadField12(buf []byte, _type int8) (offset int, err error) {
 	x.Consignee, offset, err = fastpb.ReadString(buf, _type)
-	return offset, err
-}
-
-func (x *Order) fastReadField13(buf []byte, _type int8) (offset int, err error) {
-	x.CancelReason, offset, err = fastpb.ReadString(buf, _type)
-	return offset, err
-}
-
-func (x *Order) fastReadField14(buf []byte, _type int8) (offset int, err error) {
-	x.RejectionReason, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
@@ -219,6 +189,11 @@ func (x *Status) FastRead(buf []byte, _type int8, number int32) (offset int, err
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -244,6 +219,11 @@ func (x *Status) fastReadField2(buf []byte, _type int8) (offset int, err error) 
 
 func (x *Status) fastReadField3(buf []byte, _type int8) (offset int, err error) {
 	x.Status, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *Status) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	x.Description, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
@@ -484,15 +464,12 @@ func (x *Order) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField3(buf[offset:])
 	offset += x.fastWriteField4(buf[offset:])
 	offset += x.fastWriteField5(buf[offset:])
-	offset += x.fastWriteField6(buf[offset:])
 	offset += x.fastWriteField7(buf[offset:])
 	offset += x.fastWriteField8(buf[offset:])
 	offset += x.fastWriteField9(buf[offset:])
 	offset += x.fastWriteField10(buf[offset:])
 	offset += x.fastWriteField11(buf[offset:])
 	offset += x.fastWriteField12(buf[offset:])
-	offset += x.fastWriteField13(buf[offset:])
-	offset += x.fastWriteField14(buf[offset:])
 	offset += x.fastWriteField15(buf[offset:])
 	offset += x.fastWriteField16(buf[offset:])
 	offset += x.fastWriteField17(buf[offset:])
@@ -529,7 +506,7 @@ func (x *Order) fastWriteField4(buf []byte) (offset int) {
 	if x.AddressBookId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetAddressBookId())
+	offset += fastpb.WriteUint32(buf[offset:], 4, x.GetAddressBookId())
 	return offset
 }
 
@@ -538,14 +515,6 @@ func (x *Order) fastWriteField5(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteInt32(buf[offset:], 5, x.GetPayMethod())
-	return offset
-}
-
-func (x *Order) fastWriteField6(buf []byte) (offset int) {
-	if x.PayStatus == 0 {
-		return offset
-	}
-	offset += fastpb.WriteInt32(buf[offset:], 6, x.GetPayStatus())
 	return offset
 }
 
@@ -597,22 +566,6 @@ func (x *Order) fastWriteField12(buf []byte) (offset int) {
 	return offset
 }
 
-func (x *Order) fastWriteField13(buf []byte) (offset int) {
-	if x.CancelReason == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 13, x.GetCancelReason())
-	return offset
-}
-
-func (x *Order) fastWriteField14(buf []byte) (offset int) {
-	if x.RejectionReason == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 14, x.GetRejectionReason())
-	return offset
-}
-
 func (x *Order) fastWriteField15(buf []byte) (offset int) {
 	if x.ID == 0 {
 		return offset
@@ -644,6 +597,7 @@ func (x *Status) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
 	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
 	return offset
 }
 
@@ -668,6 +622,14 @@ func (x *Status) fastWriteField3(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetStatus())
+	return offset
+}
+
+func (x *Status) fastWriteField4(buf []byte) (offset int) {
+	if x.Description == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 4, x.GetDescription())
 	return offset
 }
 
@@ -845,15 +807,12 @@ func (x *Order) Size() (n int) {
 	n += x.sizeField3()
 	n += x.sizeField4()
 	n += x.sizeField5()
-	n += x.sizeField6()
 	n += x.sizeField7()
 	n += x.sizeField8()
 	n += x.sizeField9()
 	n += x.sizeField10()
 	n += x.sizeField11()
 	n += x.sizeField12()
-	n += x.sizeField13()
-	n += x.sizeField14()
 	n += x.sizeField15()
 	n += x.sizeField16()
 	n += x.sizeField17()
@@ -890,7 +849,7 @@ func (x *Order) sizeField4() (n int) {
 	if x.AddressBookId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(4, x.GetAddressBookId())
+	n += fastpb.SizeUint32(4, x.GetAddressBookId())
 	return n
 }
 
@@ -899,14 +858,6 @@ func (x *Order) sizeField5() (n int) {
 		return n
 	}
 	n += fastpb.SizeInt32(5, x.GetPayMethod())
-	return n
-}
-
-func (x *Order) sizeField6() (n int) {
-	if x.PayStatus == 0 {
-		return n
-	}
-	n += fastpb.SizeInt32(6, x.GetPayStatus())
 	return n
 }
 
@@ -958,22 +909,6 @@ func (x *Order) sizeField12() (n int) {
 	return n
 }
 
-func (x *Order) sizeField13() (n int) {
-	if x.CancelReason == "" {
-		return n
-	}
-	n += fastpb.SizeString(13, x.GetCancelReason())
-	return n
-}
-
-func (x *Order) sizeField14() (n int) {
-	if x.RejectionReason == "" {
-		return n
-	}
-	n += fastpb.SizeString(14, x.GetRejectionReason())
-	return n
-}
-
 func (x *Order) sizeField15() (n int) {
 	if x.ID == 0 {
 		return n
@@ -1005,6 +940,7 @@ func (x *Status) Size() (n int) {
 	n += x.sizeField1()
 	n += x.sizeField2()
 	n += x.sizeField3()
+	n += x.sizeField4()
 	return n
 }
 
@@ -1029,6 +965,14 @@ func (x *Status) sizeField3() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint32(3, x.GetStatus())
+	return n
+}
+
+func (x *Status) sizeField4() (n int) {
+	if x.Description == "" {
+		return n
+	}
+	n += fastpb.SizeString(4, x.GetDescription())
 	return n
 }
 
@@ -1203,15 +1147,12 @@ var fieldIDToName_Order = map[int32]string{
 	3:  "Status",
 	4:  "AddressBookId",
 	5:  "PayMethod",
-	6:  "PayStatus",
 	7:  "Amount",
 	8:  "Remark",
 	9:  "Phone",
 	10: "Address",
 	11: "Username",
 	12: "Consignee",
-	13: "CancelReason",
-	14: "RejectionReason",
 	15: "ID",
 	16: "ShopId",
 	17: "FinalStatus",
@@ -1221,6 +1162,7 @@ var fieldIDToName_Status = map[int32]string{
 	1: "StartTime",
 	2: "EndTime",
 	3: "Status",
+	4: "Description",
 }
 
 var fieldIDToName_OrderDetail = map[int32]string{
