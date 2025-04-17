@@ -49,6 +49,7 @@ var SubmitError = &errorno.BasicMessageError{Code: 500, Message: "提交错误"}
 var ChargeError = &errorno.BasicMessageError{Code: 417, Message: "支付异常"}
 
 // Checkout implements the CheckoutServiceImpl interface.
+// 结算接口
 func (s *CheckoutServiceImpl) Checkout(ctx context.Context, req *checkout.CheckoutReq) (resp *checkout.CheckoutResp, err error) {
 	//get cart
 	cartResult, err := CartClient.GetCart(s.ctx, &cart.GetCartReq{UserId: req.UserId})

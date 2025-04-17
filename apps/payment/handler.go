@@ -22,6 +22,7 @@ var NotSupportWechatPay = &errorno.BasicMessageError{Code: 400, Message: "暂时
 type PaymentServiceImpl struct{}
 
 // Charge implements the PaymentServiceImpl interface.
+// 支付接口
 func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq) (resp *payment.ChargeResp, err error) {
 	var order models.Order
 	if err = database.Model(&models.Order{}).Where("user_id = ? and number = ?", req.UserId, req.OrderId).First(&order).Error; err != nil {
@@ -81,7 +82,7 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 		}
 		var orderDetail models.OrderDetail
 		result = database.Model(&models.OrderDetail{}).Where("order_id = ?", Id).First(&orderDetail)
-		Id = orderDetail.ID
+		Id = uint32(orderDetail.ID)
 
 		// OrderStatusLog表的更改:改一个，加一个
 		result = database.Model(&models.OrderStatusLog{}).Where("order_detail_id = ? AND status = ?", Id, 0).Update("end_time", time.Now())
@@ -107,6 +108,7 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 }
 
 // Notify implements the PaymentServiceImpl interface.
+// 通知接口
 func (s *PaymentServiceImpl) Notify(ctx context.Context, req *payment.NotifyReq) (resp *payment.NotifyResp, err error) {
 	orderId := req.OrderId
 	transactionId := req.TransactionId
@@ -128,7 +130,7 @@ func (s *PaymentServiceImpl) Notify(ctx context.Context, req *payment.NotifyReq)
 	}
 	var orderDetail models.OrderDetail
 	result = database.Model(&models.OrderDetail{}).Where("order_id = ?", Id).First(&orderDetail)
-	Id = orderDetail.ID
+	Id = uint32(orderDetail.ID)
 
 	// OrderStatusLog表的更改:改一个，加一个
 	result = database.Model(&models.OrderStatusLog{}).Where("order_detail_id = ? AND status = ?", Id, 0).Update("end_time", time.Now())

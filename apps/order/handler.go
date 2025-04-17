@@ -83,6 +83,7 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 		order.Remark = req.Remark
 		order.ShopId = req.Order.ShopId
 		order.FinalStatus = 0
+		order.FinalVersion = 0
 
 		var total float32
 
@@ -127,6 +128,7 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 			StartTime:   &current,
 			EndTime:     &task,
 			Description: "订单创建，待付款",
+			Version:     0,
 		}
 
 		// 保存状态日志
@@ -289,7 +291,7 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 	var status models.OrderStatusLog
 
 	//查询订单日志异常
-	if err = DB.Where("order_id = ?", req.OrderId).Last(&status).Error; err != nil {
+	if err = DB.Where("order_id = ? and version = ?", req.OrderId, order.FinalVersion).Last(&status).Error; err != nil {
 		log.Println(err)
 		return nil, SearchOrderLogError
 	}
@@ -321,6 +323,7 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 		Status:      Status,
 		EndTime:     nil,
 		Description: Description,
+		Version:     status.Version + 1,
 	}
 
 	// 更新订单详情的状态为“已取消”并记录到 OrderStatusLog
@@ -337,7 +340,7 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 		}
 
 		//为修改订单为取消状态
-		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", newStatus.Status).Error; err != nil {
+		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", newStatus.Status).Update("final_version", newStatus.Version).Error; err != nil {
 			return err
 		}
 
@@ -412,7 +415,7 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 	var status models.OrderStatusLog
 
 	//查询订单日志失败,返回异常
-	if err = DB.Where("order_id = ?", req.OrderId).Last(&status).Error; err != nil {
+	if err = DB.Where("order_id = ? and version = ?", req.OrderId, order.FinalVersion).Last(&status).Error; err != nil {
 		log.Println(err)
 		return nil, SearchOrderLogError
 	}
@@ -427,10 +430,10 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 
 	//创建完成状态
 	newStatus := models.OrderStatusLog{
-		StartTime:   &currentTime,
-		Status:      5,
-		EndTime:     nil,
-		Description: "已完成",
+		StartTime: &currentTime,
+		Status:    5,
+		EndTime:   nil,
+		Version:   status.Version + 1,
 	}
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
@@ -445,7 +448,7 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 		}
 
 		//为修改订单为完成状态
-		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", newStatus.Status).Error; err != nil {
+		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", newStatus.Status).Update("final_version", newStatus.Version).Error; err != nil {
 			return err
 		}
 

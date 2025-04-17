@@ -13,6 +13,7 @@ import (
 type ProductCatalogServiceImpl struct{}
 
 // ListProducts implements the ProductCatalogServiceImpl interface.
+// 获取商品列表接口
 // 若分类名为空，则返回所以商品中的第page页的pageSize个商品
 // 若分类名不为空，则返回指定分类名的第page页的pageSize个商品
 // 当商品不存在时，返回空列表
@@ -71,6 +72,7 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 }
 
 // GetProduct implements the ProductCatalogServiceImpl interface.
+// 查找指定商品接口
 // 当商品不存在时，返回nil
 // 当商品存在时，返回商品信息
 func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product.GetProductReq) (resp *product.GetProductResp, err error) {
@@ -105,6 +107,7 @@ func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product
 }
 
 // SearchProducts implements the ProductCatalogServiceImpl interface.
+// 搜索商品接口
 // 当搜索结果为空时，返回空列表
 // 当搜索结果不为空时，返回搜索结果
 func (s *ProductCatalogServiceImpl) SearchProducts(ctx context.Context, req *product.SearchProductsReq) (resp *product.SearchProductsResp, err error) {

@@ -39,7 +39,6 @@ func GetOrderInfo(orderId uint32) (*models.Order, error) {
 }
 
 // 核心方法，用于更新订单的状态
-// TODO 修改
 func (s *OrderBusinessServiceImpl) updateOrderStatus(orderId uint32, status uint32) (err error) {
 
 	order, err := GetOrderInfo(orderId)
@@ -50,7 +49,7 @@ func (s *OrderBusinessServiceImpl) updateOrderStatus(orderId uint32, status uint
 
 	var orderLog models.OrderStatusLog
 
-	if err = DB.Model(&models.OrderStatusLog{}).Where("order = ?", orderId).Last(&orderLog).Error; err != nil {
+	if err = DB.Model(&models.OrderStatusLog{}).Where("order = ? and version = ?", orderId, order.FinalVersion).Last(&orderLog).Error; err != nil {
 		log.Println(err)
 		return SearchOrderLogsError
 	}
@@ -65,9 +64,11 @@ func (s *OrderBusinessServiceImpl) updateOrderStatus(orderId uint32, status uint
 	current := time.Now()
 
 	newOrderLog := models.OrderStatusLog{
-		StartTime: &current,
+		OrderId:   orderId,
 		Status:    status,
+		StartTime: &current,
 		EndTime:   nil,
+		Version:   orderLog.Version + 1,
 	}
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
@@ -83,7 +84,7 @@ func (s *OrderBusinessServiceImpl) updateOrderStatus(orderId uint32, status uint
 		}
 
 		//更新最终状态
-		if err = DB.Model(&models.Order{}).Where("id = ?", orderId).Update("final_status", status).Error; err != nil {
+		if err = DB.Model(&models.Order{}).Where("id = ?", orderId).Update("final_status", newOrderLog.Status).Update("final_version", newOrderLog.Version).Error; err != nil {
 			return err
 		}
 
@@ -114,6 +115,8 @@ var ReceiveOrderError = &errorno.BasicMessageError{Code: 500, Message: "订单�
 var RejectionOrderError = &errorno.BasicMessageError{Code: 500, Message: "拒单失败"}
 
 var ConfirmOrderError = &errorno.BasicMessageError{Code: 500, Message: "确认订单失败"}
+
+var UnableRejectionOrderError = &errorno.BasicMessageError{Code: 500, Message: "当前状态不允许拒单,请注意"}
 
 //凡是只涉及查询功能的不应该上锁
 
@@ -236,11 +239,11 @@ func (s *OrderBusinessServiceImpl) Detail(ctx context.Context, req *order_common
 
 // Confirm implements the OrderBusinessServiceImpl interface.
 // 确认订单
-// TODO 重写
 func (s *OrderBusinessServiceImpl) Confirm(ctx context.Context, req *businessOrder.ConfirmReq) (resp *order_common.Empty, err error) {
 
-	if err := s.updateOrderStatus(req.OrderId, 2); err != nil {
-		return nil, err
+	if err = s.updateOrderStatus(req.OrderId, 2); err != nil {
+		log.Println(err)
+		return nil, ConfirmOrderError
 	}
 
 	// 返回空响应
@@ -262,11 +265,11 @@ func (s *OrderBusinessServiceImpl) Delivery(ctx context.Context, req *businessOr
 
 // Receive implements the OrderBusinessServiceImpl interface.
 // 转变订单状态为待收货
-// TODO 重写
 func (s *OrderBusinessServiceImpl) Receive(ctx context.Context, req *businessOrder.ReceiveReq) (resp *order_common.Empty, err error) {
 
-	if err := s.updateOrderStatus(req.OrderId, 4); err != nil {
-		return nil, err
+	if err = s.updateOrderStatus(req.OrderId, 4); err != nil {
+		log.Println(err)
+		return nil, ReceiveOrderError
 	}
 
 	// 返回空响应
@@ -275,9 +278,70 @@ func (s *OrderBusinessServiceImpl) Receive(ctx context.Context, req *businessOrd
 
 // Rejection implements the OrderBusinessServiceImpl interface.
 // 商家拒绝订单
-// TODO 重写
-
+// 订单状态 0待付款 1待接单 2已接单 3运输中 4待收货 5已完成 6已取消 7退款中 8已退款 9商家拒单 取消退款(直接回到上一步即可)
 func (s *OrderBusinessServiceImpl) Rejection(ctx context.Context, req *businessOrder.RejectionReq) (resp *order_common.Empty, err error) {
+
+	order, err := GetOrderInfo(req.OrderId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var orderLog models.OrderStatusLog
+
+	if err = DB.Where("order_id = ? and version = ?", req.OrderId, order.FinalVersion).Last(&orderLog).Error; err != nil {
+		log.Println(err)
+		return nil, SearchOrderLogsError
+	}
+
+	if order.FinalStatus > 2 {
+		log.Println("当前状态无法拒单,请注意")
+		return nil, UnableRejectionOrderError
+	}
+
+	var status uint32
+
+	current := time.Now()
+
+	if orderLog.Status == 2 {
+		status = 7
+	} else {
+		status = 9
+	}
+
+	newOrderLog := models.OrderStatusLog{
+		OrderId:     req.OrderId,
+		Status:      status,
+		StartTime:   &current,
+		EndTime:     nil,
+		Description: req.RejectionReason,
+		Version:     orderLog.Version + 1,
+	}
+
+	err = DB.Transaction(func(tx *gorm.DB) error {
+
+		//更新旧订单状态
+		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", orderLog.ID).Update("end_time", &current).Error; err != nil {
+			return err
+		}
+
+		//插入新订单状态
+		if err = DB.Create(&newOrderLog).Error; err != nil {
+			return err
+		}
+
+		//更新最终状态
+		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", newOrderLog.Status).Update("final_version", newOrderLog.Version).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Println(err)
+		return nil, RejectionOrderError
+	}
 
 	return &order_common.Empty{}, nil
 }
@@ -294,21 +358,17 @@ func (s *OrderBusinessServiceImpl) Cancel(ctx context.Context, req *order_common
 
 	var orderLog models.OrderStatusLog
 
-	if err = DB.Model(&models.OrderStatusLog{}).Where("order = ?", req.OrderId).Last(&orderLog).Error; err != nil {
+	if err = DB.Model(&models.OrderStatusLog{}).Where("order = ? and version = ?", req.OrderId, order.FinalVersion).Last(&orderLog).Error; err != nil {
 		log.Println(err)
 		return nil, SearchOrderLogsError
 	}
 
 	var status uint32
 
-	var description string
-
 	if order.FinalStatus == 0 {
 		status = 6
-		description = "已取消"
 	} else {
 		status = 7
-		description = "退款中"
 	}
 
 	current := time.Now()
@@ -317,7 +377,8 @@ func (s *OrderBusinessServiceImpl) Cancel(ctx context.Context, req *order_common
 		StartTime:   &current,
 		Status:      status,
 		EndTime:     nil,
-		Description: description,
+		Description: req.CancelReason,
+		Version:     orderLog.Version + 1,
 	}
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
@@ -333,7 +394,7 @@ func (s *OrderBusinessServiceImpl) Cancel(ctx context.Context, req *order_common
 		}
 
 		//更新最终状态
-		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", status).Error; err != nil {
+		if err = DB.Model(&models.Order{}).Where("id = ?", req.OrderId).Update("final_status", newOrderLog.Status).Update("final_version", newOrderLog.Version).Error; err != nil {
 			return err
 		}
 

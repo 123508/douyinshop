@@ -12,4 +12,5 @@ type OrderStatusLog struct {
 	StartTime   *time.Time `gorm:"comment '状态开始时间'"`
 	EndTime     *time.Time `gorm:"comment '状态结束时间'"`
 	Description string     `gorm:"comment '状态描述'"`
+	Version     uint32     `gorm:"comment '当前版本号'"`
 }

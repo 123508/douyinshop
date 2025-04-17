@@ -51,7 +51,8 @@ func (s *ShopServiceImpl) Register(ctx context.Context, req *pb.RegisterShopReq)
 // GetShopId 获取用户所开的店铺id
 func (s *ShopServiceImpl) GetShopId(ctx context.Context, req *pb.GetShopIdReq) (*pb.GetShopIdResp, error) {
 	var shop models.Shop
-	result := s.db.Where("user_id = ?", req.UserId).First(&shop)
+
+	result := s.db.Where("user_id = ?", ctx.Value("userId").(uint32)).First(&shop)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return &pb.GetShopIdResp{ShopId: 0}, nil
@@ -111,7 +112,7 @@ func (s *ShopServiceImpl) AddProduct(ctx context.Context, req *pb.AddProductReq)
 		Name:        req.Product.Name,
 		Description: req.Product.Description,
 		Picture:     req.Product.Picture,
-		Price:       float32(req.Product.Price),
+		Price:       req.Product.Price,
 		Categories:  categoriesStr,
 		Status:      req.Status, // 修正状态字段来源
 	}
@@ -170,7 +171,7 @@ func (s *ShopServiceImpl) UpdateProduct(ctx context.Context, req *pb.UpdateProdu
 	product.Name = req.Product.Name
 	product.Description = req.Product.Description
 	product.Picture = req.Product.Picture
-	product.Price = float32(req.Product.Price)
+	product.Price = req.Product.Price
 	product.Categories = categoriesStr
 	product.Status = req.Product.Status
 	updateResult := s.db.Save(&product)
@@ -225,7 +226,7 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 			Name:        p.Name,
 			Description: p.Description,
 			Picture:     p.Picture,
-			Price:       float32(p.Price),
+			Price:       p.Price,
 			Categories:  category,
 		}
 	}

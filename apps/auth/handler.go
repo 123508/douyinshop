@@ -33,6 +33,7 @@ var RedisError = &errorno.BasicMessageError{Code: 500, Message: "Redis数据库�
 
 var RedisConnectionError = &errorno.BasicMessageError{Code: 404, Message: "Redis数据库连接异常"}
 
+// GenerateJWT 产生一个jwt令牌
 func GenerateJWT(userId uint32) (string, error) {
 
 	claims := UserClaims{
@@ -54,6 +55,7 @@ func GenerateJWT(userId uint32) (string, error) {
 	return signedToken, nil
 }
 
+// ParseJWT 解析jwt令牌
 func ParseJWT(tokenString string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
@@ -73,6 +75,7 @@ func ParseJWT(tokenString string) (*UserClaims, error) {
 }
 
 // DeliverTokenByRPC implements the AuthServiceImpl interface.
+// 对外暴露的负责分发令牌的借口
 func (s *AuthServiceImpl) DeliverTokenByRPC(ctx context.Context, req *auth.DeliverTokenReq) (resp *auth.DeliveryResp, err error) {
 	token, err := GenerateJWT(req.UserId)
 	if err != nil {
@@ -83,7 +86,7 @@ func (s *AuthServiceImpl) DeliverTokenByRPC(ctx context.Context, req *auth.Deliv
 }
 
 // VerifyTokenByRPC implements the AuthServiceImpl interface.
-// 验证令牌接口
+// 对外暴露的验证令牌接口
 // 如果redis中标记该令牌无效,返回错误响应
 // 如果令牌无效,返回错误响应
 // 如果令牌存活时间小于等于阈值,刷新令牌并返回成功响应

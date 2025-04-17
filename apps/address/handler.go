@@ -26,6 +26,8 @@ var ForbiddenAskError = &errorno.BasicMessageError{Code: 401, Message: "无权�
 
 var FailUpdateError = &errorno.BasicMessageError{Code: 500, Message: "更新地址失败,请联系管理员"}
 
+var GetDefaultError = &errorno.BasicMessageError{Code: 404, Message: "获取默认地址失败"}
+
 //注意地址类型有Address,AddressItem,AddressBook
 
 func tranAddressToAddressBook(origin *address.Address) *models.AddressBook {
@@ -308,6 +310,7 @@ func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address
 }
 
 // GetAddressInfo implements the AddressServiceImpl interface.
+// 获取指定地址信息
 func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.GetAddressInfoReq) (resp *address.GetAddressInfoResp, err error) {
 	var addr models.AddressBook
 
@@ -335,7 +338,30 @@ func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.Ge
 }
 
 // GetDefaultAddress implements the AddressServiceImpl interface.
+// 获取默认地址
 func (s *AddressServiceImpl) GetDefaultAddress(ctx context.Context, req *address.GetDefaultAddressReq) (resp *address.GetDefaultAddressResp, err error) {
-	// TODO: Your code here...
-	return
+	DefaultId := s.getDefaultAddress(req.UserId)
+
+	var Address *models.AddressBook
+
+	if err = DB.Where(" id = ?", DefaultId).First(&Address).Error; err != nil {
+		klog.Fatal(err)
+		return nil, GetDefaultError
+	}
+
+	return &address.GetDefaultAddressResp{
+		Addr: &address.Address{
+			StreetAddress: Address.StressAddress,
+			City:          Address.City,
+			State:         Address.State,
+			Country:       Address.Country,
+			ZipCode:       Address.ZipCode,
+			Consignee:     Address.Consignee,
+			Gender:        Address.Gender,
+			Phone:         Address.Phone,
+			Label:         Address.Label,
+			IsDefault:     Address.IsDefault,
+			AddressId:     uint32(Address.ID),
+		},
+	}, nil
 }

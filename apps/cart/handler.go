@@ -54,6 +54,7 @@ func IsDuplicateKeyError(err error) bool {
 }
 
 // AddItem implements the CartServiceImpl interface.
+// 添加商品接口
 func (s *CartServiceImpl) AddItem(ctx context.Context, req *cart.AddItemReq) (*cart.AddItemResp, error) {
 	// 1. 输入验证
 	if err := validateAddItemReq(req); err != nil {
@@ -96,6 +97,7 @@ func (s *CartServiceImpl) AddItem(ctx context.Context, req *cart.AddItemReq) (*c
 }
 
 // GetCart implements the CartServiceImpl interface.
+// 查看购物车接口
 func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*cart.GetCartResp, error) {
 	if req.UserId == 0 {
 		return nil, NilUserIdError
@@ -126,6 +128,7 @@ func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*c
 }
 
 // EmptyCart implements the CartServiceImpl interface.
+// 清空购物车接口
 func (s *CartServiceImpl) EmptyCart(ctx context.Context, req *cart.EmptyCartReq) (*cart.EmptyCartResp, error) {
 	if req.UserId == 0 {
 		return nil, NilUserIdError
@@ -140,6 +143,7 @@ func (s *CartServiceImpl) EmptyCart(ctx context.Context, req *cart.EmptyCartReq)
 }
 
 // DeleteItem implements the CartServiceImpl interface.
+// 删除指定商品接口
 func (s *CartServiceImpl) DeleteItem(ctx context.Context, req *cart.DeleteItemReq) (*cart.EmptyCartResp, error) {
 	if req.UserId == 0 {
 		return nil, NilUserIdError

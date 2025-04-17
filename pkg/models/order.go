@@ -20,4 +20,5 @@ type Order struct {
 	Consignee     string  `gorm:"type:varchar(60) comment '收货人'"`
 	TransactionId string  `gorm:"type:varchar(50) comment '支付交易号'"`
 	FinalStatus   uint32  `gorm:"comment '订单最终状态'"`
+	FinalVersion  uint32  `gorm:"comment '最终版本号'"`
 }

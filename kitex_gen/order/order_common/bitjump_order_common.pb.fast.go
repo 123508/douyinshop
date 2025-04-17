@@ -69,18 +69,18 @@ func (x *Order) FastRead(buf []byte, _type int8, number int32) (offset int, err 
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 13:
+		offset, err = x.fastReadField13(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 14:
+		offset, err = x.fastReadField14(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	case 15:
 		offset, err = x.fastReadField15(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	case 16:
-		offset, err = x.fastReadField16(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	case 17:
-		offset, err = x.fastReadField17(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -157,17 +157,17 @@ func (x *Order) fastReadField12(buf []byte, _type int8) (offset int, err error) 
 	return offset, err
 }
 
-func (x *Order) fastReadField15(buf []byte, _type int8) (offset int, err error) {
+func (x *Order) fastReadField13(buf []byte, _type int8) (offset int, err error) {
 	x.ID, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
-func (x *Order) fastReadField16(buf []byte, _type int8) (offset int, err error) {
+func (x *Order) fastReadField14(buf []byte, _type int8) (offset int, err error) {
 	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
-func (x *Order) fastReadField17(buf []byte, _type int8) (offset int, err error) {
+func (x *Order) fastReadField15(buf []byte, _type int8) (offset int, err error) {
 	x.FinalStatus, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
@@ -470,9 +470,9 @@ func (x *Order) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField10(buf[offset:])
 	offset += x.fastWriteField11(buf[offset:])
 	offset += x.fastWriteField12(buf[offset:])
+	offset += x.fastWriteField13(buf[offset:])
+	offset += x.fastWriteField14(buf[offset:])
 	offset += x.fastWriteField15(buf[offset:])
-	offset += x.fastWriteField16(buf[offset:])
-	offset += x.fastWriteField17(buf[offset:])
 	return offset
 }
 
@@ -566,27 +566,27 @@ func (x *Order) fastWriteField12(buf []byte) (offset int) {
 	return offset
 }
 
-func (x *Order) fastWriteField15(buf []byte) (offset int) {
+func (x *Order) fastWriteField13(buf []byte) (offset int) {
 	if x.ID == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 15, x.GetID())
+	offset += fastpb.WriteUint32(buf[offset:], 13, x.GetID())
 	return offset
 }
 
-func (x *Order) fastWriteField16(buf []byte) (offset int) {
+func (x *Order) fastWriteField14(buf []byte) (offset int) {
 	if x.ShopId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 16, x.GetShopId())
+	offset += fastpb.WriteUint32(buf[offset:], 14, x.GetShopId())
 	return offset
 }
 
-func (x *Order) fastWriteField17(buf []byte) (offset int) {
+func (x *Order) fastWriteField15(buf []byte) (offset int) {
 	if x.FinalStatus == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 17, x.GetFinalStatus())
+	offset += fastpb.WriteUint32(buf[offset:], 15, x.GetFinalStatus())
 	return offset
 }
 
@@ -813,9 +813,9 @@ func (x *Order) Size() (n int) {
 	n += x.sizeField10()
 	n += x.sizeField11()
 	n += x.sizeField12()
+	n += x.sizeField13()
+	n += x.sizeField14()
 	n += x.sizeField15()
-	n += x.sizeField16()
-	n += x.sizeField17()
 	return n
 }
 
@@ -909,27 +909,27 @@ func (x *Order) sizeField12() (n int) {
 	return n
 }
 
-func (x *Order) sizeField15() (n int) {
+func (x *Order) sizeField13() (n int) {
 	if x.ID == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(15, x.GetID())
+	n += fastpb.SizeUint32(13, x.GetID())
 	return n
 }
 
-func (x *Order) sizeField16() (n int) {
+func (x *Order) sizeField14() (n int) {
 	if x.ShopId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(16, x.GetShopId())
+	n += fastpb.SizeUint32(14, x.GetShopId())
 	return n
 }
 
-func (x *Order) sizeField17() (n int) {
+func (x *Order) sizeField15() (n int) {
 	if x.FinalStatus == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(17, x.GetFinalStatus())
+	n += fastpb.SizeUint32(15, x.GetFinalStatus())
 	return n
 }
 
@@ -1153,9 +1153,9 @@ var fieldIDToName_Order = map[int32]string{
 	10: "Address",
 	11: "Username",
 	12: "Consignee",
-	15: "ID",
-	16: "ShopId",
-	17: "FinalStatus",
+	13: "ID",
+	14: "ShopId",
+	15: "FinalStatus",
 }
 
 var fieldIDToName_Status = map[int32]string{
