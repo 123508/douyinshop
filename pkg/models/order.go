@@ -10,8 +10,8 @@ type Order struct {
 	ShopId        uint32  `gorm:"comment  '商家Id'"`
 	Number        string  `gorm:"type:varchar(50) comment '订单号'"`
 	AddressBookId int     `gorm:"comment '地址id'"`
+	Status        int     `gorm:"comment '订单状态'"`
 	PayMethod     int     `gorm:"comment '支付方式 1微信 2支付宝 3银行卡'"`
-	PayStatus     int     `gorm:"comment '支付状态 0未支付 1已支付 2已取消'"`
 	Amount        float64 `gorm:"type:decimal(10,2) comment '支付金额,精确到后两位'"`
 	Remark        string  `gorm:"comment '用户备注'"`
 	Phone         string  `gorm:"type:varchar(11) comment '用户电话'"`
