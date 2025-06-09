@@ -7,7 +7,7 @@ import (
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
-	"github.com/123508/douyinshop/pkg/redis"
+	"github.com/123508/douyinshop/pkg/myredis"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
 	"log"
@@ -139,7 +139,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 // 将用户当前的token设置为
 func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp *user.LogoutResp, err error) {
 
-	ir, err := redis.InitRedis()
+	ir, err := myredis.InitRedis()
 
 	//如果初始化redis成功则让token失效,否则报错并返回
 	if err != nil {

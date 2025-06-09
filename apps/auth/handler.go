@@ -6,7 +6,7 @@ import (
 	"github.com/123508/douyinshop/kitex_gen/auth"
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/123508/douyinshop/pkg/errorno"
-	"github.com/123508/douyinshop/pkg/redis"
+	"github.com/123508/douyinshop/pkg/myredis"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/golang-jwt/jwt/v4"
 	"log"
@@ -98,7 +98,7 @@ func (s *AuthServiceImpl) VerifyTokenByRPC(ctx context.Context, req *auth.Verify
 		return &auth.VerifyResp{Res: false}, errors.New("请求令牌为空")
 	}
 
-	rds, err := redis.InitRedis()
+	rds, err := myredis.InitRedis()
 	if err != nil {
 		klog.Fatal(err)
 		return nil, RedisError

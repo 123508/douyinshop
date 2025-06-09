@@ -2,19 +2,53 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/123508/douyinshop/kitex_gen/address"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
+	"github.com/123508/douyinshop/pkg/myredis"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"log"
+	"math/rand"
+	"strconv"
+	"strings"
+	"time"
 )
+
+//缓存策略采取先写入数据库后写入缓存,这种策略存在的问题是缓存过时失效
+//同时采用随机过期策略防止雪崩
+//增删改数据只将结果写入缓存,除此之外不涉及任何缓存有关的操作
+//查找需要先检查缓存,如果有就返回,没有查完数据库后写入缓存再返回
 
 // AddressServiceImpl implements the last service interface defined in the IDL.
 type AddressServiceImpl struct{}
 
-var DB = open()
+const (
+	serviceName = "address"
+)
+
+var DB = connectWithMySQL()
+
+func connectWithMySQL() *gorm.DB {
+	DB, err := db.InitDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return DB
+}
+
+var rds = connectWithRedis()
+
+func connectWithRedis() *redis.Client {
+	rds, err := myredis.InitRedis()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return rds
+}
 
 var InvalidAddressIdError = &errorno.BasicMessageError{Code: 400, Message: "地址ID无效"}
 
@@ -28,8 +62,7 @@ var FailUpdateError = &errorno.BasicMessageError{Code: 500, Message: "更新地�
 
 var GetDefaultError = &errorno.BasicMessageError{Code: 404, Message: "获取默认地址失败"}
 
-//注意地址类型有Address,AddressItem,AddressBook
-
+// 两个地址转换函数,注意地址类型有Address,AddressItem,AddressBook
 func tranAddressToAddressBook(origin *address.Address) *models.AddressBook {
 	addr := &models.AddressBook{}
 	addr.StressAddress = origin.StreetAddress
@@ -59,20 +92,75 @@ func tranAddressBookToAddress(origin *models.AddressBook) *address.Address {
 	return addr
 }
 
-// 获取默认地址
-func (s *AddressServiceImpl) getDefaultAddress(UserId uint32) uint64 {
-	var item models.AddressBook
-	DB.Model(&models.AddressBook{}).Where("user_id = ? and is_default= ?", UserId, true).First(&item)
-	//没有用户默认地址,返回0
-	return uint64(item.ID)
+// 写入缓存函数,后两个参数为基础时间和偏移时间
+func flushRAM(ctx context.Context, key string, value any, baseTime time.Duration, offsetTime int) {
+	//随机过期时间,防止雪崩问题
+	base := time.Now().Add(baseTime).Unix()
+	randOffset := rand.Intn(offsetTime)
+	finalTime := base + int64(randOffset)
+
+	//重置缓存
+	rds.SetEx(ctx, key, value, time.Duration(finalTime)*time.Second)
 }
 
-func open() *gorm.DB {
-	DB, err := db.InitDB()
+// 从缓存中读取数据并完成反序列化
+func takeAddrFromCache(ctx context.Context, key string) ([]models.AddressBook, error) {
+	jsonData, _ := rds.Get(ctx, key).Result()
+
+	res := make([]models.AddressBook, 0)
+
+	err := json.Unmarshal([]byte(jsonData), &res)
+
 	if err != nil {
-		log.Fatal(err)
+		return make([]models.AddressBook, 0), err
 	}
-	return DB
+
+	return res, nil
+}
+
+// 构建key函数,默认为data[0]:data[1]:....:data[n],注意如果有无法识别的类型会在原本的位置填入 ???
+func takeKey(data ...any) string {
+	builder := strings.Builder{}
+	for i, v := range data {
+		switch v.(type) {
+		case string:
+			builder.WriteString(v.(string))
+		case int32:
+			builder.WriteString(strconv.FormatInt(int64(v.(int32)), 10))
+		case uint32:
+			builder.WriteString(strconv.FormatInt(int64(v.(uint32)), 10))
+		case int64:
+			builder.WriteString(strconv.FormatInt(v.(int64), 10))
+		case uint64:
+			builder.WriteString(strconv.FormatUint(v.(uint64), 10))
+		case int:
+			builder.WriteString(strconv.Itoa(v.(int)))
+		case uint:
+			builder.WriteString(strconv.FormatInt(int64(v.(uint)), 10))
+		case []byte:
+			builder.WriteString(string(v.([]byte)))
+		case time.Time:
+			builder.WriteString(strconv.FormatInt(v.(time.Time).Unix(), 10))
+		case byte:
+			builder.WriteString(strconv.FormatInt(int64(v.(byte)), 10))
+		}
+		if i != len(data)-1 {
+			builder.WriteString(":")
+		}
+	}
+
+	return builder.String()
+}
+
+// 获取默认地址
+func (s *AddressServiceImpl) getDefaultAddress(ctx context.Context, UserId uint32) uint64 {
+
+	//查询失败,则重新查询数据库
+	var item models.AddressBook
+	DB.Model(&models.AddressBook{}).Where("user_id = ? and is_default= ?", UserId, true).First(&item)
+
+	//没有用户默认地址,返回0
+	return uint64(item.ID)
 }
 
 // AddAddress implements the AddressServiceImpl interface.
@@ -88,26 +176,31 @@ func (s *AddressServiceImpl) AddAddress(ctx context.Context, req *address.AddAdd
 	//}
 	//address1.IsDefault = len(listResp.Address) == 0
 
-	address1 := &models.AddressBook{}
-	address1 = tranAddressToAddressBook(req.Address)
+	addr := &models.AddressBook{}
+	addr = tranAddressToAddressBook(req.Address)
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		//如果设置当前地址为默认地址
 		if req.Address.IsDefault {
 			//查询默认地址是否存在
-			defaultAddressId := s.getDefaultAddress(req.UserId)
+			defaultAddressId := s.getDefaultAddress(ctx, req.UserId)
 			//如果存在就先将默认地址取消
 			if defaultAddressId != 0 {
 				if err := DB.Model(&models.AddressBook{}).Where("id = ?", defaultAddressId).Update("is_default", false).Error; err != nil {
 					return err
 				}
 			}
-			address1.IsDefault = true
+
+			addr.IsDefault = true
 		}
 		//创建新地址
-		if err := DB.Create(&address1).Update("user_id", req.UserId).Error; err != nil {
+		if err := DB.Create(&addr).Update("user_id", req.UserId).Error; err != nil {
 			return err
 		}
+
+		//将结果加入缓存
+		jsonData, _ := json.Marshal(&addr)
+		flushRAM(ctx, takeKey(serviceName, req.UserId, req.Address.AddressId), string(jsonData), 30*time.Minute, 15*60)
 
 		return nil
 	})
@@ -116,33 +209,7 @@ func (s *AddressServiceImpl) AddAddress(ctx context.Context, req *address.AddAdd
 		return nil, err
 	}
 
-	return &address.AddAddressResp{AddrId: uint64(address1.ID)}, nil
-}
-
-// GetAddressList implements the AddressServiceImpl interface.
-// 获取地址列表接口
-func (s *AddressServiceImpl) GetAddressList(ctx context.Context, req *address.GetAddressListReq) (resp *address.GetAddressListResp, err error) {
-
-	var res []models.AddressBook
-
-	// 执行查询并处理错误
-	if err := DB.Model(&models.AddressBook{}).Where("user_id = ?", req.UserId).Find(&res).Error; err != nil {
-		// 处理错误，例如返回错误或记录日志
-		return nil, err
-	}
-
-	//提前给定切片容量,优化性能
-	result := make([]*address.AddressItem, 0, len(res))
-
-	for _, k := range res {
-
-		result = append(result, &address.AddressItem{AddrId: uint64(k.ID), Address: tranAddressBookToAddress(&k)})
-
-	}
-
-	_ = res
-
-	return &address.GetAddressListResp{Address: result}, nil
+	return &address.AddAddressResp{AddrId: uint64(addr.ID)}, nil
 }
 
 // DeleteAddress implements the AddressServiceImpl interface.
@@ -168,14 +235,14 @@ func (s *AddressServiceImpl) DeleteAddress(ctx context.Context, req *address.Del
 	}()
 
 	// 检查地址是否属于用户
-	var address1 models.AddressBook
-	if err = tx.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&address1).Error; err != nil {
+	var addr models.AddressBook
+	if err = tx.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&addr).Error; err != nil {
 		tx.Rollback()
 		return &address.DeleteAddressResp{Res: false}, ForbiddenAskError
 	}
 
 	// 执行删除操作
-	if err = tx.Unscoped().Delete(&address1).Error; err != nil {
+	if err = tx.Unscoped().Delete(&addr).Error; err != nil {
 		tx.Rollback()
 		return &address.DeleteAddressResp{Res: false}, DeleteAddrError
 	}
@@ -184,6 +251,10 @@ func (s *AddressServiceImpl) DeleteAddress(ctx context.Context, req *address.Del
 	if err = tx.Commit().Error; err != nil {
 		return &address.DeleteAddressResp{Res: false}, DeleteAddrError
 	}
+
+	//删除对应缓存
+	rds.Del(ctx, takeKey(serviceName, req.UserId, req.AddrId))
+	rds.Del(ctx, takeKey(serviceName, "default", req.UserId))
 
 	// 返回成功响应
 	return &address.DeleteAddressResp{Res: true}, nil
@@ -202,8 +273,8 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 	}
 
 	// 检查地址是否属于用户
-	var address1 models.AddressBook
-	if err = DB.Model(&models.AddressBook{}).Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&address1).Error; err != nil {
+	var addr models.AddressBook
+	if err = DB.Model(&models.AddressBook{}).Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&addr).Error; err != nil {
 		return nil, ForbiddenDeleteError
 	}
 
@@ -271,17 +342,21 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 		return &address.UpdateAddressResp{Res: false}, FailUpdateError
 	}
 
+	//修改对应缓存
+	jsonData, _ := json.Marshal(&addr)
+	flushRAM(ctx, takeKey(serviceName, req.UserId, req.AddrId), string(jsonData), 30*time.Minute, 15*60)
+
 	return &address.UpdateAddressResp{Res: true}, nil
 }
 
 // SetDefaultAddress implements the AddressServiceImpl interface.
 // 设置默认地址
 func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address.SetDefaultAddressReq) (resp *address.SetDefaultAddressResp, err error) {
-	defaultAddressId := s.getDefaultAddress(req.UserId)
+	defaultAddressId := s.getDefaultAddress(ctx, req.UserId)
 
 	// 检查地址是否属于用户
-	var address1 models.AddressBook
-	if err = DB.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&address1).Error; err != nil {
+	var addr models.AddressBook
+	if err = DB.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&addr).Error; err != nil {
 		return nil, ForbiddenAskError
 	}
 
@@ -306,16 +381,68 @@ func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address
 		return &address.SetDefaultAddressResp{Res: false}, err
 	}
 
+	//将结果写入缓存
+	jsonData, _ := json.Marshal(&addr)
+	flushRAM(ctx, takeKey(serviceName, "default", req.UserId), string(jsonData), 30*time.Minute, 15*60)
+
 	return &address.SetDefaultAddressResp{Res: true}, nil
+}
+
+// GetAddressList implements the AddressServiceImpl interface.
+// 获取地址列表接口
+func (s *AddressServiceImpl) GetAddressList(ctx context.Context, req *address.GetAddressListReq) (resp *address.GetAddressListResp, err error) {
+
+	key := takeKey(serviceName, req.UserId, "*")
+
+	res, err := takeAddrFromCache(ctx, key)
+
+	if err != nil {
+		// 执行查询并处理错误
+		if err := DB.Model(&models.AddressBook{}).Where("user_id = ?", req.UserId).Find(&res).Error; err != nil {
+			// 处理错误，例如返回错误或记录日志
+			return nil, err
+		}
+
+		for _, v := range res {
+			jsonData, _ := json.Marshal(&v)
+			flushRAM(ctx, takeKey(serviceName, req.UserId, v.ID), string(jsonData), 30*time.Second, 15*60)
+		}
+	}
+
+	//提前给定切片容量,优化性能
+	result := make([]*address.AddressItem, 0, len(res))
+
+	for _, k := range res {
+
+		result = append(result, &address.AddressItem{AddrId: uint64(k.ID), Address: tranAddressBookToAddress(&k)})
+
+	}
+
+	_ = res
+
+	return &address.GetAddressListResp{Address: result}, nil
 }
 
 // GetAddressInfo implements the AddressServiceImpl interface.
 // 获取指定地址信息
 func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.GetAddressInfoReq) (resp *address.GetAddressInfoResp, err error) {
+
+	//查询缓存
+	key := takeKey(serviceName, req.UserId, req.AddrId)
+	cache, err := takeAddrFromCache(ctx, key)
+
 	var addr models.AddressBook
 
-	if err = DB.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&addr).Error; err != nil {
-		return nil, ForbiddenAskError
+	if err != nil { //没有查到的情况
+		if err = DB.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&addr).Error; err != nil {
+			return nil, ForbiddenAskError
+		}
+
+		jsonData, _ := json.Marshal(&addr)
+
+		flushRAM(ctx, key, string(jsonData), 30*time.Minute, 15*60)
+	} else { //查到缓存
+		addr = cache[0]
 	}
 
 	if addr.ID == 0 {
@@ -340,28 +467,44 @@ func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.Ge
 // GetDefaultAddress implements the AddressServiceImpl interface.
 // 获取默认地址
 func (s *AddressServiceImpl) GetDefaultAddress(ctx context.Context, req *address.GetDefaultAddressReq) (resp *address.GetDefaultAddressResp, err error) {
-	DefaultId := s.getDefaultAddress(req.UserId)
 
-	var Address *models.AddressBook
+	//先查缓存
+	key := takeKey(serviceName, "default", req.UserId)
 
-	if err = DB.Where(" id = ?", DefaultId).First(&Address).Error; err != nil {
-		klog.Fatal(err)
-		return nil, GetDefaultError
+	cache, err := takeAddrFromCache(ctx, key)
+
+	var addr models.AddressBook
+
+	//缓存查询失败
+	if err != nil {
+
+		DefaultId := s.getDefaultAddress(ctx, req.UserId)
+
+		if err = DB.Where(" id = ?", DefaultId).First(&addr).Error; err != nil {
+			klog.Fatal(err)
+			return nil, GetDefaultError
+		}
+
+		jsonData, _ := json.Marshal(&addr)
+		flushRAM(ctx, key, string(jsonData), 30*time.Minute, 15*60)
+
+	} else {
+		addr = cache[0]
 	}
 
 	return &address.GetDefaultAddressResp{
 		Addr: &address.Address{
-			StreetAddress: Address.StressAddress,
-			City:          Address.City,
-			State:         Address.State,
-			Country:       Address.Country,
-			ZipCode:       Address.ZipCode,
-			Consignee:     Address.Consignee,
-			Gender:        Address.Gender,
-			Phone:         Address.Phone,
-			Label:         Address.Label,
-			IsDefault:     Address.IsDefault,
-			AddressId:     uint32(Address.ID),
+			StreetAddress: addr.StressAddress,
+			City:          addr.City,
+			State:         addr.State,
+			Country:       addr.Country,
+			ZipCode:       addr.ZipCode,
+			Consignee:     addr.Consignee,
+			Gender:        addr.Gender,
+			Phone:         addr.Phone,
+			Label:         addr.Label,
+			IsDefault:     addr.IsDefault,
+			AddressId:     uint32(addr.ID),
 		},
 	}, nil
 }

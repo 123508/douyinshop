@@ -8,7 +8,7 @@ import (
 
 	auth "github.com/123508/douyinshop/kitex_gen/auth/authservice"
 	"github.com/123508/douyinshop/pkg/config"
-	"github.com/123508/douyinshop/pkg/redis"
+	"github.com/123508/douyinshop/pkg/myredis"
 
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	rdb, err := redis.InitRedis()
+	rdb, err := myredis.InitRedis()
 	if err != nil {
 		log.Fatal(err)
 	}
