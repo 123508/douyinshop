@@ -9,9 +9,20 @@ import (
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	etcd "github.com/kitex-contrib/registry-etcd"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net"
 )
+
+func init() {
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+		FieldMap: log.FieldMap{
+			log.FieldKeyTime:  "时间",
+			log.FieldKeyLevel: "日志类型",
+			log.FieldKeyMsg:   "日志内容",
+		},
+	})
+}
 
 func main() {
 	database, err := db.InitDB()

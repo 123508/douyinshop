@@ -3,17 +3,57 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/123508/douyinshop/pkg/errorno"
-	"strings"
-
 	cart "github.com/123508/douyinshop/kitex_gen/cart"
+	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
+	"github.com/123508/douyinshop/pkg/myredis"
+	"github.com/redis/go-redis/v9"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"strings"
 )
 
 // CartServiceImpl implements the last service interface defined in the IDL.
 type CartServiceImpl struct {
 	db *gorm.DB
+}
+
+const (
+	serviceName = "cart"
+)
+
+func logError(description, funcName, step string, err error) {
+
+	param := map[string]interface{}{}
+	if description != "" {
+		param["问题描述"] = description
+	}
+	if funcName != "" {
+		param["报错函数"] = funcName
+	}
+	if step != "" {
+		param["报错步骤"] = step
+	}
+	if err != nil {
+		param["错误原因"] = err
+	}
+
+	field := log.Fields{}
+	for k, v := range param {
+		field[k] = v
+	}
+
+	log.WithFields(field).Error()
+}
+
+var rds = connectWithRedis()
+
+func connectWithRedis() *redis.Client {
+	rds, err := myredis.InitRedis()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return rds
 }
 
 var NilRequestError = &errorno.BasicMessageError{Code: 400, Message: "请求为空"}

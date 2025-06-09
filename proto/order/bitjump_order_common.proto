@@ -54,4 +54,5 @@ message OrderReq{
 message CancelReq{
   uint32 order_id=1;
   string cancel_reason=2;
+  uint32 ShopId=3;
 }

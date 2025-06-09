@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	product "github.com/123508/douyinshop/kitex_gen/product"
+	"github.com/123508/douyinshop/kitex_gen/product"
 	"github.com/123508/douyinshop/pkg/els"
 	"github.com/123508/douyinshop/pkg/models"
 	"strconv"

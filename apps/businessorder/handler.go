@@ -2,27 +2,46 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/123508/douyinshop/kitex_gen/order/businessOrder"
 	"github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
+	"github.com/123508/douyinshop/pkg/myredis"
+	"github.com/123508/douyinshop/pkg/util"
+	"github.com/redis/go-redis/v9"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"log"
+	"math/rand"
 	"time"
 )
 
 // OrderBusinessServiceImpl implements the last service interface defined in the IDL.
 type OrderBusinessServiceImpl struct{}
 
-var DB = open()
+const (
+	serviceName = "businessOrder"
+)
 
-func open() *gorm.DB {
+var DB = connectWithMySQL()
+
+func connectWithMySQL() *gorm.DB {
 	DB, err := db.InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 	return DB
+}
+
+var rds = connectWithRedis()
+
+func connectWithRedis() *redis.Client {
+	rds, err := myredis.InitRedis()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return rds
 }
 
 // GetOrderInfo 查询订单信息
@@ -124,14 +143,54 @@ var UnableRejectionOrderError = &errorno.BasicMessageError{Code: 500, Message: "
 // 获取订单
 func (s *OrderBusinessServiceImpl) GetOrderList(ctx context.Context, req *businessOrder.GetOrderListReq) (resp *businessOrder.GetOrderListResp, err error) {
 
-	//查询订单
-	var orders []models.Order
-	offset := (req.Page - 1) * req.PageSize
+	key := util.TakeKey(serviceName, "order", req.ShopId)
 
-	//查询异常,返回错误
-	if err = DB.Where("shop_id = ?", req.ShopId).Offset(int(offset)).Find(&orders).Error; err != nil {
-		log.Println(err)
-		return nil, SearchOrderError
+	result, err := rds.HGetAll(ctx, key).Result()
+
+	if err != nil {
+		util.LogError("查询缓存失败", "GetOrderList", "查询order缓存", err)
+	}
+
+	//查询订单
+	orders := make([]models.Order, 0)
+
+	for _, v := range result {
+		o := models.Order{}
+		err = json.Unmarshal([]byte(v), &o)
+		if err != nil {
+			util.LogError("反序列化数据失败", "GetOrderList", "反序列化order", err)
+			orders = make([]models.Order, 0)
+			break
+		}
+		orders = append(orders, o)
+	}
+
+	if err != nil { //查询缓存失败
+		offset := (req.Page - 1) * req.PageSize
+
+		//查询异常,返回错误
+		if err = DB.Where("shop_id = ?", req.ShopId).Offset(int(offset)).Find(&orders).Error; err != nil {
+			log.Println(err)
+			return nil, SearchOrderError
+		}
+
+		cache := map[string]string{}
+
+		for _, v := range orders {
+			jsonData, _ := json.Marshal(&v)
+			cache[util.TakeKey(v.ID)] = string(jsonData)
+		}
+
+		//存储哈希
+		err := rds.HMSet(ctx, key, cache).Err()
+
+		if err != nil {
+			util.LogError("缓存数据失败", "GetOrderList", "将order加入缓存", err)
+		}
+
+		// 设置随机过期时间，30~45 分钟
+		rds.Expire(ctx, key, time.Duration(rand.Intn(15)+30)*time.Minute)
+
 	}
 
 	// 封装订单响应列表
@@ -164,30 +223,133 @@ func (s *OrderBusinessServiceImpl) GetOrderList(ctx context.Context, req *busine
 // 订单详情
 func (s *OrderBusinessServiceImpl) Detail(ctx context.Context, req *order_common.OrderReq) (resp *order_common.OrderResp, err error) {
 	// 查询订单信息（Order）基本信息
+
 	var order models.Order
 
-	// 如果没有找到对应订单，返回错误信息
-	if err = DB.Where("id = ? and shop_id = ?", req.OrderId, req.ShopId).First(&order).Error; err != nil {
-		log.Println(err)
-		return nil, SearchOrderError
+	orderKey := util.TakeKey(serviceName, "order", req.ShopId)
+
+	//查询order缓存
+	jsonData, err := rds.HGet(ctx, orderKey, util.TakeKey(req.OrderId)).Result()
+
+	if err != nil {
+		util.LogError("查询order缓存失败", "Detail", "查询order缓存", err)
+	}
+
+	err = json.Unmarshal([]byte(jsonData), &order)
+
+	if err != nil { //查询缓存失败,直接去查数据库
+
+		// 如果没有找到对应订单，返回错误信息
+		if err = DB.Where("id = ? and shop_id = ?", req.OrderId, req.ShopId).First(&order).Error; err != nil {
+			util.LogError("没有找到对应订单", "Detail", "查询order数据库", err)
+			return nil, SearchOrderError
+		}
 	}
 
 	// 查询订单详情（List）
 	var orderDetails []models.OrderDetail
 
-	// 如果查询订单详情失败，返回错误
-	if err = DB.Where("order_id = ?", req.OrderId).Find(&orderDetails).Error; err != nil {
-		log.Println(err)
-		return nil, SearchOrderDetailsError
+	detailKey := util.TakeKey(serviceName, "orderDetail", req.OrderId)
+
+	//查询orderDetails缓存
+	result, err := rds.HGetAll(ctx, detailKey).Result()
+
+	if err != nil {
+		util.LogError("查询orderDetail缓存失败", "Detail", "查询orderDetail缓存", err)
+	}
+
+	for _, v := range result {
+
+		t := models.OrderDetail{}
+
+		err = json.Unmarshal([]byte(v), &t)
+
+		if err != nil {
+			util.LogError("反序列化失败", "Detail", "查询orderDetail", err)
+			orderDetails = make([]models.OrderDetail, 0)
+			break
+		}
+
+		orderDetails = append(orderDetails, t)
+	}
+
+	if err != nil {
+
+		// 如果查询订单详情失败，返回错误
+		if err = DB.Where("order_id = ?", req.OrderId).Find(&orderDetails).Error; err != nil {
+			util.LogError("查询订单详情失败", "Detail", "查询订单详情", err)
+			return nil, SearchOrderDetailsError
+		}
+
+		cache := map[string]string{}
+
+		for _, v := range orderDetails {
+			jsonData, err := json.Marshal(&v)
+			if err != nil {
+				util.LogError("序列化数据失败", "Detail", "序列化orderDetail", err)
+			}
+			cache[util.TakeKey(v.ID)] = string(jsonData)
+		}
+
+		//存储哈希
+		err := rds.HMSet(ctx, detailKey, cache).Err()
+
+		if err != nil {
+			util.LogError("缓存数据失败", "Detail", "将orderDetail加入缓存", err)
+		}
+
+		// 设置随机过期时间，30~45 分钟
+		rds.Expire(ctx, detailKey, time.Duration(rand.Intn(15)+30)*time.Minute)
 	}
 
 	//查询订单日志详情
 	var orderLogs []models.OrderStatusLog
 
-	//查询失败报错
-	if err = DB.Where("order_id = ?", req.OrderId).Find(&orderLogs).Error; err != nil {
-		log.Println(err)
-		return nil, SearchOrderLogsError
+	logKey := util.TakeKey(serviceName, "orderLog", req.OrderId)
+
+	res, err := rds.HGetAll(ctx, logKey).Result()
+
+	if err != nil {
+		util.LogError("查询orderLog缓存失败", "Detail", "查询order缓存", err)
+	}
+
+	for _, v := range res {
+		l := models.OrderStatusLog{}
+		err = json.Unmarshal([]byte(v), &l)
+		if err != nil {
+			util.LogError("反序列化失败", "Detail", "查询orderLog", err)
+			orderLogs = make([]models.OrderStatusLog, 0)
+			break
+		}
+		orderLogs = append(orderLogs, l)
+	}
+
+	if err != nil { //查询缓存失败
+		//查询失败报错
+		if err = DB.Where("order_id = ?", req.OrderId).Find(&orderLogs).Error; err != nil {
+			log.Println(err)
+			return nil, SearchOrderLogsError
+		}
+
+		cache := map[string]string{}
+
+		for _, v := range orderLogs {
+			jsonData, err := json.Marshal(&v)
+
+			if err != nil {
+				util.LogError("序列化数据失败", "Detail", "序列化orderLog", err)
+			}
+
+			cache[util.TakeKey(v.ID)] = string(jsonData)
+		}
+
+		err := rds.HMSet(ctx, detailKey, cache).Err()
+
+		if err != nil {
+			util.LogError("缓存数据失败", "Detail", "将orderLog加入缓存", err)
+		}
+
+		rds.Expire(ctx, detailKey, time.Duration(rand.Intn(15)+30)*time.Minute)
 	}
 
 	//将切片中的OrderStatusLog转换为order_common.Status
@@ -241,8 +403,12 @@ func (s *OrderBusinessServiceImpl) Detail(ctx context.Context, req *order_common
 // 确认订单
 func (s *OrderBusinessServiceImpl) Confirm(ctx context.Context, req *businessOrder.ConfirmReq) (resp *order_common.Empty, err error) {
 
+	//清除缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.ShopId))
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.OrderId))
+
 	if err = s.updateOrderStatus(req.OrderId, 2); err != nil {
-		log.Println(err)
+		util.LogError("修改订单失败", "Confirm", "", err)
 		return nil, ConfirmOrderError
 	}
 
@@ -254,8 +420,12 @@ func (s *OrderBusinessServiceImpl) Confirm(ctx context.Context, req *businessOrd
 // 商家发货
 func (s *OrderBusinessServiceImpl) Delivery(ctx context.Context, req *businessOrder.DeliveryReq) (resp *order_common.Empty, err error) {
 
+	//清除缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.ShopId))
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.OrderId))
+
 	if err = s.updateOrderStatus(req.OrderId, 3); err != nil {
-		log.Println(err)
+		util.LogError("修改订单失败", "Delivery", "", err)
 		return nil, DeliveryOrderError
 	}
 
@@ -267,8 +437,13 @@ func (s *OrderBusinessServiceImpl) Delivery(ctx context.Context, req *businessOr
 // 转变订单状态为待收货
 func (s *OrderBusinessServiceImpl) Receive(ctx context.Context, req *businessOrder.ReceiveReq) (resp *order_common.Empty, err error) {
 
+	//清除缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.ShopId))
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.OrderId))
+
 	if err = s.updateOrderStatus(req.OrderId, 4); err != nil {
 		log.Println(err)
+		util.LogError("修改订单失败", "Receive", "", err)
 		return nil, ReceiveOrderError
 	}
 
@@ -281,6 +456,10 @@ func (s *OrderBusinessServiceImpl) Receive(ctx context.Context, req *businessOrd
 // 订单状态 0待付款 1待接单 2已接单 3运输中 4待收货 5已完成 6已取消 7退款中 8已退款 9商家拒单 取消退款(直接回到上一步即可)
 func (s *OrderBusinessServiceImpl) Rejection(ctx context.Context, req *businessOrder.RejectionReq) (resp *order_common.Empty, err error) {
 
+	//清除缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.ShopId))
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.OrderId))
+
 	order, err := GetOrderInfo(req.OrderId)
 
 	if err != nil {
@@ -290,12 +469,11 @@ func (s *OrderBusinessServiceImpl) Rejection(ctx context.Context, req *businessO
 	var orderLog models.OrderStatusLog
 
 	if err = DB.Where("order_id = ? and version = ?", req.OrderId, order.FinalVersion).Last(&orderLog).Error; err != nil {
-		log.Println(err)
+		util.LogError("查询数据库失败", "Rejection", "查询order订单", err)
 		return nil, SearchOrderLogsError
 	}
 
 	if order.FinalStatus > 2 {
-		log.Println("当前状态无法拒单,请注意")
 		return nil, UnableRejectionOrderError
 	}
 
@@ -339,7 +517,7 @@ func (s *OrderBusinessServiceImpl) Rejection(ctx context.Context, req *businessO
 	})
 
 	if err != nil {
-		log.Println(err)
+		util.LogError("更新订单失败", "Rejection", "更新orderLog", err)
 		return nil, RejectionOrderError
 	}
 
@@ -349,6 +527,10 @@ func (s *OrderBusinessServiceImpl) Rejection(ctx context.Context, req *businessO
 // Cancel implements the OrderBusinessServiceImpl interface.
 // 商家取消订单(整体逻辑基本保持与用户端一样)
 func (s *OrderBusinessServiceImpl) Cancel(ctx context.Context, req *order_common.CancelReq) (resp *order_common.Empty, err error) {
+
+	//清除缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.ShopId))
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "order", req.OrderId))
 
 	order, err := GetOrderInfo(req.OrderId)
 
@@ -402,7 +584,7 @@ func (s *OrderBusinessServiceImpl) Cancel(ctx context.Context, req *order_common
 	})
 
 	if err != nil {
-		log.Println(err)
+		util.LogError("更新订单失败", "Cancel", "", err)
 		return nil, CancelOrderError
 	}
 

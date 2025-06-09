@@ -25,6 +25,11 @@ func (x *ConfirmReq) FastRead(buf []byte, _type int8, number int32) (offset int,
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -48,6 +53,11 @@ func (x *ConfirmReq) fastReadField2(buf []byte, _type int8) (offset int, err err
 	return offset, err
 }
 
+func (x *ConfirmReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
 func (x *RejectionReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
@@ -57,6 +67,11 @@ func (x *RejectionReq) FastRead(buf []byte, _type int8, number int32) (offset in
 		}
 	case 2:
 		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -83,10 +98,20 @@ func (x *RejectionReq) fastReadField2(buf []byte, _type int8) (offset int, err e
 	return offset, err
 }
 
+func (x *RejectionReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
 func (x *DeliveryReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
 		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -108,10 +133,20 @@ func (x *DeliveryReq) fastReadField1(buf []byte, _type int8) (offset int, err er
 	return offset, err
 }
 
+func (x *DeliveryReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
 func (x *ReceiveReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
 		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -130,6 +165,11 @@ ReadFieldError:
 
 func (x *ReceiveReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *ReceiveReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -304,6 +344,7 @@ func (x *ConfirmReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -323,12 +364,21 @@ func (x *ConfirmReq) fastWriteField2(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *ConfirmReq) fastWriteField3(buf []byte) (offset int) {
+	if x.ShopId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetShopId())
+	return offset
+}
+
 func (x *RejectionReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -348,11 +398,20 @@ func (x *RejectionReq) fastWriteField2(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *RejectionReq) fastWriteField3(buf []byte) (offset int) {
+	if x.ShopId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetShopId())
+	return offset
+}
+
 func (x *DeliveryReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -364,11 +423,20 @@ func (x *DeliveryReq) fastWriteField1(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *DeliveryReq) fastWriteField2(buf []byte) (offset int) {
+	if x.ShopId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetShopId())
+	return offset
+}
+
 func (x *ReceiveReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -377,6 +445,14 @@ func (x *ReceiveReq) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	return offset
+}
+
+func (x *ReceiveReq) fastWriteField2(buf []byte) (offset int) {
+	if x.ShopId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetShopId())
 	return offset
 }
 
@@ -495,6 +571,7 @@ func (x *ConfirmReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -514,12 +591,21 @@ func (x *ConfirmReq) sizeField2() (n int) {
 	return n
 }
 
+func (x *ConfirmReq) sizeField3() (n int) {
+	if x.ShopId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(3, x.GetShopId())
+	return n
+}
+
 func (x *RejectionReq) Size() (n int) {
 	if x == nil {
 		return n
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -539,11 +625,20 @@ func (x *RejectionReq) sizeField2() (n int) {
 	return n
 }
 
+func (x *RejectionReq) sizeField3() (n int) {
+	if x.ShopId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(3, x.GetShopId())
+	return n
+}
+
 func (x *DeliveryReq) Size() (n int) {
 	if x == nil {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
@@ -555,11 +650,20 @@ func (x *DeliveryReq) sizeField1() (n int) {
 	return n
 }
 
+func (x *DeliveryReq) sizeField2() (n int) {
+	if x.ShopId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(2, x.GetShopId())
+	return n
+}
+
 func (x *ReceiveReq) Size() (n int) {
 	if x == nil {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
@@ -568,6 +672,14 @@ func (x *ReceiveReq) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint32(1, x.GetOrderId())
+	return n
+}
+
+func (x *ReceiveReq) sizeField2() (n int) {
+	if x.ShopId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(2, x.GetShopId())
 	return n
 }
 
@@ -683,19 +795,23 @@ func (x *GetNotifyResp) sizeField1() (n int) {
 var fieldIDToName_ConfirmReq = map[int32]string{
 	1: "OrderId",
 	2: "Status",
+	3: "ShopId",
 }
 
 var fieldIDToName_RejectionReq = map[int32]string{
 	1: "OrderId",
 	2: "RejectionReason",
+	3: "ShopId",
 }
 
 var fieldIDToName_DeliveryReq = map[int32]string{
 	1: "OrderId",
+	2: "ShopId",
 }
 
 var fieldIDToName_ReceiveReq = map[int32]string{
 	1: "OrderId",
+	2: "ShopId",
 }
 
 var fieldIDToName_GetOrderListReq = map[int32]string{

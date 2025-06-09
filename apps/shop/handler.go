@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"github.com/123508/douyinshop/pkg/els"
 	"github.com/123508/douyinshop/pkg/errorno"
 	"log"
@@ -54,7 +55,7 @@ func (s *ShopServiceImpl) GetShopId(ctx context.Context, req *pb.GetShopIdReq) (
 
 	result := s.db.Where("user_id = ?", ctx.Value("userId").(uint32)).First(&shop)
 	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return &pb.GetShopIdResp{ShopId: 0}, nil
 		}
 		return nil, result.Error
@@ -67,7 +68,7 @@ func (s *ShopServiceImpl) GetShopInfo(ctx context.Context, req *pb.GetShopInfoRe
 	var shop models.Shop
 	result := s.db.Where("id = ?", req.ShopId).First(&shop)
 	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, ShopNotFound
 		}
 		return nil, result.Error
@@ -85,7 +86,7 @@ func (s *ShopServiceImpl) UpdateShopInfo(ctx context.Context, req *pb.UpdateShop
 	var shop models.Shop
 	result := s.db.Where("id = ?", req.ShopId).First(&shop)
 	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return &pb.UpdateShopInfoResp{Res: false}, nil
 		}
 		return nil, result.Error
@@ -161,7 +162,7 @@ func (s *ShopServiceImpl) UpdateProduct(ctx context.Context, req *pb.UpdateProdu
 	var product models.Product
 	result := s.db.Where("id = ? AND shop_id = ?", req.Product.Id, req.ShopId).First(&product)
 	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return &pb.UpdateProductResp{Res: false}, nil
 		}
 		return nil, result.Error

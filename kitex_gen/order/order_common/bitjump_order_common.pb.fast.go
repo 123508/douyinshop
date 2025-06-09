@@ -432,6 +432,11 @@ func (x *CancelReq) FastRead(buf []byte, _type int8, number int32) (offset int, 
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -452,6 +457,11 @@ func (x *CancelReq) fastReadField1(buf []byte, _type int8) (offset int, err erro
 
 func (x *CancelReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.CancelReason, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *CancelReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
 	return offset, err
 }
 
@@ -779,6 +789,7 @@ func (x *CancelReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -795,6 +806,14 @@ func (x *CancelReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 2, x.GetCancelReason())
+	return offset
+}
+
+func (x *CancelReq) fastWriteField3(buf []byte) (offset int) {
+	if x.ShopId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetShopId())
 	return offset
 }
 
@@ -1122,6 +1141,7 @@ func (x *CancelReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -1138,6 +1158,14 @@ func (x *CancelReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeString(2, x.GetCancelReason())
+	return n
+}
+
+func (x *CancelReq) sizeField3() (n int) {
+	if x.ShopId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(3, x.GetShopId())
 	return n
 }
 
@@ -1191,4 +1219,5 @@ var fieldIDToName_OrderReq = map[int32]string{
 var fieldIDToName_CancelReq = map[int32]string{
 	1: "OrderId",
 	2: "CancelReason",
+	3: "ShopId",
 }
