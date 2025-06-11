@@ -28,6 +28,7 @@ type AddressServiceImpl struct{}
 
 const (
 	serviceName = "address"
+	info        = "info"
 )
 
 var DB = connectWithMySQL()
@@ -117,7 +118,6 @@ func (s *AddressServiceImpl) AddAddress(ctx context.Context, req *address.AddAdd
 	//address1.IsDefault = len(listResp.Address) == 0
 
 	//删除对应缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
 	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "default", req.UserId))
 
 	addr := &models.AddressBook{}
@@ -159,7 +159,7 @@ func (s *AddressServiceImpl) AddAddress(ctx context.Context, req *address.AddAdd
 func (s *AddressServiceImpl) DeleteAddress(ctx context.Context, req *address.DeleteAddressReq) (resp *address.DeleteAddressResp, err error) {
 
 	//删除对应缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, info, req.AddrId))
 	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "default", req.UserId))
 
 	// 验证地址ID是否有效
@@ -208,7 +208,7 @@ func (s *AddressServiceImpl) DeleteAddress(ctx context.Context, req *address.Del
 func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.UpdateAddressReq) (resp *address.UpdateAddressResp, err error) {
 
 	//删除对应缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, info, req.AddrId))
 	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "default", req.UserId))
 
 	tx := DB.Model(&models.AddressBook{}).Where("id = ?", req.AddrId)
@@ -336,60 +336,140 @@ func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address
 // 获取地址列表接口
 func (s *AddressServiceImpl) GetAddressList(ctx context.Context, req *address.GetAddressListReq) (resp *address.GetAddressListResp, err error) {
 
-	key := util.TakeKey(serviceName, req.UserId)
-	data, err := rds.HGetAll(ctx, key).Result()
-
-	if err != nil {
-		util.LogError("查询缓存出错", "GetAddressList", "", err)
-	}
-
 	res := make([]models.AddressBook, 0)
-	for _, v := range data {
+
+	key := util.Md5Hash(util.TakeKey(serviceName, req.UserId))
+
+	jsonData, _ := rds.Get(ctx, key).Result()
+
+	list := make([]uint, 0)
+	fail := make([]uint, 0)
+	addressMap := make(map[uint]models.AddressBook)
+
+	ok := json.Unmarshal([]byte(jsonData), &list)
+
+	//按照list查询详情缓存
+	for _, v := range list {
 		t := models.AddressBook{}
-		err = json.Unmarshal([]byte(v), &t)
-		if err != nil {
-			res = make([]models.AddressBook, 0)
-			break
+		key := util.TakeKey(serviceName, info, v)
+		jsonData, err := rds.Get(ctx, key).Result()
+		if err != nil || json.Unmarshal([]byte(jsonData), &t) != nil {
+			fail = append(fail, v)
+			continue
 		}
-		res = append(res, t)
+		addressMap[v] = t
 	}
 
-	if err != nil || len(res) == 0 {
+	//计算缓存失效比率
+
+	rate := 100
+
+	if len(list) != 0 {
+		rate = len(fail) * 100 / len(list)
+	}
+
+	if ok != nil || len(res) == 0 || rate > 30 {
 		// 执行查询并处理错误
 		if err := DB.Model(&models.AddressBook{}).Where("user_id = ?", req.UserId).Find(&res).Error; err != nil {
 			// 处理错误，例如返回错误或记录日志
 			return nil, err
 		}
 
-		cache := map[string]string{}
-
+		//构建地址ID数组
+		idList := make([]uint, 0, len(res))
 		for _, v := range res {
-			jsonData, _ := json.Marshal(&v)
-			cache[util.TakeKey(v.ID)] = string(jsonData)
+			idList = append(idList, v.ID)
 		}
 
-		//存储哈希
-		err := rds.HMSet(ctx, key, cache).Err()
+		//序列化并存储ID列表缓存
+		jsonData, err := json.Marshal(&idList)
 
 		if err != nil {
-			util.LogError("存储缓存出错", "GetAddressList", "存储缓存hash", err)
+			util.LogError("序列化地址数组错误", "GetAddressList", "请求hash为"+key, err)
+		} else {
+			// 设置随机过期时间，30~45 分钟
+			if setErr := rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
+				util.LogError("存入address缓存失败", "GetAddressList", "", setErr)
+			}
 		}
 
-		// 设置随机过期时间，30~45 分钟
-		rds.Expire(ctx, key, time.Duration(rand.Intn(15)+30)*time.Minute)
+		//地址详情分级存储
+		for _, v := range res {
+			key := util.TakeKey(serviceName, info, v.ID)
+			jsonData, err := json.Marshal(&v)
+			if err != nil {
+				util.LogError("序列化地址错误", "GetAddressList", "address的id为"+strconv.Itoa(int(v.ID)), err)
+			} else {
+				if err = rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
+					util.LogError("缓存地址失败", "GetAddressList", "address的id为"+strconv.Itoa(int(v.ID)), err)
+				}
+			}
+		}
+
 	} else {
+
+		//缓存失效比例较低,逐条查询并放入缓存
+		if len(fail) > 1 {
+			var missedAddress []models.AddressBook
+			if err := DB.Where("id IN ?", fail).Find(&missedAddress).Error; err != nil {
+				util.LogError("查询Address错误", "GetAddressList", "", err)
+				return nil, InvalidAddressIdError
+			}
+			for _, o := range missedAddress {
+				addressMap[o.ID] = o
+				//放入缓存
+				key := util.TakeKey(serviceName, info, o.ID)
+
+				jsonData, err := json.Marshal(&o)
+				if err != nil {
+					util.LogError("序列化地址错误", "GetAddressList", "地址id为"+strconv.Itoa(int(o.ID)), err)
+				} else {
+					if err = rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
+						util.LogError("缓存地址失败", "GetAddressList", "地址id为"+strconv.Itoa(int(o.ID)), err)
+					}
+				}
+			}
+		} else if len(fail) == 1 {
+			t := models.AddressBook{}
+
+			//查询异常,返回错误
+			if err := DB.Where("id = ?", fail[0]).First(&t).Error; err != nil {
+				util.LogError("查询address错误", "GetAddressList", "", err)
+				return nil, InvalidAddressIdError
+			}
+
+			addressMap[fail[0]] = t
+
+			//放入缓存
+			key := util.TakeKey(serviceName, info, fail[0])
+
+			jsonData, err := json.Marshal(&t)
+			if err != nil {
+				util.LogError("序列化地址错误", "GetAddressList", "地址id为"+strconv.Itoa(int(fail[0])), err)
+			} else {
+				if err = rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
+					util.LogError("缓存地址失败", "GetAddressList", "地址id为"+strconv.Itoa(int(fail[0])), err)
+				}
+			}
+		}
+		res = make([]models.AddressBook, 0)
+
+		for _, v := range list {
+			if v, ok := addressMap[v]; ok {
+				res = append(res, v)
+			}
+		}
+
 		log.WithFields(log.Fields{
 			"方法名": "GetAddressList",
 		}).Info("查询缓存成功")
 	}
 
 	//提前给定切片容量,优化性能
-	result := make([]*address.AddressItem, 0, len(res))
+	result := make([]*address.AddressItem, 0, len(addressMap))
 
 	for _, k := range res {
-
 		result = append(result, &address.AddressItem{AddrId: uint64(k.ID), Address: tranAddressBookToAddress(&k)})
-
 	}
 
 	_ = res
@@ -401,29 +481,31 @@ func (s *AddressServiceImpl) GetAddressList(ctx context.Context, req *address.Ge
 // 获取指定地址信息
 func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.GetAddressInfoReq) (resp *address.GetAddressInfoResp, err error) {
 
-	//查询缓存
-	key := util.TakeKey(serviceName, req.UserId)
-
-	jsonData, _ := rds.HGet(ctx, key, strconv.FormatUint(req.AddrId, 10)).Result()
-
 	var addr models.AddressBook
 
-	err = json.Unmarshal([]byte(jsonData), &addr)
+	//查询缓存
+	key := util.TakeKey(serviceName, info, req.AddrId)
 
-	if err != nil { //没有查到的情况
+	jsonData, _ := rds.Get(ctx, key).Result()
+
+	ok := json.Unmarshal([]byte(jsonData), &addr)
+
+	//缓存没有查到,直接查找数据库
+	if ok != nil {
 		if err = DB.Where("id = ? and user_id = ?", req.AddrId, req.UserId).First(&addr).Error; err != nil {
 			return nil, ForbiddenAskError
 		}
 
-		//存储哈希
-		err := rds.HSet(ctx, key, addr).Err()
+		jsonData, err := json.Marshal(&addr)
 
 		if err != nil {
-			util.LogError("存储缓存出错", "GetAddressInfo", "存储缓存hash", err)
+			util.LogError("序列化地址错误", "GetAddressInfo", "地址id为"+strconv.Itoa(int(addr.ID)), err)
+		} else {
+			if err = rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
+				util.LogError("缓存地址失败", "GetAddressInfo", "地址id为"+strconv.Itoa(int(addr.ID)), err)
+			}
 		}
 
-		// 设置随机过期时间，30~45 分钟
-		rds.Expire(ctx, key, time.Duration(rand.Intn(15)+30)*time.Minute)
 	} else {
 		log.WithFields(log.Fields{
 			"方法名": "GetAddressInfo",
@@ -459,10 +541,11 @@ func (s *AddressServiceImpl) GetDefaultAddress(ctx context.Context, req *address
 	result, _ := rds.Get(ctx, key).Result()
 
 	var addr models.AddressBook
-	err = json.Unmarshal([]byte(result), &addr)
+
+	ok := json.Unmarshal([]byte(result), &addr)
 
 	//缓存查询失败
-	if err != nil {
+	if ok != nil {
 
 		DefaultId := s.getDefaultAddress(ctx, req.UserId)
 
@@ -473,6 +556,7 @@ func (s *AddressServiceImpl) GetDefaultAddress(ctx context.Context, req *address
 
 		//重新缓存
 		jsonData, _ := json.Marshal(&addr)
+
 		rds.SetEx(ctx, key, string(jsonData), time.Duration(rand.Intn(15)+30)*time.Minute)
 	} else {
 		log.WithFields(log.Fields{
