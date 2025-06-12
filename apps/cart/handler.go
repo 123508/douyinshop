@@ -5,15 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/123508/douyinshop/kitex_gen/cart"
-	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
-	"github.com/123508/douyinshop/pkg/myredis"
 	"github.com/123508/douyinshop/pkg/util"
-	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"math/rand"
-	"strings"
 	"time"
 )
 
@@ -22,63 +18,12 @@ type CartServiceImpl struct {
 	db *gorm.DB
 }
 
-const (
-	serviceName = "cart"
-)
-
-var rds = connectWithRedis()
-
-func connectWithRedis() *redis.Client {
-	rds, err := myredis.InitRedis()
-	if err != nil {
-		util.LogError("打开Redis连接失败", "connectWithRedis", "", err)
-	}
-	return rds
-}
-
-var NilRequestError = &errorno.BasicMessageError{Code: 400, Message: "请求为空"}
-
-var NilItemError = &errorno.BasicMessageError{Code: 400, Message: "商品为空"}
-
-var NegativeQuantityError = &errorno.BasicMessageError{Code: 400, Message: "数量必须为正数"}
-
-var NilUserIdError = &errorno.BasicMessageError{Code: 400, Message: "用户id不能为空"}
-
-var FailToUpdateCart = &errorno.BasicMessageError{Code: 403, Message: "无法更新购物车"}
-
-var NilProductIdError = &errorno.BasicMessageError{Code: 400, Message: "商品id不能为空"}
-
-// 验证添加商品请求
-func validateAddItemReq(req *cart.AddItemReq) error {
-	if req == nil {
-		return NilRequestError
-	}
-	if req.Item == nil {
-		return NilItemError
-	}
-	if req.Item.Quantity <= 0 {
-		return NegativeQuantityError
-	}
-	if req.UserId == 0 {
-		return NilUserIdError
-	}
-	return nil
-}
-
-// IsDuplicateKeyError 检查是否为重复键错误
-func IsDuplicateKeyError(err error) bool {
-	if err == nil {
-		return false
-	}
-	return strings.Contains(err.Error(), "Duplicate entry")
-}
-
 // AddItem implements the CartServiceImpl interface.
 // 添加商品接口
 func (s *CartServiceImpl) AddItem(ctx context.Context, req *cart.AddItemReq) (*cart.AddItemResp, error) {
 
 	//清理缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
 
 	// 1. 输入验证
 	if err := validateAddItemReq(req); err != nil {
@@ -141,7 +86,7 @@ func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*c
 	//查询缓存部分
 	key := util.TakeKey(serviceName, req.UserId)
 
-	data, err := rds.HGetAll(ctx, key).Result()
+	data, err := Rds.HGetAll(ctx, key).Result()
 
 	if err != nil {
 		util.LogError("查询缓存失败", "GetCart", "", err)
@@ -172,14 +117,14 @@ func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*c
 		}
 
 		//存储哈希
-		err := rds.HMSet(ctx, key, cache).Err()
+		err := Rds.HMSet(ctx, key, cache).Err()
 
 		if err != nil {
 			util.LogError("存储缓存出错", "GetAddressList", "存储缓存hash", err)
 		}
 
 		// 设置随机过期时间，30~45 分钟
-		rds.Expire(ctx, key, time.Duration(rand.Intn(15)+30)*time.Minute)
+		Rds.Expire(ctx, key, time.Duration(rand.Intn(15)+30)*time.Minute)
 
 	} else {
 		log.WithFields(log.Fields{
@@ -203,7 +148,7 @@ func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*c
 func (s *CartServiceImpl) EmptyCart(ctx context.Context, req *cart.EmptyCartReq) (*cart.EmptyCartResp, error) {
 
 	//清理缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
 
 	if req.UserId == 0 {
 		return nil, NilUserIdError
@@ -222,7 +167,7 @@ func (s *CartServiceImpl) EmptyCart(ctx context.Context, req *cart.EmptyCartReq)
 func (s *CartServiceImpl) DeleteItem(ctx context.Context, req *cart.DeleteItemReq) (*cart.EmptyCartResp, error) {
 
 	//清理缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
 
 	if req.UserId == 0 {
 		return nil, NilUserIdError

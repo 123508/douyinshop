@@ -5,13 +5,9 @@ import (
 	"encoding/json"
 	"github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder"
-	"github.com/123508/douyinshop/pkg/db"
-	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
-	"github.com/123508/douyinshop/pkg/myredis"
 	"github.com/123508/douyinshop/pkg/util"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"math/rand"
@@ -21,195 +17,6 @@ import (
 
 // OrderUserServiceImpl implements the last service interface defined in the IDL.
 type OrderUserServiceImpl struct{}
-
-const (
-	serviceName = "order"
-	goods       = "goods"
-)
-
-var DB = connectWithMySQL()
-
-func connectWithMySQL() *gorm.DB {
-	DB, err := db.InitDB()
-	if err != nil {
-		util.LogError("打开MySQL连接失败", "connectWithMySQL", "", err)
-	}
-	return DB
-}
-
-var rds = connectWithRedis()
-
-func connectWithRedis() *redis.Client {
-	rds, err := myredis.InitRedis()
-	if err != nil {
-		util.LogError("打开Redis连接失败", "connectWithRedis", "", err)
-	}
-	return rds
-}
-
-// GetOrderInfo 查询订单信息
-func GetOrderInfo(ctx context.Context, orderId uint64) (*models.Order, error) {
-	// 查询订单信息（Order）基本信息
-	var order models.Order
-
-	// 如果没有找到对应订单，返回错误信息
-	if err := DB.Where("id = ?", orderId).First(&order).Error; err != nil {
-		log.Println(err)
-		return nil, SearchOrderError
-	}
-
-	return &order, nil
-}
-
-func GetOrderInfoWithCache(ctx context.Context, orderId uint64) (*models.Order, error) {
-	// 查询订单信息（Order）基本信息
-	var order models.Order
-
-	orderKey := util.TakeKey(goods, "order", orderId)
-
-	//查询单条order缓存
-	jsonData, _ := rds.Get(ctx, orderKey).Result()
-
-	//查询缓存失败
-	if err := json.Unmarshal([]byte(jsonData), &order); err != nil {
-		// 如果没有找到对应订单，返回错误信息
-		if err := DB.Where("id = ?", orderId).First(&order).Error; err != nil {
-			log.Println(err)
-			return nil, SearchOrderError
-		}
-
-		jsonData, err := json.Marshal(&order)
-
-		if err != nil {
-			util.LogError("序列化商品数据错误", "GetOrderInfoWithCache", "", err)
-		} else {
-			//将数据加入缓存
-			if setErr := rds.Set(ctx, orderKey, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
-				util.LogError("缓存数据失败", "GetOrderInfoWithCache", "将order加入缓存", setErr)
-			}
-		}
-
-	} else {
-
-		log.WithFields(log.Fields{
-			"方法名": "GetOrderInfoWithCache",
-		}).Info("查询order缓存成功")
-	}
-
-	return &order, nil
-}
-
-// GetOrderDetailsWithCache 查询指定订单的详细信息
-func GetOrderDetailsWithCache(ctx context.Context, orderId uint64) ([]models.OrderDetail, error) {
-	// 查询订单详情（List）
-	orderDetails := make([]models.OrderDetail, 0)
-
-	detailKey := util.TakeKey(goods, "orderDetail", orderId)
-
-	//查询orderDetails缓存
-	result, err := rds.Get(ctx, detailKey).Result()
-
-	//查询orderDetail缓存失败
-	if err != nil || json.Unmarshal([]byte(result), &orderDetails) != nil {
-
-		// 如果查询订单详情失败，返回错误
-		if dbErr := DB.Where("order_id = ?", orderId).Find(&orderDetails).Error; dbErr != nil {
-			util.LogError("查询订单详情失败", "GetOrderDetailsWithCache", "查询订单详情", dbErr)
-			return nil, SearchOrderDetailsError
-		}
-
-		jsonData, err := json.Marshal(&orderDetails)
-
-		if err != nil {
-			util.LogError("序列化数据失败", "GetOrderDetailsWithCache", "序列化orderDetail", err)
-		} else {
-			if setErr := rds.Set(ctx, detailKey, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
-				util.LogError("缓存数据失败", "GetOrderDetailsWithCache", "将orderDetail加入缓存", setErr)
-			}
-		}
-
-	} else {
-		log.WithFields(log.Fields{
-			"方法名": "GetOrderDetailsWithCache",
-		}).Info("查询orderDetail缓存成功")
-	}
-
-	return orderDetails, nil
-}
-
-// GetOrderLogsWithCache 查询指定订单的日志信息
-func GetOrderLogsWithCache(ctx context.Context, orderId uint64) ([]models.OrderStatusLog, error) {
-	//查询订单日志详情
-	orderLogs := make([]models.OrderStatusLog, 0)
-
-	logKey := util.TakeKey(goods, "orderLog", orderId)
-
-	res, err := rds.Get(ctx, logKey).Result()
-
-	//查询缓存失败
-	if err != nil || json.Unmarshal([]byte(res), &orderLogs) != nil {
-		//查询失败报错
-		if err = DB.Where("order_id = ?", orderId).Find(&orderLogs).Error; err != nil {
-			log.Println(err)
-			return nil, SearchOrderLogsError
-		}
-
-		jsonData, err := json.Marshal(&orderLogs)
-
-		if err != nil {
-			util.LogError("序列化数据失败", "GetOrderLogsWithCache", "序列化orderLog", err)
-		} else {
-			if setErr := rds.Set(ctx, logKey, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
-				util.LogError("缓存数据失败", "GetOrderLogsWithCache", "将orderLog加入缓存", setErr)
-			}
-
-		}
-	} else {
-		log.WithFields(log.Fields{
-			"方法名": "GetOrderLogsWithCache",
-		}).Info("查询orderLog缓存成功")
-	}
-
-	return orderLogs, nil
-}
-
-// 清除缓存
-func cleanCache(ctx context.Context, orderId uint64) {
-	//清除缓存
-	util.CleanCache(rds, ctx, util.TakeKey(goods, "order", orderId))
-	util.CleanCache(rds, ctx, util.TakeKey(goods, "orderDetail", orderId))
-	util.CleanCache(rds, ctx, util.TakeKey(goods, "orderLog", orderId))
-}
-
-var SubmitOrderError = &errorno.BasicMessageError{Code: 500, Message: "订单提交失败"}
-
-var SearchOrderError = &errorno.BasicMessageError{Code: 404, Message: "查询订单错误"}
-
-var SearchOrderDetailsError = &errorno.BasicMessageError{Code: 500, Message: "查询订单详细信息错误"}
-
-var SearchOrderLogsError = &errorno.BasicMessageError{Code: 404, Message: "查询订单日志错误"}
-
-var CancelOrderError = &errorno.BasicMessageError{Code: 500, Message: "取消订单失败"}
-
-var UnableChangeStatusError = &errorno.BasicMessageError{Code: 400, Message: "更新状态失败,该状态不允许被更新"}
-
-var NotPayReminderError = &errorno.BasicMessageError{Code: 400, Message: "没有支付订单,无法提醒发货"}
-
-var DeliveredReminderError = &errorno.BasicMessageError{Code: 400, Message: "商家已经发货,无需提醒"}
-
-var CancelReminderError = &errorno.BasicMessageError{Code: 400, Message: "订单已经取消,无法提醒发货"}
-
-var RefundingReminderError = &errorno.BasicMessageError{Code: 400, Message: "退款中,无法提醒发货"}
-
-var RefundedReminderError = &errorno.BasicMessageError{Code: 400, Message: "已经退款,无法提醒发货"}
-
-var RejectionReminderError = &errorno.BasicMessageError{Code: 400, Message: "商家拒绝发货,无法提醒"}
-
-var StatusError = &errorno.BasicMessageError{Code: 400, Message: "不允许的行为"}
-
-var CompletionOrderError = &errorno.BasicMessageError{Code: 400, Message: "无法确认收货"}
-
-var BadPageOrPageSize = &errorno.BasicMessageError{Code: 400, Message: "请求页数或页长错误"}
 
 // Submit implements the OrderUserServiceImpl interface.
 // 用户提交订单
@@ -313,7 +120,7 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 	//使用Md5作为条件,支持复杂扩容
 	key := util.Md5Hash(util.TakeKey(serviceName, "list", req.UserId, req.Page, req.PageSize, req.Status))
 
-	result, _ := rds.Get(ctx, key).Result()
+	result, _ := Rds.Get(ctx, key).Result()
 
 	list := make([]uint64, 0)
 	fail := make([]uint64, 0)
@@ -327,7 +134,7 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 
 		t := models.Order{}
 		key := util.TakeKey(goods, "order", v)
-		jsonData, err := rds.Get(ctx, key).Result()
+		jsonData, err := Rds.Get(ctx, key).Result()
 		if err != nil || json.Unmarshal([]byte(jsonData), &t) != nil {
 			fail = append(fail, v)
 			continue
@@ -368,7 +175,7 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 			util.LogError("序列化订单数组错误", "History", "请求hash为"+key, err)
 		} else {
 			// 设置随机过期时间，3~6 分钟
-			if setErr := rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
+			if setErr := Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
 				util.LogError("存入order缓存失败", "History", "", setErr)
 			}
 		}
@@ -380,7 +187,7 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 			if err != nil {
 				util.LogError("序列化订单错误", "History", "order的id为"+strconv.Itoa(int(v.ID)), err)
 			} else {
-				if err = rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
+				if err = Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
 					util.LogError("缓存订单失败", "History", "order的id为"+strconv.Itoa(int(v.ID)), err)
 				}
 			}
@@ -402,7 +209,7 @@ func (s *OrderUserServiceImpl) History(ctx context.Context, req *userOrder.Histo
 				if err != nil {
 					util.LogError("序列化订单错误", "History", "订单id为"+strconv.Itoa(int(o.ID)), err)
 				} else {
-					if err = rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
+					if err = Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
 						util.LogError("缓存订单失败", "History", "订单id为"+strconv.Itoa(int(o.ID)), err)
 					}
 				}

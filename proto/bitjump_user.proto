@@ -17,6 +17,10 @@ service UserService {
     rpc Update(UpdateReq) returns (UpdateResp){}
     //删除用户
     rpc Delete(DeleteReq) returns (DeleteResp){}
+    // 分发token
+    rpc DeliverTokenByRPC(DeliverTokenReq) returns (DeliveryResp) {}
+    // 验证token/续期
+    rpc VerifyTokenByRPC(VerifyTokenReq) returns (VerifyResp) {}
 }
 
 message RegisterReq {
@@ -76,3 +80,21 @@ message DeleteReq{
 }
 
 message DeleteResp{}
+
+message DeliverTokenReq {
+    uint64 user_id = 1;
+}
+
+message VerifyTokenReq {
+    string token = 1;
+}
+
+message DeliveryResp {
+    string token = 1;
+}
+
+message VerifyResp {
+    bool res = 1;
+    string token=2;
+    uint64 user_id=3;
+}

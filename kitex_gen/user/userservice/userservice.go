@@ -57,6 +57,20 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"DeliverTokenByRPC": kitex.NewMethodInfo(
+		deliverTokenByRPCHandler,
+		newDeliverTokenByRPCArgs,
+		newDeliverTokenByRPCResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
+	"VerifyTokenByRPC": kitex.NewMethodInfo(
+		verifyTokenByRPCHandler,
+		newVerifyTokenByRPCArgs,
+		newVerifyTokenByRPCResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 }
 
 var (
@@ -1041,6 +1055,312 @@ func (p *DeleteResult) GetResult() interface{} {
 	return p.Success
 }
 
+func deliverTokenByRPCHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.DeliverTokenReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).DeliverTokenByRPC(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *DeliverTokenByRPCArgs:
+		success, err := handler.(user.UserService).DeliverTokenByRPC(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*DeliverTokenByRPCResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newDeliverTokenByRPCArgs() interface{} {
+	return &DeliverTokenByRPCArgs{}
+}
+
+func newDeliverTokenByRPCResult() interface{} {
+	return &DeliverTokenByRPCResult{}
+}
+
+type DeliverTokenByRPCArgs struct {
+	Req *user.DeliverTokenReq
+}
+
+func (p *DeliverTokenByRPCArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.DeliverTokenReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *DeliverTokenByRPCArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *DeliverTokenByRPCArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *DeliverTokenByRPCArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *DeliverTokenByRPCArgs) Unmarshal(in []byte) error {
+	msg := new(user.DeliverTokenReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var DeliverTokenByRPCArgs_Req_DEFAULT *user.DeliverTokenReq
+
+func (p *DeliverTokenByRPCArgs) GetReq() *user.DeliverTokenReq {
+	if !p.IsSetReq() {
+		return DeliverTokenByRPCArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *DeliverTokenByRPCArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *DeliverTokenByRPCArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type DeliverTokenByRPCResult struct {
+	Success *user.DeliveryResp
+}
+
+var DeliverTokenByRPCResult_Success_DEFAULT *user.DeliveryResp
+
+func (p *DeliverTokenByRPCResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.DeliveryResp)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *DeliverTokenByRPCResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *DeliverTokenByRPCResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *DeliverTokenByRPCResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *DeliverTokenByRPCResult) Unmarshal(in []byte) error {
+	msg := new(user.DeliveryResp)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *DeliverTokenByRPCResult) GetSuccess() *user.DeliveryResp {
+	if !p.IsSetSuccess() {
+		return DeliverTokenByRPCResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *DeliverTokenByRPCResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.DeliveryResp)
+}
+
+func (p *DeliverTokenByRPCResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *DeliverTokenByRPCResult) GetResult() interface{} {
+	return p.Success
+}
+
+func verifyTokenByRPCHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.VerifyTokenReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).VerifyTokenByRPC(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *VerifyTokenByRPCArgs:
+		success, err := handler.(user.UserService).VerifyTokenByRPC(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*VerifyTokenByRPCResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newVerifyTokenByRPCArgs() interface{} {
+	return &VerifyTokenByRPCArgs{}
+}
+
+func newVerifyTokenByRPCResult() interface{} {
+	return &VerifyTokenByRPCResult{}
+}
+
+type VerifyTokenByRPCArgs struct {
+	Req *user.VerifyTokenReq
+}
+
+func (p *VerifyTokenByRPCArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.VerifyTokenReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *VerifyTokenByRPCArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *VerifyTokenByRPCArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *VerifyTokenByRPCArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *VerifyTokenByRPCArgs) Unmarshal(in []byte) error {
+	msg := new(user.VerifyTokenReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var VerifyTokenByRPCArgs_Req_DEFAULT *user.VerifyTokenReq
+
+func (p *VerifyTokenByRPCArgs) GetReq() *user.VerifyTokenReq {
+	if !p.IsSetReq() {
+		return VerifyTokenByRPCArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *VerifyTokenByRPCArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *VerifyTokenByRPCArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type VerifyTokenByRPCResult struct {
+	Success *user.VerifyResp
+}
+
+var VerifyTokenByRPCResult_Success_DEFAULT *user.VerifyResp
+
+func (p *VerifyTokenByRPCResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.VerifyResp)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *VerifyTokenByRPCResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *VerifyTokenByRPCResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *VerifyTokenByRPCResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *VerifyTokenByRPCResult) Unmarshal(in []byte) error {
+	msg := new(user.VerifyResp)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *VerifyTokenByRPCResult) GetSuccess() *user.VerifyResp {
+	if !p.IsSetSuccess() {
+		return VerifyTokenByRPCResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *VerifyTokenByRPCResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.VerifyResp)
+}
+
+func (p *VerifyTokenByRPCResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *VerifyTokenByRPCResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -1106,6 +1426,26 @@ func (p *kClient) Delete(ctx context.Context, Req *user.DeleteReq) (r *user.Dele
 	_args.Req = Req
 	var _result DeleteResult
 	if err = p.c.Call(ctx, "Delete", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) DeliverTokenByRPC(ctx context.Context, Req *user.DeliverTokenReq) (r *user.DeliveryResp, err error) {
+	var _args DeliverTokenByRPCArgs
+	_args.Req = Req
+	var _result DeliverTokenByRPCResult
+	if err = p.c.Call(ctx, "DeliverTokenByRPC", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) VerifyTokenByRPC(ctx context.Context, Req *user.VerifyTokenReq) (r *user.VerifyResp, err error) {
+	var _args VerifyTokenByRPCArgs
+	_args.Req = Req
+	var _result VerifyTokenByRPCResult
+	if err = p.c.Call(ctx, "VerifyTokenByRPC", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

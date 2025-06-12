@@ -17,6 +17,8 @@ type Client interface {
 	Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *user.LogoutResp, err error)
 	Update(ctx context.Context, Req *user.UpdateReq, callOptions ...callopt.Option) (r *user.UpdateResp, err error)
 	Delete(ctx context.Context, Req *user.DeleteReq, callOptions ...callopt.Option) (r *user.DeleteResp, err error)
+	DeliverTokenByRPC(ctx context.Context, Req *user.DeliverTokenReq, callOptions ...callopt.Option) (r *user.DeliveryResp, err error)
+	VerifyTokenByRPC(ctx context.Context, Req *user.VerifyTokenReq, callOptions ...callopt.Option) (r *user.VerifyResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -76,4 +78,14 @@ func (p *kUserServiceClient) Update(ctx context.Context, Req *user.UpdateReq, ca
 func (p *kUserServiceClient) Delete(ctx context.Context, Req *user.DeleteReq, callOptions ...callopt.Option) (r *user.DeleteResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Delete(ctx, Req)
+}
+
+func (p *kUserServiceClient) DeliverTokenByRPC(ctx context.Context, Req *user.DeliverTokenReq, callOptions ...callopt.Option) (r *user.DeliveryResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.DeliverTokenByRPC(ctx, Req)
+}
+
+func (p *kUserServiceClient) VerifyTokenByRPC(ctx context.Context, Req *user.VerifyTokenReq, callOptions ...callopt.Option) (r *user.VerifyResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.VerifyTokenByRPC(ctx, Req)
 }

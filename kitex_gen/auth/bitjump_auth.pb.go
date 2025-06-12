@@ -21,16 +21,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type DeliverTokenReq struct {
+type Role struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId uint64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Id          uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	RoleName    string `protobuf:"bytes,2,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Status      bool   `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedBy   uint64 `protobuf:"varint,5,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
 }
 
-func (x *DeliverTokenReq) Reset() {
-	*x = DeliverTokenReq{}
+func (x *Role) Reset() {
+	*x = Role{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_bitjump_auth_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -38,13 +42,13 @@ func (x *DeliverTokenReq) Reset() {
 	}
 }
 
-func (x *DeliverTokenReq) String() string {
+func (x *Role) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeliverTokenReq) ProtoMessage() {}
+func (*Role) ProtoMessage() {}
 
-func (x *DeliverTokenReq) ProtoReflect() protoreflect.Message {
+func (x *Role) ProtoReflect() protoreflect.Message {
 	mi := &file_bitjump_auth_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -56,28 +60,63 @@ func (x *DeliverTokenReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeliverTokenReq.ProtoReflect.Descriptor instead.
-func (*DeliverTokenReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use Role.ProtoReflect.Descriptor instead.
+func (*Role) Descriptor() ([]byte, []int) {
 	return file_bitjump_auth_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DeliverTokenReq) GetUserId() uint64 {
+func (x *Role) GetId() uint64 {
 	if x != nil {
-		return x.UserId
+		return x.Id
 	}
 	return 0
 }
 
-type VerifyTokenReq struct {
+func (x *Role) GetRoleName() string {
+	if x != nil {
+		return x.RoleName
+	}
+	return ""
+}
+
+func (x *Role) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Role) GetStatus() bool {
+	if x != nil {
+		return x.Status
+	}
+	return false
+}
+
+func (x *Role) GetCreatedBy() uint64 {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return 0
+}
+
+type Permission struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Id             uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	PermissionName string `protobuf:"bytes,2,opt,name=permission_name,json=permissionName,proto3" json:"permission_name,omitempty"`
+	Description    string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	ParentId       uint64 `protobuf:"varint,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Type           string `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
+	Resource       string `protobuf:"bytes,6,opt,name=resource,proto3" json:"resource,omitempty"`
+	Method         string `protobuf:"bytes,7,opt,name=method,proto3" json:"method,omitempty"`
+	Status         bool   `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`
 }
 
-func (x *VerifyTokenReq) Reset() {
-	*x = VerifyTokenReq{}
+func (x *Permission) Reset() {
+	*x = Permission{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_bitjump_auth_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -85,13 +124,13 @@ func (x *VerifyTokenReq) Reset() {
 	}
 }
 
-func (x *VerifyTokenReq) String() string {
+func (x *Permission) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VerifyTokenReq) ProtoMessage() {}
+func (*Permission) ProtoMessage() {}
 
-func (x *VerifyTokenReq) ProtoReflect() protoreflect.Message {
+func (x *Permission) ProtoReflect() protoreflect.Message {
 	mi := &file_bitjump_auth_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -103,28 +142,75 @@ func (x *VerifyTokenReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VerifyTokenReq.ProtoReflect.Descriptor instead.
-func (*VerifyTokenReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use Permission.ProtoReflect.Descriptor instead.
+func (*Permission) Descriptor() ([]byte, []int) {
 	return file_bitjump_auth_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *VerifyTokenReq) GetToken() string {
+func (x *Permission) GetId() uint64 {
 	if x != nil {
-		return x.Token
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Permission) GetPermissionName() string {
+	if x != nil {
+		return x.PermissionName
 	}
 	return ""
 }
 
-type DeliveryResp struct {
+func (x *Permission) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Permission) GetParentId() uint64 {
+	if x != nil {
+		return x.ParentId
+	}
+	return 0
+}
+
+func (x *Permission) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *Permission) GetResource() string {
+	if x != nil {
+		return x.Resource
+	}
+	return ""
+}
+
+func (x *Permission) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *Permission) GetStatus() bool {
+	if x != nil {
+		return x.Status
+	}
+	return false
+}
+
+type Empty struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 }
 
-func (x *DeliveryResp) Reset() {
-	*x = DeliveryResp{}
+func (x *Empty) Reset() {
+	*x = Empty{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_bitjump_auth_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -132,13 +218,13 @@ func (x *DeliveryResp) Reset() {
 	}
 }
 
-func (x *DeliveryResp) String() string {
+func (x *Empty) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeliveryResp) ProtoMessage() {}
+func (*Empty) ProtoMessage() {}
 
-func (x *DeliveryResp) ProtoReflect() protoreflect.Message {
+func (x *Empty) ProtoReflect() protoreflect.Message {
 	mi := &file_bitjump_auth_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -150,30 +236,22 @@ func (x *DeliveryResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeliveryResp.ProtoReflect.Descriptor instead.
-func (*DeliveryResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
+func (*Empty) Descriptor() ([]byte, []int) {
 	return file_bitjump_auth_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *DeliveryResp) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
-type VerifyResp struct {
+type AssignRoleToUserReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Res    bool   `protobuf:"varint,1,opt,name=res,proto3" json:"res,omitempty"`
-	Token  string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	UserId uint64 `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId uint64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RoleId uint64 `protobuf:"varint,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 }
 
-func (x *VerifyResp) Reset() {
-	*x = VerifyResp{}
+func (x *AssignRoleToUserReq) Reset() {
+	*x = AssignRoleToUserReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_bitjump_auth_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -181,13 +259,13 @@ func (x *VerifyResp) Reset() {
 	}
 }
 
-func (x *VerifyResp) String() string {
+func (x *AssignRoleToUserReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VerifyResp) ProtoMessage() {}
+func (*AssignRoleToUserReq) ProtoMessage() {}
 
-func (x *VerifyResp) ProtoReflect() protoreflect.Message {
+func (x *AssignRoleToUserReq) ProtoReflect() protoreflect.Message {
 	mi := &file_bitjump_auth_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -199,62 +277,1025 @@ func (x *VerifyResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VerifyResp.ProtoReflect.Descriptor instead.
-func (*VerifyResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use AssignRoleToUserReq.ProtoReflect.Descriptor instead.
+func (*AssignRoleToUserReq) Descriptor() ([]byte, []int) {
 	return file_bitjump_auth_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *VerifyResp) GetRes() bool {
-	if x != nil {
-		return x.Res
-	}
-	return false
-}
-
-func (x *VerifyResp) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
-func (x *VerifyResp) GetUserId() uint64 {
+func (x *AssignRoleToUserReq) GetUserId() uint64 {
 	if x != nil {
 		return x.UserId
 	}
 	return 0
 }
 
+func (x *AssignRoleToUserReq) GetRoleId() uint64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+type RemoveRoleFromUserReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId uint64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RoleId uint64 `protobuf:"varint,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+}
+
+func (x *RemoveRoleFromUserReq) Reset() {
+	*x = RemoveRoleFromUserReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RemoveRoleFromUserReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveRoleFromUserReq) ProtoMessage() {}
+
+func (x *RemoveRoleFromUserReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveRoleFromUserReq.ProtoReflect.Descriptor instead.
+func (*RemoveRoleFromUserReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *RemoveRoleFromUserReq) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *RemoveRoleFromUserReq) GetRoleId() uint64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+type GetUserRolesReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId uint64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *GetUserRolesReq) Reset() {
+	*x = GetUserRolesReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserRolesReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRolesReq) ProtoMessage() {}
+
+func (x *GetUserRolesReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRolesReq.ProtoReflect.Descriptor instead.
+func (*GetUserRolesReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetUserRolesReq) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type GetUserRolesResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Roles []*Role `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
+}
+
+func (x *GetUserRolesResp) Reset() {
+	*x = GetUserRolesResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserRolesResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRolesResp) ProtoMessage() {}
+
+func (x *GetUserRolesResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRolesResp.ProtoReflect.Descriptor instead.
+func (*GetUserRolesResp) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetUserRolesResp) GetRoles() []*Role {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
+type GrantPermissionToRoleReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleId       uint64 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	PermissionId uint64 `protobuf:"varint,2,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
+}
+
+func (x *GrantPermissionToRoleReq) Reset() {
+	*x = GrantPermissionToRoleReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GrantPermissionToRoleReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GrantPermissionToRoleReq) ProtoMessage() {}
+
+func (x *GrantPermissionToRoleReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GrantPermissionToRoleReq.ProtoReflect.Descriptor instead.
+func (*GrantPermissionToRoleReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GrantPermissionToRoleReq) GetRoleId() uint64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *GrantPermissionToRoleReq) GetPermissionId() uint64 {
+	if x != nil {
+		return x.PermissionId
+	}
+	return 0
+}
+
+type RevokePermissionFromRoleReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleId       uint64 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	PermissionId uint64 `protobuf:"varint,2,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
+}
+
+func (x *RevokePermissionFromRoleReq) Reset() {
+	*x = RevokePermissionFromRoleReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RevokePermissionFromRoleReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokePermissionFromRoleReq) ProtoMessage() {}
+
+func (x *RevokePermissionFromRoleReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokePermissionFromRoleReq.ProtoReflect.Descriptor instead.
+func (*RevokePermissionFromRoleReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RevokePermissionFromRoleReq) GetRoleId() uint64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *RevokePermissionFromRoleReq) GetPermissionId() uint64 {
+	if x != nil {
+		return x.PermissionId
+	}
+	return 0
+}
+
+type GetRolePermissionsReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleId uint64 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+}
+
+func (x *GetRolePermissionsReq) Reset() {
+	*x = GetRolePermissionsReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRolePermissionsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRolePermissionsReq) ProtoMessage() {}
+
+func (x *GetRolePermissionsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRolePermissionsReq.ProtoReflect.Descriptor instead.
+func (*GetRolePermissionsReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetRolePermissionsReq) GetRoleId() uint64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+type GetRolePermissionsResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Permissions []*Permission `protobuf:"bytes,1,rep,name=permissions,proto3" json:"permissions,omitempty"`
+}
+
+func (x *GetRolePermissionsResp) Reset() {
+	*x = GetRolePermissionsResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRolePermissionsResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRolePermissionsResp) ProtoMessage() {}
+
+func (x *GetRolePermissionsResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRolePermissionsResp.ProtoReflect.Descriptor instead.
+func (*GetRolePermissionsResp) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetRolePermissionsResp) GetPermissions() []*Permission {
+	if x != nil {
+		return x.Permissions
+	}
+	return nil
+}
+
+type GetUserPermissionsReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId uint64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *GetUserPermissionsReq) Reset() {
+	*x = GetUserPermissionsReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserPermissionsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserPermissionsReq) ProtoMessage() {}
+
+func (x *GetUserPermissionsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserPermissionsReq.ProtoReflect.Descriptor instead.
+func (*GetUserPermissionsReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetUserPermissionsReq) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type GetUserPermissionsResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Permissions []*Permission `protobuf:"bytes,1,rep,name=permissions,proto3" json:"permissions,omitempty"`
+}
+
+func (x *GetUserPermissionsResp) Reset() {
+	*x = GetUserPermissionsResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserPermissionsResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserPermissionsResp) ProtoMessage() {}
+
+func (x *GetUserPermissionsResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserPermissionsResp.ProtoReflect.Descriptor instead.
+func (*GetUserPermissionsResp) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetUserPermissionsResp) GetPermissions() []*Permission {
+	if x != nil {
+		return x.Permissions
+	}
+	return nil
+}
+
+type HasPermissionReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId         uint64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PermissionCode string `protobuf:"bytes,2,opt,name=permission_code,json=permissionCode,proto3" json:"permission_code,omitempty"`
+}
+
+func (x *HasPermissionReq) Reset() {
+	*x = HasPermissionReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HasPermissionReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HasPermissionReq) ProtoMessage() {}
+
+func (x *HasPermissionReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HasPermissionReq.ProtoReflect.Descriptor instead.
+func (*HasPermissionReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *HasPermissionReq) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *HasPermissionReq) GetPermissionCode() string {
+	if x != nil {
+		return x.PermissionCode
+	}
+	return ""
+}
+
+type HasPermissionResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *HasPermissionResp) Reset() {
+	*x = HasPermissionResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HasPermissionResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HasPermissionResp) ProtoMessage() {}
+
+func (x *HasPermissionResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HasPermissionResp.ProtoReflect.Descriptor instead.
+func (*HasPermissionResp) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *HasPermissionResp) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+type CanAccessReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId   uint64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Resource string `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
+	Action   string `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
+}
+
+func (x *CanAccessReq) Reset() {
+	*x = CanAccessReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CanAccessReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CanAccessReq) ProtoMessage() {}
+
+func (x *CanAccessReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CanAccessReq.ProtoReflect.Descriptor instead.
+func (*CanAccessReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CanAccessReq) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *CanAccessReq) GetResource() string {
+	if x != nil {
+		return x.Resource
+	}
+	return ""
+}
+
+func (x *CanAccessReq) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+type CanAccessResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *CanAccessResp) Reset() {
+	*x = CanAccessResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CanAccessResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CanAccessResp) ProtoMessage() {}
+
+func (x *CanAccessResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CanAccessResp.ProtoReflect.Descriptor instead.
+func (*CanAccessResp) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CanAccessResp) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+type ListRolesResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	R []*Role `protobuf:"bytes,1,rep,name=r,proto3" json:"r,omitempty"`
+}
+
+func (x *ListRolesResp) Reset() {
+	*x = ListRolesResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListRolesResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRolesResp) ProtoMessage() {}
+
+func (x *ListRolesResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRolesResp.ProtoReflect.Descriptor instead.
+func (*ListRolesResp) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListRolesResp) GetR() []*Role {
+	if x != nil {
+		return x.R
+	}
+	return nil
+}
+
+type ListPermissionsResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	P []*Permission `protobuf:"bytes,1,rep,name=p,proto3" json:"p,omitempty"`
+}
+
+func (x *ListPermissionsResp) Reset() {
+	*x = ListPermissionsResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListPermissionsResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPermissionsResp) ProtoMessage() {}
+
+func (x *ListPermissionsResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPermissionsResp.ProtoReflect.Descriptor instead.
+func (*ListPermissionsResp) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListPermissionsResp) GetP() []*Permission {
+	if x != nil {
+		return x.P
+	}
+	return nil
+}
+
+type IsSuperAdminReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId uint64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *IsSuperAdminReq) Reset() {
+	*x = IsSuperAdminReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *IsSuperAdminReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsSuperAdminReq) ProtoMessage() {}
+
+func (x *IsSuperAdminReq) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsSuperAdminReq.ProtoReflect.Descriptor instead.
+func (*IsSuperAdminReq) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *IsSuperAdminReq) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type IsSuperAdminResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *IsSuperAdminResp) Reset() {
+	*x = IsSuperAdminResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bitjump_auth_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *IsSuperAdminResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsSuperAdminResp) ProtoMessage() {}
+
+func (x *IsSuperAdminResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bitjump_auth_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsSuperAdminResp.ProtoReflect.Descriptor instead.
+func (*IsSuperAdminResp) Descriptor() ([]byte, []int) {
+	return file_bitjump_auth_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *IsSuperAdminResp) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
 var File_bitjump_auth_proto protoreflect.FileDescriptor
 
 var file_bitjump_auth_proto_rawDesc = []byte{
 	0x0a, 0x12, 0x62, 0x69, 0x74, 0x6a, 0x75, 0x6d, 0x70, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x04, 0x61, 0x75, 0x74, 0x68, 0x22, 0x2a, 0x0a, 0x0f, 0x44, 0x65,
-	0x6c, 0x69, 0x76, 0x65, 0x72, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x17, 0x0a,
-	0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06,
-	0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x26, 0x0a, 0x0e, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79,
-	0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65,
-	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x24,
-	0x0a, 0x0c, 0x44, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x12, 0x14,
-	0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74,
-	0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x4d, 0x0a, 0x0a, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x52, 0x65,
-	0x73, 0x70, 0x12, 0x10, 0x0a, 0x03, 0x72, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52,
-	0x03, 0x72, 0x65, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
-	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x64, 0x32, 0x8d, 0x01, 0x0a, 0x0b, 0x41, 0x75, 0x74, 0x68, 0x53, 0x65, 0x72, 0x76,
-	0x69, 0x63, 0x65, 0x12, 0x40, 0x0a, 0x11, 0x44, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x54, 0x6f,
-	0x6b, 0x65, 0x6e, 0x42, 0x79, 0x52, 0x50, 0x43, 0x12, 0x15, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e,
-	0x44, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x1a,
-	0x12, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x44, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x79, 0x52,
-	0x65, 0x73, 0x70, 0x22, 0x00, 0x12, 0x3c, 0x0a, 0x10, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x54,
-	0x6f, 0x6b, 0x65, 0x6e, 0x42, 0x79, 0x52, 0x50, 0x43, 0x12, 0x14, 0x2e, 0x61, 0x75, 0x74, 0x68,
-	0x2e, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x1a,
-	0x10, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x52, 0x65, 0x73,
-	0x70, 0x22, 0x00, 0x42, 0x2d, 0x5a, 0x2b, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x31, 0x32, 0x33, 0x35, 0x30, 0x38, 0x2f, 0x64, 0x6f, 0x75, 0x79, 0x69, 0x6e, 0x73,
-	0x68, 0x6f, 0x70, 0x2f, 0x6b, 0x69, 0x74, 0x65, 0x78, 0x5f, 0x67, 0x65, 0x6e, 0x2f, 0x61, 0x75,
-	0x74, 0x68, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x04, 0x61, 0x75, 0x74, 0x68, 0x22, 0x8c, 0x01, 0x0a, 0x04, 0x52,
+	0x6f, 0x6c, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52,
+	0x02, 0x69, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x6e, 0x61, 0x6d, 0x65,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x72, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65,
+	0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69,
+	0x6f, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x08, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x05, 0x20, 0x01, 0x28, 0x04, 0x52, 0x09,
+	0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x42, 0x79, 0x22, 0xe4, 0x01, 0x0a, 0x0a, 0x50, 0x65,
+	0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x27, 0x0a, 0x0f, 0x70, 0x65, 0x72, 0x6d,
+	0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0e, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d,
+	0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74,
+	0x69, 0x6f, 0x6e, 0x12, 0x1b, 0x0a, 0x09, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x04, 0x52, 0x08, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x49, 0x64,
+	0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x74, 0x79, 0x70, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
+	0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
+	0x12, 0x16, 0x0a, 0x06, 0x6d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x06, 0x6d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x18, 0x08, 0x20, 0x01, 0x28, 0x08, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x22, 0x07, 0x0a, 0x05, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x47, 0x0a, 0x13, 0x41, 0x73, 0x73,
+	0x69, 0x67, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x54, 0x6f, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71,
+	0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c,
+	0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65,
+	0x49, 0x64, 0x22, 0x49, 0x0a, 0x15, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x52, 0x6f, 0x6c, 0x65,
+	0x46, 0x72, 0x6f, 0x6d, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x12, 0x17, 0x0a, 0x07, 0x75,
+	0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x75, 0x73,
+	0x65, 0x72, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x22, 0x2a, 0x0a,
+	0x0f, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x71,
+	0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x34, 0x0a, 0x10, 0x47, 0x65, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12, 0x20, 0x0a,
+	0x05, 0x72, 0x6f, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x61,
+	0x75, 0x74, 0x68, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x05, 0x72, 0x6f, 0x6c, 0x65, 0x73, 0x22,
+	0x58, 0x0a, 0x18, 0x47, 0x72, 0x61, 0x6e, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x54, 0x6f, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x12, 0x17, 0x0a, 0x07, 0x72,
+	0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x72, 0x6f,
+	0x6c, 0x65, 0x49, 0x64, 0x12, 0x23, 0x0a, 0x0d, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0c, 0x70, 0x65, 0x72,
+	0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x22, 0x5b, 0x0a, 0x1b, 0x52, 0x65, 0x76,
+	0x6f, 0x6b, 0x65, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x46, 0x72, 0x6f,
+	0x6d, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65,
+	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49,
+	0x64, 0x12, 0x23, 0x0a, 0x0d, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f,
+	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0c, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73,
+	0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x22, 0x30, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c,
+	0x65, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x12,
+	0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x22, 0x4c, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x52,
+	0x6f, 0x6c, 0x65, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x12, 0x32, 0x0a, 0x0b, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+	0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x50,
+	0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x0b, 0x70, 0x65, 0x72, 0x6d, 0x69,
+	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0x30, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x12,
+	0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x4c, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x55,
+	0x73, 0x65, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x12, 0x32, 0x0a, 0x0b, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+	0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x50,
+	0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x0b, 0x70, 0x65, 0x72, 0x6d, 0x69,
+	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0x54, 0x0a, 0x10, 0x48, 0x61, 0x73, 0x50, 0x65, 0x72,
+	0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
+	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x64, 0x12, 0x27, 0x0a, 0x0f, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f,
+	0x6e, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x70, 0x65,
+	0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x43, 0x6f, 0x64, 0x65, 0x22, 0x23, 0x0a, 0x11,
+	0x48, 0x61, 0x73, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f,
+	0x6b, 0x22, 0x5b, 0x0a, 0x0c, 0x43, 0x61, 0x6e, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65,
+	0x71, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x04, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x72, 0x65,
+	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x72, 0x65,
+	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x1f,
+	0x0a, 0x0d, 0x43, 0x61, 0x6e, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12,
+	0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b, 0x22,
+	0x29, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x12, 0x18, 0x0a, 0x01, 0x72, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x61, 0x75,
+	0x74, 0x68, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x01, 0x72, 0x22, 0x35, 0x0a, 0x13, 0x4c, 0x69,
+	0x73, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x1e, 0x0a, 0x01, 0x70, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x61,
+	0x75, 0x74, 0x68, 0x2e, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x01,
+	0x70, 0x22, 0x2a, 0x0a, 0x0f, 0x49, 0x73, 0x53, 0x75, 0x70, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69,
+	0x6e, 0x52, 0x65, 0x71, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x22, 0x0a,
+	0x10, 0x49, 0x73, 0x53, 0x75, 0x70, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f,
+	0x6b, 0x32, 0xb5, 0x06, 0x0a, 0x0b, 0x41, 0x75, 0x74, 0x68, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x12, 0x3c, 0x0a, 0x10, 0x41, 0x73, 0x73, 0x69, 0x67, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x54,
+	0x6f, 0x55, 0x73, 0x65, 0x72, 0x12, 0x19, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x41, 0x73, 0x73,
+	0x69, 0x67, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x54, 0x6f, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71,
+	0x1a, 0x0b, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12,
+	0x40, 0x0a, 0x12, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x46, 0x72, 0x6f,
+	0x6d, 0x55, 0x73, 0x65, 0x72, 0x12, 0x1b, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x52, 0x65, 0x6d,
+	0x6f, 0x76, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x46, 0x72, 0x6f, 0x6d, 0x55, 0x73, 0x65, 0x72, 0x52,
+	0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22,
+	0x00, 0x12, 0x3f, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65,
+	0x73, 0x12, 0x15, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72,
+	0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x16, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e,
+	0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x22, 0x00, 0x12, 0x46, 0x0a, 0x15, 0x47, 0x72, 0x61, 0x6e, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x69,
+	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x54, 0x6f, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x1e, 0x2e, 0x61, 0x75,
+	0x74, 0x68, 0x2e, 0x47, 0x72, 0x61, 0x6e, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x54, 0x6f, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x61, 0x75,
+	0x74, 0x68, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x4c, 0x0a, 0x18, 0x52, 0x65,
+	0x76, 0x6f, 0x6b, 0x65, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x46, 0x72,
+	0x6f, 0x6d, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x21, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x52, 0x65,
+	0x76, 0x6f, 0x6b, 0x65, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x46, 0x72,
+	0x6f, 0x6d, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x61, 0x75, 0x74, 0x68,
+	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x51, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x52,
+	0x6f, 0x6c, 0x65, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x1b,
+	0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x65, 0x72,
+	0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x1c, 0x2e, 0x61, 0x75,
+	0x74, 0x68, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73,
+	0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x12, 0x51, 0x0a, 0x12, 0x47,
+	0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+	0x73, 0x12, 0x1b, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72,
+	0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x1c,
+	0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x50, 0x65, 0x72,
+	0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x12, 0x42,
+	0x0a, 0x0d, 0x48, 0x61, 0x73, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x12,
+	0x16, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x48, 0x61, 0x73, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73,
+	0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x48,
+	0x61, 0x73, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70,
+	0x22, 0x00, 0x12, 0x36, 0x0a, 0x09, 0x43, 0x61, 0x6e, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x12,
+	0x12, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x43, 0x61, 0x6e, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73,
+	0x52, 0x65, 0x71, 0x1a, 0x13, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x43, 0x61, 0x6e, 0x41, 0x63,
+	0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x12, 0x2f, 0x0a, 0x09, 0x4c, 0x69,
+	0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x12, 0x0b, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x1a, 0x13, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x4c, 0x69, 0x73, 0x74,
+	0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x12, 0x3b, 0x0a, 0x0f, 0x4c,
+	0x69, 0x73, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x0b,
+	0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x19, 0x2e, 0x61, 0x75,
+	0x74, 0x68, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f,
+	0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x12, 0x3f, 0x0a, 0x0c, 0x49, 0x73, 0x53, 0x75,
+	0x70, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x15, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e,
+	0x49, 0x73, 0x53, 0x75, 0x70, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a,
+	0x16, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x49, 0x73, 0x53, 0x75, 0x70, 0x65, 0x72, 0x41, 0x64,
+	0x6d, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x42, 0x2d, 0x5a, 0x2b, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x31, 0x32, 0x33, 0x35, 0x30, 0x38, 0x2f, 0x64,
+	0x6f, 0x75, 0x79, 0x69, 0x6e, 0x73, 0x68, 0x6f, 0x70, 0x2f, 0x6b, 0x69, 0x74, 0x65, 0x78, 0x5f,
+	0x67, 0x65, 0x6e, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -269,23 +1310,65 @@ func file_bitjump_auth_proto_rawDescGZIP() []byte {
 	return file_bitjump_auth_proto_rawDescData
 }
 
-var file_bitjump_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_bitjump_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_bitjump_auth_proto_goTypes = []interface{}{
-	(*DeliverTokenReq)(nil), // 0: auth.DeliverTokenReq
-	(*VerifyTokenReq)(nil),  // 1: auth.VerifyTokenReq
-	(*DeliveryResp)(nil),    // 2: auth.DeliveryResp
-	(*VerifyResp)(nil),      // 3: auth.VerifyResp
+	(*Role)(nil),                        // 0: auth.Role
+	(*Permission)(nil),                  // 1: auth.Permission
+	(*Empty)(nil),                       // 2: auth.Empty
+	(*AssignRoleToUserReq)(nil),         // 3: auth.AssignRoleToUserReq
+	(*RemoveRoleFromUserReq)(nil),       // 4: auth.RemoveRoleFromUserReq
+	(*GetUserRolesReq)(nil),             // 5: auth.GetUserRolesReq
+	(*GetUserRolesResp)(nil),            // 6: auth.GetUserRolesResp
+	(*GrantPermissionToRoleReq)(nil),    // 7: auth.GrantPermissionToRoleReq
+	(*RevokePermissionFromRoleReq)(nil), // 8: auth.RevokePermissionFromRoleReq
+	(*GetRolePermissionsReq)(nil),       // 9: auth.GetRolePermissionsReq
+	(*GetRolePermissionsResp)(nil),      // 10: auth.GetRolePermissionsResp
+	(*GetUserPermissionsReq)(nil),       // 11: auth.GetUserPermissionsReq
+	(*GetUserPermissionsResp)(nil),      // 12: auth.GetUserPermissionsResp
+	(*HasPermissionReq)(nil),            // 13: auth.HasPermissionReq
+	(*HasPermissionResp)(nil),           // 14: auth.HasPermissionResp
+	(*CanAccessReq)(nil),                // 15: auth.CanAccessReq
+	(*CanAccessResp)(nil),               // 16: auth.CanAccessResp
+	(*ListRolesResp)(nil),               // 17: auth.ListRolesResp
+	(*ListPermissionsResp)(nil),         // 18: auth.ListPermissionsResp
+	(*IsSuperAdminReq)(nil),             // 19: auth.IsSuperAdminReq
+	(*IsSuperAdminResp)(nil),            // 20: auth.IsSuperAdminResp
 }
 var file_bitjump_auth_proto_depIdxs = []int32{
-	0, // 0: auth.AuthService.DeliverTokenByRPC:input_type -> auth.DeliverTokenReq
-	1, // 1: auth.AuthService.VerifyTokenByRPC:input_type -> auth.VerifyTokenReq
-	2, // 2: auth.AuthService.DeliverTokenByRPC:output_type -> auth.DeliveryResp
-	3, // 3: auth.AuthService.VerifyTokenByRPC:output_type -> auth.VerifyResp
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: auth.GetUserRolesResp.roles:type_name -> auth.Role
+	1,  // 1: auth.GetRolePermissionsResp.permissions:type_name -> auth.Permission
+	1,  // 2: auth.GetUserPermissionsResp.permissions:type_name -> auth.Permission
+	0,  // 3: auth.ListRolesResp.r:type_name -> auth.Role
+	1,  // 4: auth.ListPermissionsResp.p:type_name -> auth.Permission
+	3,  // 5: auth.AuthService.AssignRoleToUser:input_type -> auth.AssignRoleToUserReq
+	4,  // 6: auth.AuthService.RemoveRoleFromUser:input_type -> auth.RemoveRoleFromUserReq
+	5,  // 7: auth.AuthService.GetUserRoles:input_type -> auth.GetUserRolesReq
+	7,  // 8: auth.AuthService.GrantPermissionToRole:input_type -> auth.GrantPermissionToRoleReq
+	8,  // 9: auth.AuthService.RevokePermissionFromRole:input_type -> auth.RevokePermissionFromRoleReq
+	9,  // 10: auth.AuthService.GetRolePermissions:input_type -> auth.GetRolePermissionsReq
+	11, // 11: auth.AuthService.GetUserPermissions:input_type -> auth.GetUserPermissionsReq
+	13, // 12: auth.AuthService.HasPermission:input_type -> auth.HasPermissionReq
+	15, // 13: auth.AuthService.CanAccess:input_type -> auth.CanAccessReq
+	2,  // 14: auth.AuthService.ListRoles:input_type -> auth.Empty
+	2,  // 15: auth.AuthService.ListPermissions:input_type -> auth.Empty
+	19, // 16: auth.AuthService.IsSuperAdmin:input_type -> auth.IsSuperAdminReq
+	2,  // 17: auth.AuthService.AssignRoleToUser:output_type -> auth.Empty
+	2,  // 18: auth.AuthService.RemoveRoleFromUser:output_type -> auth.Empty
+	6,  // 19: auth.AuthService.GetUserRoles:output_type -> auth.GetUserRolesResp
+	2,  // 20: auth.AuthService.GrantPermissionToRole:output_type -> auth.Empty
+	2,  // 21: auth.AuthService.RevokePermissionFromRole:output_type -> auth.Empty
+	10, // 22: auth.AuthService.GetRolePermissions:output_type -> auth.GetRolePermissionsResp
+	12, // 23: auth.AuthService.GetUserPermissions:output_type -> auth.GetUserPermissionsResp
+	14, // 24: auth.AuthService.HasPermission:output_type -> auth.HasPermissionResp
+	16, // 25: auth.AuthService.CanAccess:output_type -> auth.CanAccessResp
+	17, // 26: auth.AuthService.ListRoles:output_type -> auth.ListRolesResp
+	18, // 27: auth.AuthService.ListPermissions:output_type -> auth.ListPermissionsResp
+	20, // 28: auth.AuthService.IsSuperAdmin:output_type -> auth.IsSuperAdminResp
+	17, // [17:29] is the sub-list for method output_type
+	5,  // [5:17] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_bitjump_auth_proto_init() }
@@ -295,7 +1378,7 @@ func file_bitjump_auth_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_bitjump_auth_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeliverTokenReq); i {
+			switch v := v.(*Role); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -307,7 +1390,7 @@ func file_bitjump_auth_proto_init() {
 			}
 		}
 		file_bitjump_auth_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*VerifyTokenReq); i {
+			switch v := v.(*Permission); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -319,7 +1402,7 @@ func file_bitjump_auth_proto_init() {
 			}
 		}
 		file_bitjump_auth_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeliveryResp); i {
+			switch v := v.(*Empty); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -331,7 +1414,211 @@ func file_bitjump_auth_proto_init() {
 			}
 		}
 		file_bitjump_auth_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*VerifyResp); i {
+			switch v := v.(*AssignRoleToUserReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RemoveRoleFromUserReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetUserRolesReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetUserRolesResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GrantPermissionToRoleReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RevokePermissionFromRoleReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRolePermissionsReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRolePermissionsResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetUserPermissionsReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetUserPermissionsResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HasPermissionReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HasPermissionResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CanAccessReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CanAccessResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListRolesResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListPermissionsResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IsSuperAdminReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bitjump_auth_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IsSuperAdminResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -349,7 +1636,7 @@ func file_bitjump_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_bitjump_auth_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -368,6 +1655,16 @@ var _ context.Context
 // Code generated by Kitex v0.12.1. DO NOT EDIT.
 
 type AuthService interface {
-	DeliverTokenByRPC(ctx context.Context, req *DeliverTokenReq) (res *DeliveryResp, err error)
-	VerifyTokenByRPC(ctx context.Context, req *VerifyTokenReq) (res *VerifyResp, err error)
+	AssignRoleToUser(ctx context.Context, req *AssignRoleToUserReq) (res *Empty, err error)
+	RemoveRoleFromUser(ctx context.Context, req *RemoveRoleFromUserReq) (res *Empty, err error)
+	GetUserRoles(ctx context.Context, req *GetUserRolesReq) (res *GetUserRolesResp, err error)
+	GrantPermissionToRole(ctx context.Context, req *GrantPermissionToRoleReq) (res *Empty, err error)
+	RevokePermissionFromRole(ctx context.Context, req *RevokePermissionFromRoleReq) (res *Empty, err error)
+	GetRolePermissions(ctx context.Context, req *GetRolePermissionsReq) (res *GetRolePermissionsResp, err error)
+	GetUserPermissions(ctx context.Context, req *GetUserPermissionsReq) (res *GetUserPermissionsResp, err error)
+	HasPermission(ctx context.Context, req *HasPermissionReq) (res *HasPermissionResp, err error)
+	CanAccess(ctx context.Context, req *CanAccessReq) (res *CanAccessResp, err error)
+	ListRoles(ctx context.Context, req *Empty) (res *ListRolesResp, err error)
+	ListPermissions(ctx context.Context, req *Empty) (res *ListPermissionsResp, err error)
+	IsSuperAdmin(ctx context.Context, req *IsSuperAdminReq) (res *IsSuperAdminResp, err error)
 }

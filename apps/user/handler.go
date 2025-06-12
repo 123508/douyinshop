@@ -2,84 +2,18 @@ package main
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
-	"github.com/123508/douyinshop/pkg/db"
-	"github.com/123508/douyinshop/pkg/errorno"
+	"github.com/123508/douyinshop/pkg/config"
 	"github.com/123508/douyinshop/pkg/models"
-	"github.com/123508/douyinshop/pkg/myredis"
 	"github.com/123508/douyinshop/pkg/util"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
-	"math/rand"
 	"time"
 
 	"github.com/123508/douyinshop/kitex_gen/user"
 )
 
-const (
-	serviceName = "user"
-)
-
-var UserNotExists = &errorno.BasicMessageError{Code: 401, Message: "用户不存在"}
-
-var PasswordNotEqual = &errorno.BasicMessageError{Code: 400, Message: "密码不匹配,请重新输入"}
-
-var ErrorUsernameOrPassword = &errorno.BasicMessageError{Code: 404, Message: "用户名或密码错误"}
-
 // UserServiceImpl implements the last service interface defined in the IDL.
 type UserServiceImpl struct{}
-
-// sha256加密算法
-func encryption(origin string) string {
-	hash := sha256.New()
-	hash.Write([]byte(origin))
-	hashBytes := hash.Sum(nil)
-	res := hex.EncodeToString(hashBytes)
-	return res
-}
-
-var DB = connectWithMySQL()
-
-func connectWithMySQL() *gorm.DB {
-	DB, err := db.InitDB()
-	if err != nil {
-		util.LogError("打开MySQL连接失败", "connectWithMySQL", "", err)
-	}
-	return DB
-}
-
-var rds = connectWithRedis()
-
-func connectWithRedis() *redis.Client {
-	rds, err := myredis.InitRedis()
-	if err != nil {
-		util.LogError("打开Redis连接失败", "connectWithRedis", "", err)
-	}
-	return rds
-}
-
-func GetUserInfoWithCache(ctx context.Context, userId uint64) (models.User, error) {
-	simple := util.SimpleCacheComponent[uint64, models.User]{
-		Rds:       rds,
-		Ctx:       ctx,
-		Key:       util.TakeKey(serviceName, userId),
-		Marshal:   json.Marshal,
-		Unmarshal: json.Unmarshal,
-		QueryExec: func() (models.User, error) {
-			var row models.User
-			if err := DB.Model(&models.User{}).Where("id = ?", userId).First(&row).Error; err != nil {
-				util.LogError("用户不存在", "GetUserInfo", "", err)
-				return models.User{}, UserNotExists
-			}
-			return row, nil
-		},
-		Expires: time.Duration(rand.Intn(10)+5) * time.Minute,
-	}
-	return simple.QueryWithCache()
-}
 
 // Register implements the UserServiceImpl interface.
 // 用户注册接口
@@ -97,7 +31,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 	user1.Phone = req.Phone
 	user1.Gender = req.Gender
 	user2 := &models.UserLogin{}
-	user2.Password = encryption(req.Password)
+	user2.Password = Encryption(req.Password)
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
@@ -135,7 +69,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 
 	//从user_logins表中获取Password信息
 	var res models.UserLogin
-	DB.Model(&models.UserLogin{}).Where("user_id = ? and password = ?", row.ID, encryption(req.Password)).Find(&res)
+	DB.Model(&models.UserLogin{}).Where("user_id = ? and password = ?", row.ID, Encryption(req.Password)).Find(&res)
 
 	//如果用户已经被删除也返回空
 	if res.ID == 0 {
@@ -161,7 +95,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	//var row models.User
 	//
 	////查询缓存
-	//result, _ := rds.Get(ctx, util.TakeKey(serviceName, req.UserId)).Result()
+	//result, _ := Rds.Get(ctx, util.TakeKey(serviceName, req.UserId)).Result()
 	//
 	//err = json.Unmarshal([]byte(result), &row)
 	//
@@ -176,7 +110,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	//
 	//	//存入缓存
 	//	jsonData, _ := json.Marshal(row)
-	//	err := rds.Set(ctx, util.TakeKey(serviceName, req.UserId), string(jsonData), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
+	//	err := Rds.Set(ctx, util.TakeKey(serviceName, req.UserId), string(jsonData), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
 	//	if err != nil {
 	//		util.LogError("存入缓存失败", "GetUserInfo", "", err)
 	//	}
@@ -202,7 +136,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp *user.LogoutResp, err error) {
 
 	//让token失效,否则报错并返回
-	if err = rds.Set(ctx, req.Token, "1", 8*time.Hour).Err(); err != nil {
+	if err = Rds.Set(ctx, req.Token, "1", 8*time.Hour).Err(); err != nil {
 		return &user.LogoutResp{}, err
 	}
 
@@ -217,7 +151,7 @@ func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp
 func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp *user.UpdateResp, err error) {
 
 	//清理缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
 
 	if req.UserId == 0 {
 		return nil, UserNotExists
@@ -253,7 +187,7 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 		//更新用户密码部分
 		if req.Password != "" {
 			where := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId)
-			if err = where.Update("password", encryption(req.Password)).Update("updated_at", time.Now()).Error; err != nil {
+			if err = where.Update("password", Encryption(req.Password)).Update("updated_at", time.Now()).Error; err != nil {
 				util.LogError("更新用户密码错误", "Update", "", err)
 				return err
 			}
@@ -273,7 +207,7 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp *user.DeleteResp, err error) {
 
 	//清理缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).Update("phone", nil).Update("email", nil).Delete(&models.User{}).Error; err != nil {
@@ -290,4 +224,74 @@ func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp
 		return nil, err
 	}
 	return &user.DeleteResp{}, nil
+}
+
+// DeliverTokenByRPC implements the AuthServiceImpl interface.
+// 对外暴露的负责分发令牌的借口
+func (s *UserServiceImpl) DeliverTokenByRPC(ctx context.Context, req *user.DeliverTokenReq) (resp *user.DeliveryResp, err error) {
+	token, err := GenerateJWT(req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	resp = &user.DeliveryResp{Token: token}
+	return resp, nil
+}
+
+// VerifyTokenByRPC implements the AuthServiceImpl interface.
+// 对外暴露的验证令牌接口
+// 如果redis中标记该令牌无效,返回错误响应
+// 如果令牌无效,返回错误响应
+// 如果令牌存活时间小于等于阈值,刷新令牌并返回成功响应
+// 如果令牌存活时间大于阈值,直接返回成功响应
+// 注意每次需要使用响应去接收token
+func (s *UserServiceImpl) VerifyTokenByRPC(ctx context.Context, req *user.VerifyTokenReq) (resp *user.VerifyResp, err error) {
+	if req.Token == "" {
+		return &user.VerifyResp{Res: false}, NilToken
+	}
+
+	//在redis中检查token是否存活
+	result, err := Rds.Exists(ctx, req.Token).Result()
+
+	//如果redis连接出错,直接返回错误信息
+	if err != nil {
+		util.LogError("redis连接错误", "VerifyTokenByRPC", "", err)
+		return nil, RedisConnectionError
+	} else {
+		//如果在redis中检测到token,则直接返回失败响应
+		if result == 1 {
+			resp = &user.VerifyResp{Res: false}
+			return resp, InvalidToken
+		}
+	}
+
+	token, err := ParseJWT(req.Token)
+	//判断令牌是否可以被解析,如果令牌无法被解析返回失败响应
+	resp = &user.VerifyResp{Res: err == nil}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Res {
+		//如果相差时间小于令牌存活阈值,就重新生成令牌
+		diff := config.Conf.AdminTtl - config.Conf.AdminSuv
+		if diff <= 0 {
+			diff = 10800
+		}
+		suv := time.Duration(diff) * time.Second
+		if time.Since(token.IssuedAt.Time) >= suv {
+			newToken, err := GenerateJWT(token.UserId)
+			if err != nil {
+				resp.Res = false
+				return resp, err // 返回错误
+			}
+			//将token重新放入
+			resp.Token = newToken
+		} else {
+			resp.Token = req.Token
+		}
+		resp.UserId = token.UserId
+	}
+
+	return resp, err
 }

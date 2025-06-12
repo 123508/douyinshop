@@ -4,15 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/123508/douyinshop/pkg/els"
-	"github.com/123508/douyinshop/pkg/errorno"
-	"github.com/123508/douyinshop/pkg/myredis"
-	"github.com/123508/douyinshop/pkg/util"
-	"github.com/redis/go-redis/v9"
-
 	ba "github.com/123508/douyinshop/kitex_gen/product"
 	pb "github.com/123508/douyinshop/kitex_gen/shop"
+	"github.com/123508/douyinshop/pkg/els"
 	"github.com/123508/douyinshop/pkg/models"
+	"github.com/123508/douyinshop/pkg/util"
 	log "github.com/sirupsen/logrus"
 	"go.etcd.io/etcd/client/v3"
 	"gorm.io/gorm"
@@ -22,64 +18,10 @@ import (
 	"time"
 )
 
-const (
-	serviceName = "shop"
-	product     = "product"
-)
-
-var rds = connectWithRedis()
-
-func connectWithRedis() *redis.Client {
-	rds, err := myredis.InitRedis()
-	if err != nil {
-		util.LogError("打开Redis连接失败", "connectWithRedis", "", err)
-	}
-	return rds
-}
-
-var RepeatedShop = &errorno.BasicMessageError{Code: 404, Message: "你已注册店铺，请勿重复注册"}
-
-var ShopNotFound = &errorno.BasicMessageError{Code: 404, Message: "无法找到店铺"}
-
-var ProductLoss = &errorno.BasicMessageError{Code: 404, Message: "商品信息丢失"}
-
-var FailFetchProductList = &errorno.BasicMessageError{Code: 404, Message: "无法获取商品列表"}
-
-var BadPageOrPageSize = &errorno.BasicMessageError{Code: 400, Message: "请求页数或页长错误"}
-
 type ShopServiceImpl struct {
 	db         *gorm.DB
 	etcdClient *clientv3.Client
 	leaseID    clientv3.LeaseID
-}
-
-func DelShopProductCache(ctx context.Context, rds *redis.Client, shopId uint64) {
-	// 构建 pattern
-	pattern := util.TakeKey(product, shopId, "*")
-	var cursor uint64 = 0
-	var batchSize int64 = 100 // 可调整
-
-	for {
-		keys, nextCursor, err := rds.Scan(ctx, cursor, pattern, batchSize).Result()
-		if err != nil {
-			util.LogError("redis扫描错误", "DelShopProductCache", "", err)
-			return
-		}
-		if len(keys) > 0 {
-			pipe := rds.Pipeline()
-			for _, key := range keys {
-				pipe.Del(ctx, key)
-			}
-			if _, err := pipe.Exec(ctx); err != nil {
-				util.LogError("redis pipeline删除错误", "DelShopProductCache", "", err)
-				return
-			}
-		}
-		cursor = nextCursor
-		if cursor == 0 {
-			break
-		}
-	}
 }
 
 // Register 注册店铺
@@ -107,7 +49,7 @@ func (s *ShopServiceImpl) GetShopId(ctx context.Context, req *pb.GetShopIdReq) (
 	var shop models.Shop
 
 	key := util.TakeKey(serviceName, "shopId", req.UserId)
-	shopId, err := rds.Get(ctx, key).Result()
+	shopId, err := Rds.Get(ctx, key).Result()
 
 	if err != nil {
 		util.LogError("查询shopId缓存失败", "GetShopId", "", err)
@@ -127,7 +69,7 @@ func (s *ShopServiceImpl) GetShopId(ctx context.Context, req *pb.GetShopIdReq) (
 		}
 
 		//存入缓存
-		err := rds.Set(ctx, key, util.TakeKey(shop.ID), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
+		err := Rds.Set(ctx, key, util.TakeKey(shop.ID), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
 
 		if err != nil {
 			util.LogError("缓存数据失败", "GetShopId", "", err)
@@ -151,7 +93,7 @@ func (s *ShopServiceImpl) GetShopInfo(ctx context.Context, req *pb.GetShopInfoRe
 
 	key := util.TakeKey(serviceName, "shopInfo", req.ShopId)
 
-	jsonData, err := rds.Get(ctx, key).Result()
+	jsonData, err := Rds.Get(ctx, key).Result()
 
 	if err != nil {
 		util.LogError("查询shopInfo缓存失败", "GetShopInfo", "", err)
@@ -173,7 +115,7 @@ func (s *ShopServiceImpl) GetShopInfo(ctx context.Context, req *pb.GetShopInfoRe
 		//放入缓存
 		jsonData, _ := json.Marshal(&shop)
 
-		err := rds.Set(ctx, key, string(jsonData), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
+		err := Rds.Set(ctx, key, string(jsonData), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
 
 		if err != nil {
 			util.LogError("缓存数据失败", "GetShopInfo", "", err)
@@ -197,7 +139,7 @@ func (s *ShopServiceImpl) GetShopInfo(ctx context.Context, req *pb.GetShopInfoRe
 // UpdateShopInfo 更新店铺信息
 func (s *ShopServiceImpl) UpdateShopInfo(ctx context.Context, req *pb.UpdateShopInfoReq) (*pb.UpdateShopInfoResp, error) {
 	//清除缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, "shopInfo", req.ShopId))
+	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, "shopInfo", req.ShopId))
 
 	var shop models.Shop
 	result := s.db.Where("id = ?", req.ShopId).First(&shop)
@@ -261,8 +203,8 @@ func (s *ShopServiceImpl) AddProduct(ctx context.Context, req *pb.AddProductReq)
 func (s *ShopServiceImpl) DeleteProduct(ctx context.Context, req *pb.DeleteProductReq) (*pb.DeleteProductResp, error) {
 
 	//清除缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(product, "item", req.ProductId))
-	defer DelShopProductCache(ctx, rds, req.ShopId)
+	defer util.CleanCache(Rds, ctx, util.TakeKey(product, "item", req.ProductId))
+	defer DelShopProductCache(ctx, Rds, req.ShopId)
 
 	var product models.Product
 	result := s.db.Where("id = ? AND shop_id = ?", req.ProductId, req.ShopId).Delete(&product)
@@ -283,7 +225,7 @@ func (s *ShopServiceImpl) DeleteProduct(ctx context.Context, req *pb.DeleteProdu
 func (s *ShopServiceImpl) UpdateProduct(ctx context.Context, req *pb.UpdateProductReq) (*pb.UpdateProductResp, error) {
 
 	//清除缓存
-	defer util.CleanCache(rds, ctx, util.TakeKey(product, "item", req.Product.Id))
+	defer util.CleanCache(Rds, ctx, util.TakeKey(product, "item", req.Product.Id))
 
 	var product models.Product
 	result := s.db.Where("id = ? AND shop_id = ?", req.Product.Id, req.ShopId).First(&product)
@@ -331,7 +273,7 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 	//使用Md5作为条件,支持复杂扩容
 	key := util.TakeKey(product, req.ShopId, util.Md5Hash(util.TakeKey(req.Page, req.PageSize)))
 
-	result, _ := rds.Get(ctx, key).Result()
+	result, _ := Rds.Get(ctx, key).Result()
 
 	list := make([]uint64, 0)
 	fail := make([]uint64, 0)
@@ -345,7 +287,7 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 
 		t := models.Product{}
 		key := util.TakeKey(product, "item", v)
-		jsonData, err := rds.Get(ctx, key).Result()
+		jsonData, err := Rds.Get(ctx, key).Result()
 		if err != nil || json.Unmarshal([]byte(jsonData), &t) != nil {
 			fail = append(fail, v)
 			continue
@@ -389,7 +331,7 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 			util.LogError("序列化商品数组错误", "GetProductList", "请求hash为"+key, err)
 		} else {
 			// 设置随机过期时间，3~6 分钟
-			if setErr := rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
+			if setErr := Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
 				util.LogError("存入商品缓存失败", "GetProductList", "", setErr)
 			}
 		}
@@ -401,7 +343,7 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 			if err != nil {
 				util.LogError("序列化商品错误", "GetProductList", "商品id为"+strconv.Itoa(int(v.ID)), err)
 			} else {
-				if err = rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
+				if err = Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
 					util.LogError("缓存商品失败", "GetProductList", "商品id为"+strconv.Itoa(int(v.ID)), err)
 				}
 			}
@@ -424,7 +366,7 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 				if err != nil {
 					util.LogError("序列化商品错误", "GetProductList", "商品id为"+strconv.Itoa(int(o.ID)), err)
 				} else {
-					if err = rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
+					if err = Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
 						util.LogError("缓存商品失败", "GetProductList", "商品id为"+strconv.Itoa(int(o.ID)), err)
 					}
 				}

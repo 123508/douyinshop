@@ -5,11 +5,8 @@ import (
 	"encoding/json"
 	"github.com/123508/douyinshop/kitex_gen/product"
 	"github.com/123508/douyinshop/pkg/els"
-	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
-	"github.com/123508/douyinshop/pkg/myredis"
 	"github.com/123508/douyinshop/pkg/util"
-	"github.com/redis/go-redis/v9"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -23,22 +20,10 @@ const (
 // ProductCatalogServiceImpl implements the last service interface defined in the IDL.
 type ProductCatalogServiceImpl struct{}
 
-var BadPageOrPageSize = &errorno.BasicMessageError{Code: 400, Message: "请求页数或页长错误"}
-
-var rds = connectWithRedis()
-
-func connectWithRedis() *redis.Client {
-	rds, err := myredis.InitRedis()
-	if err != nil {
-		util.LogError("打开Redis连接失败", "connectWithRedis", "", err)
-	}
-	return rds
-}
-
 func (s *ProductCatalogServiceImpl) GetCategoryFromProduct(ctx context.Context, Categories string, productId uint64) ([]models.Category, error) {
 
 	simple := util.SimpleCacheComponent[uint64, []models.Category]{
-		Rds:       rds,
+		Rds:       Rds,
 		Ctx:       ctx,
 		Key:       util.TakeKey(Category, productId),
 		Marshal:   json.Marshal,

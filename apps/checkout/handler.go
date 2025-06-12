@@ -3,49 +3,21 @@ package main
 import (
 	"context"
 	"github.com/123508/douyinshop/kitex_gen/cart"
-	"github.com/123508/douyinshop/kitex_gen/cart/cartservice"
 	_ "github.com/123508/douyinshop/kitex_gen/cart/cartservice"
+	checkout "github.com/123508/douyinshop/kitex_gen/checkout"
 	_ "github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder"
-	"github.com/123508/douyinshop/kitex_gen/order/userOrder/orderuserservice"
 	"github.com/123508/douyinshop/kitex_gen/payment"
-	"github.com/123508/douyinshop/kitex_gen/payment/paymentservice"
 	"github.com/123508/douyinshop/kitex_gen/product"
-	"github.com/123508/douyinshop/kitex_gen/product/productcatalogservice"
-	"github.com/123508/douyinshop/pkg/errorno"
-	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
 	_ "go.opentelemetry.io/otel"
 	_ "go.opentelemetry.io/otel/propagation"
-	"sync"
-
-	checkout "github.com/123508/douyinshop/kitex_gen/checkout"
 )
 
 // CheckoutServiceImpl implements the last service interface defined in the IDL.
 type CheckoutServiceImpl struct {
 	ctx context.Context
 }
-
-var (
-	CartClient    cartservice.Client
-	ProductClient productcatalogservice.Client
-	PaymentClient paymentservice.Client
-	OrderClient   orderuserservice.Client
-	once          sync.Once
-	err           error
-	registryAddr  string
-	serviceName   string
-	commonSuite   client.Option
-)
-
-var GetCartError = &errorno.BasicMessageError{Code: 404, Message: "获取购物车错误"}
-
-var CartNotExistError = &errorno.BasicMessageError{Code: 404, Message: "购物车不存在"}
-
-var SubmitError = &errorno.BasicMessageError{Code: 500, Message: "提交错误"}
-
-var ChargeError = &errorno.BasicMessageError{Code: 417, Message: "支付异常"}
 
 // Checkout implements the CheckoutServiceImpl interface.
 // 结算接口
