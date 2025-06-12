@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"github.com/123508/douyinshop/pkg/db"
+	"github.com/123508/douyinshop/pkg/models"
 	"log"
 	"net"
 	"time"
@@ -18,6 +20,16 @@ import (
 )
 
 func main() {
+
+	db, err := db.InitDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db.AutoMigrate(&models.Role{})
+	db.AutoMigrate(&models.Permission{})
+	db.AutoMigrate(&models.RolePermission{})
+
 	rdb, err := myredis.InitRedis()
 	if err != nil {
 		log.Fatal(err)

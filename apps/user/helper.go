@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/models"
@@ -14,7 +13,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"math/rand"
 	"time"
 )
 
@@ -99,22 +97,22 @@ func Encryption(origin string) string {
 	return res
 }
 
-func GetUserInfoWithCache(ctx context.Context, userId uint64) (models.User, error) {
-	simple := util.SimpleCacheComponent[uint64, models.User]{
-		Rds:       Rds,
-		Ctx:       ctx,
-		Key:       util.TakeKey(serviceName, userId),
-		Marshal:   json.Marshal,
-		Unmarshal: json.Unmarshal,
-		QueryExec: func() (models.User, error) {
-			var row models.User
-			if err := DB.Model(&models.User{}).Where("id = ?", userId).First(&row).Error; err != nil {
-				util.LogError("用户不存在", "GetUserInfo", "", err)
-				return models.User{}, UserNotExists
-			}
-			return row, nil
-		},
-		Expires: time.Duration(rand.Intn(10)+5) * time.Minute,
+func GetUserInfo(ctx context.Context, userId uint64) (models.User, error) {
+	var row models.User
+	if err := DB.Model(&models.User{}).Where("id = ?", userId).First(&row).Error; err != nil {
+		util.LogError("查询用户异常", "GetUserInfo", "", err)
+		return models.User{}, SearchMySQLError
 	}
-	return simple.QueryWithCache()
+
+	return row, nil
+
+}
+
+func GetUserPassword(ctx context.Context, userId uint64) (models.UserLogin, error) {
+	var userLogin models.UserLogin
+	if err := DB.Model(&models.UserLogin{}).Where("user_id = ?", userId).First(&userLogin).Error; err != nil {
+		util.LogError("查询用户密码异常", "GetUserPassword", "", err)
+		return models.UserLogin{}, err
+	}
+	return userLogin, nil
 }

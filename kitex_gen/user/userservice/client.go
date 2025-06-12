@@ -13,12 +13,20 @@ import (
 type Client interface {
 	Register(ctx context.Context, Req *user.RegisterReq, callOptions ...callopt.Option) (r *user.RegisterResp, err error)
 	Login(ctx context.Context, Req *user.LoginReq, callOptions ...callopt.Option) (r *user.LoginResp, err error)
+	Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 	GetUserInfo(ctx context.Context, Req *user.GetUserInfoReq, callOptions ...callopt.Option) (r *user.GetUserInfoResp, err error)
-	Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *user.LogoutResp, err error)
-	Update(ctx context.Context, Req *user.UpdateReq, callOptions ...callopt.Option) (r *user.UpdateResp, err error)
-	Delete(ctx context.Context, Req *user.DeleteReq, callOptions ...callopt.Option) (r *user.DeleteResp, err error)
+	Update(ctx context.Context, Req *user.UpdateReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	Delete(ctx context.Context, Req *user.DeleteReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	ListUsers(ctx context.Context, Req *user.ListUsersReq, callOptions ...callopt.Option) (r *user.ListUsersResp, err error)
 	DeliverTokenByRPC(ctx context.Context, Req *user.DeliverTokenReq, callOptions ...callopt.Option) (r *user.DeliveryResp, err error)
 	VerifyTokenByRPC(ctx context.Context, Req *user.VerifyTokenReq, callOptions ...callopt.Option) (r *user.VerifyResp, err error)
+	ChangePassword(ctx context.Context, Req *user.ChangePasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	ResetPassword(ctx context.Context, Req *user.ResetPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	BindEmail(ctx context.Context, Req *user.BindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	UnbindEmail(ctx context.Context, Req *user.UnbindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	FreezeUser(ctx context.Context, Req *user.FreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	UnfreezeUser(ctx context.Context, Req *user.UnfreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -60,24 +68,29 @@ func (p *kUserServiceClient) Login(ctx context.Context, Req *user.LoginReq, call
 	return p.kClient.Login(ctx, Req)
 }
 
+func (p *kUserServiceClient) Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.Logout(ctx, Req)
+}
+
 func (p *kUserServiceClient) GetUserInfo(ctx context.Context, Req *user.GetUserInfoReq, callOptions ...callopt.Option) (r *user.GetUserInfoResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetUserInfo(ctx, Req)
 }
 
-func (p *kUserServiceClient) Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *user.LogoutResp, err error) {
-	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.Logout(ctx, Req)
-}
-
-func (p *kUserServiceClient) Update(ctx context.Context, Req *user.UpdateReq, callOptions ...callopt.Option) (r *user.UpdateResp, err error) {
+func (p *kUserServiceClient) Update(ctx context.Context, Req *user.UpdateReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Update(ctx, Req)
 }
 
-func (p *kUserServiceClient) Delete(ctx context.Context, Req *user.DeleteReq, callOptions ...callopt.Option) (r *user.DeleteResp, err error) {
+func (p *kUserServiceClient) Delete(ctx context.Context, Req *user.DeleteReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Delete(ctx, Req)
+}
+
+func (p *kUserServiceClient) ListUsers(ctx context.Context, Req *user.ListUsersReq, callOptions ...callopt.Option) (r *user.ListUsersResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.ListUsers(ctx, Req)
 }
 
 func (p *kUserServiceClient) DeliverTokenByRPC(ctx context.Context, Req *user.DeliverTokenReq, callOptions ...callopt.Option) (r *user.DeliveryResp, err error) {
@@ -88,4 +101,39 @@ func (p *kUserServiceClient) DeliverTokenByRPC(ctx context.Context, Req *user.De
 func (p *kUserServiceClient) VerifyTokenByRPC(ctx context.Context, Req *user.VerifyTokenReq, callOptions ...callopt.Option) (r *user.VerifyResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.VerifyTokenByRPC(ctx, Req)
+}
+
+func (p *kUserServiceClient) ChangePassword(ctx context.Context, Req *user.ChangePasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.ChangePassword(ctx, Req)
+}
+
+func (p *kUserServiceClient) ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.ForgotPassword(ctx, Req)
+}
+
+func (p *kUserServiceClient) ResetPassword(ctx context.Context, Req *user.ResetPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.ResetPassword(ctx, Req)
+}
+
+func (p *kUserServiceClient) BindEmail(ctx context.Context, Req *user.BindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.BindEmail(ctx, Req)
+}
+
+func (p *kUserServiceClient) UnbindEmail(ctx context.Context, Req *user.UnbindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UnbindEmail(ctx, Req)
+}
+
+func (p *kUserServiceClient) FreezeUser(ctx context.Context, Req *user.FreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.FreezeUser(ctx, Req)
+}
+
+func (p *kUserServiceClient) UnfreezeUser(ctx context.Context, Req *user.UnfreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UnfreezeUser(ctx, Req)
 }

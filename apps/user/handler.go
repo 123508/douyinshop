@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/123508/douyinshop/pkg/util"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
+	"math/rand"
 	"time"
 
 	"github.com/123508/douyinshop/kitex_gen/user"
@@ -85,7 +87,24 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 // 获取用户信息接口
 func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfoReq) (resp *user.GetUserInfoResp, err error) {
 
-	row, err := GetUserInfoWithCache(ctx, req.UserId)
+	simple := util.SimpleCacheComponent[uint64, models.User]{
+		Rds:       Rds,
+		Ctx:       ctx,
+		Key:       util.TakeKey(serviceName, req.UserId),
+		Marshal:   json.Marshal,
+		Unmarshal: json.Unmarshal,
+		QueryExec: func() (models.User, error) {
+			var row models.User
+			if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).First(&row).Error; err != nil {
+				util.LogError("用户不存在", "GetUserInfo", "", err)
+				return models.User{}, UserNotExists
+			}
+			return row, nil
+		},
+		Expires: time.Duration(rand.Intn(10)+5) * time.Minute,
+	}
+
+	row, err := simple.QueryWithCache()
 
 	if err != nil {
 		return nil, err
@@ -133,14 +152,14 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 // Logout implements the UserServiceImpl interface.
 // 用户登出接口
 // 将用户当前的token设置为
-func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp *user.LogoutResp, err error) {
+func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp *user.Empty, err error) {
 
 	//让token失效,否则报错并返回
 	if err = Rds.Set(ctx, req.Token, "1", 8*time.Hour).Err(); err != nil {
-		return &user.LogoutResp{}, err
+		return &user.Empty{}, err
 	}
 
-	return &user.LogoutResp{}, nil
+	return &user.Empty{}, nil
 
 }
 
@@ -148,63 +167,49 @@ func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp
 // 用户更新接口
 // 更新用户资料并
 // 绑定整个更新为事务,如果出错就进行回滚
-func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp *user.UpdateResp, err error) {
-
-	//清理缓存
-	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
+func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp *user.Empty, err error) {
 
 	if req.UserId == 0 {
 		return nil, UserNotExists
 	}
 
-	info, err := GetUserInfoWithCache(ctx, req.UserId)
+	//清理缓存
+	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
 
-	if err != nil {
-		return nil, UserNotExists
-	}
+	info, err := GetUserInfo(ctx, req.UserId)
 
-	err = DB.Transaction(func(tx *gorm.DB) error {
-
-		//更新用户信息部分
-		tx = DB.Model(&models.User{}).Where("id=?", req.UserId)
-
-		updates := make(map[string]interface{}, 5)
-
-		if req.Gender != info.Gender {
-			updates["gender"] = req.Gender
-		}
-		if req.Phone != "" {
-			updates["phone"] = req.Phone
-		}
-		if req.Nickname != "" {
-			updates["name"] = req.Nickname
-		}
-		if err := tx.Updates(updates).Error; err != nil {
-			util.LogError("更新用户出错", "Update", "", err)
-			return err
-		}
-
-		//更新用户密码部分
-		if req.Password != "" {
-			where := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId)
-			if err = where.Update("password", Encryption(req.Password)).Update("updated_at", time.Now()).Error; err != nil {
-				util.LogError("更新用户密码错误", "Update", "", err)
-				return err
-			}
-		}
-		//返回nil提交事务
-		return nil
-	})
 	if err != nil {
 		return nil, err
 	}
-	return &user.UpdateResp{}, nil
+
+	if info.Status != 0 {
+		return nil, UserStatusError
+	}
+
+	//更新用户信息
+	updates := make(map[string]interface{}, 5)
+
+	if req.Gender != info.Gender {
+		updates["gender"] = req.Gender
+	}
+	if req.Phone != "" {
+		updates["phone"] = req.Phone
+	}
+	if req.Nickname != "" {
+		updates["name"] = req.Nickname
+	}
+	if err := DB.Model(&models.User{}).Where("id=?", req.UserId).Updates(updates).Error; err != nil {
+		util.LogError("更新用户出错", "Update", "", err)
+		return nil, UpdateUserInfoError
+	}
+
+	return &user.Empty{}, nil
 }
 
 // Delete implements the UserServiceImpl interface.
 // 删除用户接口
 // 绑定事务
-func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp *user.DeleteResp, err error) {
+func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp *user.Empty, err error) {
 
 	//清理缓存
 	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
@@ -223,7 +228,7 @@ func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp
 		klog.Error("删除用户异常")
 		return nil, err
 	}
-	return &user.DeleteResp{}, nil
+	return &user.Empty{}, nil
 }
 
 // DeliverTokenByRPC implements the AuthServiceImpl interface.
@@ -294,4 +299,88 @@ func (s *UserServiceImpl) VerifyTokenByRPC(ctx context.Context, req *user.Verify
 	}
 
 	return resp, err
+}
+
+// ListUsers implements the UserServiceImpl interface.
+func (s *UserServiceImpl) ListUsers(ctx context.Context, req *user.ListUsersReq) (resp *user.ListUsersResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// ChangePassword implements the UserServiceImpl interface.
+func (s *UserServiceImpl) ChangePassword(ctx context.Context, req *user.ChangePasswordReq) (resp *user.Empty, err error) {
+
+	if req.UserId == 0 {
+		return nil, UserNotExists
+	}
+
+	//清理缓存
+	defer util.CleanCache(Rds, ctx, util.TakeKey(serviceName, req.UserId))
+
+	//用户状态合法性校验
+	info, err := GetUserInfo(ctx, req.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if info.Status != 0 {
+		return nil, UserStatusError
+	}
+
+	//查询用户密码
+	userLogin, err := GetUserPassword(ctx, req.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if userLogin.Password != Encryption(req.OldPassword) {
+		return nil, PasswordNotEqual
+	}
+
+	//修改密码部分
+	where := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId)
+	if err = where.Update("password", Encryption(req.NewPassword)).Update("updated_at", time.Now()).Error; err != nil {
+		util.LogError("更新用户密码错误", "ChangePassword", "", err)
+		return nil, UpdatePasswordError
+	}
+
+	return &user.Empty{}, nil
+}
+
+// ForgotPassword implements the UserServiceImpl interface.
+func (s *UserServiceImpl) ForgotPassword(ctx context.Context, req *user.ForgotPasswordReq) (resp *user.Empty, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// ResetPassword implements the UserServiceImpl interface.
+func (s *UserServiceImpl) ResetPassword(ctx context.Context, req *user.ResetPasswordReq) (resp *user.Empty, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// BindEmail implements the UserServiceImpl interface.
+func (s *UserServiceImpl) BindEmail(ctx context.Context, req *user.BindEmailReq) (resp *user.Empty, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// UnbindEmail implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UnbindEmail(ctx context.Context, req *user.UnbindEmailReq) (resp *user.Empty, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// FreezeUser implements the UserServiceImpl interface.
+func (s *UserServiceImpl) FreezeUser(ctx context.Context, req *user.FreezeUserReq) (resp *user.Empty, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// UnfreezeUser implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UnfreezeUser(ctx context.Context, req *user.UnfreezeUserReq) (resp *user.Empty, err error) {
+	// TODO: Your code here...
+	return
 }
