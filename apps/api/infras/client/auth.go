@@ -43,7 +43,7 @@ func DeliverToken(ctx context.Context, req *auth.DeliverTokenReq) (string, error
 	return resp.Token, nil
 }
 
-func VerifyToken(ctx context.Context, req *auth.VerifyTokenReq) (uint32, string, error) {
+func VerifyToken(ctx context.Context, req *auth.VerifyTokenReq) (uint64, string, error) {
 	resp, err := authClient.VerifyTokenByRPC(ctx, req)
 	if err != nil {
 		return 0, "", err

@@ -6,8 +6,8 @@ import (
 
 type Product struct {
 	gorm.Model
-	Id          uint32  `gorm:"primary_key;comment '商品ID'"`
-	ShopId      uint    `gorm:"comment '所属于店铺ID'"`
+	ID          uint64  `gorm:"primary_key;comment '商品ID'"`
+	ShopId      uint64  `gorm:"comment '所属于店铺ID'"`
 	Name        string  `gorm:"comment '商品名称'"`
 	Description string  `gorm:"comment '商品描述'"`
 	Picture     string  `gorm:"comment '商品图片'"`
@@ -15,4 +15,8 @@ type Product struct {
 	Categories  string  `gorm:"comment '类别ID,多个类别用逗号分隔'"`
 	Status      bool    `gorm:"comment '商品是否出售'"`
 	Sales       uint64  `gorm:"comment '商品销量'"`
+}
+
+func (p Product) GetID() uint64 {
+	return p.ID
 }

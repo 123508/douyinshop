@@ -4,16 +4,23 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/123508/douyinshop/pkg/myredis"
+	"github.com/123508/douyinshop/pkg/util"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
-	"log"
+	"math/rand"
 	"time"
 
 	"github.com/123508/douyinshop/kitex_gen/user"
+)
+
+const (
+	serviceName = "user"
 )
 
 var UserNotExists = &errorno.BasicMessageError{Code: 401, Message: "用户不存在"}
@@ -34,14 +41,44 @@ func encryption(origin string) string {
 	return res
 }
 
-var DB = open()
+var DB = connectWithMySQL()
 
-func open() *gorm.DB {
+func connectWithMySQL() *gorm.DB {
 	DB, err := db.InitDB()
 	if err != nil {
-		log.Fatal(err)
+		util.LogError("打开MySQL连接失败", "connectWithMySQL", "", err)
 	}
 	return DB
+}
+
+var rds = connectWithRedis()
+
+func connectWithRedis() *redis.Client {
+	rds, err := myredis.InitRedis()
+	if err != nil {
+		util.LogError("打开Redis连接失败", "connectWithRedis", "", err)
+	}
+	return rds
+}
+
+func GetUserInfoWithCache(ctx context.Context, userId uint64) (models.User, error) {
+	simple := util.SimpleCacheComponent[uint64, models.User]{
+		Rds:       rds,
+		Ctx:       ctx,
+		Key:       util.TakeKey(serviceName, userId),
+		Marshal:   json.Marshal,
+		Unmarshal: json.Unmarshal,
+		QueryExec: func() (models.User, error) {
+			var row models.User
+			if err := DB.Model(&models.User{}).Where("id = ?", userId).First(&row).Error; err != nil {
+				util.LogError("用户不存在", "GetUserInfo", "", err)
+				return models.User{}, UserNotExists
+			}
+			return row, nil
+		},
+		Expires: time.Duration(rand.Intn(10)+5) * time.Minute,
+	}
+	return simple.QueryWithCache()
 }
 
 // Register implements the UserServiceImpl interface.
@@ -49,7 +86,7 @@ func open() *gorm.DB {
 // 如果两个密码不同,则返回空
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (resp *user.RegisterResp, err error) {
 	if req.Password != req.ConfirmPassword {
-		klog.Error("密码和注册密码不一致!")
+		util.LogError("密码和注册密码不一致", "Register", "密码比对", nil)
 		return nil, PasswordNotEqual
 	}
 
@@ -78,7 +115,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 	})
 
 	if err != nil {
-		klog.Error("创建用户对象错误!")
+		util.LogError("创建用户对象错误", "Register", "注册提交", err)
 		return nil, err
 	}
 
@@ -102,7 +139,6 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 
 	//如果用户已经被删除也返回空
 	if res.ID == 0 {
-		klog.Error("用户名或密码错误")
 		return &user.LoginResp{UserId: 0}, ErrorUsernameOrPassword
 	}
 
@@ -115,14 +151,40 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 // 获取用户信息接口
 func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfoReq) (resp *user.GetUserInfoResp, err error) {
 
-	var row models.User
-	DB.Model(&models.User{}).Where("id = ?", req.UserId).First(&row)
+	row, err := GetUserInfoWithCache(ctx, req.UserId)
 
-	//如果查询到不存在该用户,返回error
-	if row.Email == "" {
-		klog.Error("用户不存在")
-		return nil, UserNotExists
+	if err != nil {
+		return nil, err
 	}
+
+	////通用类型
+	//var row models.User
+	//
+	////查询缓存
+	//result, _ := rds.Get(ctx, util.TakeKey(serviceName, req.UserId)).Result()
+	//
+	//err = json.Unmarshal([]byte(result), &row)
+	//
+	////查询缓存失败
+	//if err != nil {
+	//
+	//	//如果查询到不存在该用户,返回error
+	//	if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).First(&row).Error; err != nil {
+	//		util.LogError("用户不存在", "GetUserInfo", "", err)
+	//		return nil, UserNotExists
+	//	}
+	//
+	//	//存入缓存
+	//	jsonData, _ := json.Marshal(row)
+	//	err := rds.Set(ctx, util.TakeKey(serviceName, req.UserId), string(jsonData), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
+	//	if err != nil {
+	//		util.LogError("存入缓存失败", "GetUserInfo", "", err)
+	//	}
+	//} else {
+	//	log.WithFields(log.Fields{
+	//		"方法名": "GetUserInfo",
+	//	}).Info("查询缓存成功")
+	//}
 
 	//如果查询到该用户,返回用户信息
 	return &user.GetUserInfoResp{
@@ -139,17 +201,13 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 // 将用户当前的token设置为
 func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp *user.LogoutResp, err error) {
 
-	ir, err := myredis.InitRedis()
-
-	//如果初始化redis成功则让token失效,否则报错并返回
-	if err != nil {
-		klog.Error("初始化redis错误")
-		//如果redis初始化错误则返回nil
-		return nil, err
-	} else {
-		ir.Set(ctx, req.Token, "1", 8*time.Hour)
-		return &user.LogoutResp{}, nil
+	//让token失效,否则报错并返回
+	if err = rds.Set(ctx, req.Token, "1", 8*time.Hour).Err(); err != nil {
+		return &user.LogoutResp{}, err
 	}
+
+	return &user.LogoutResp{}, nil
+
 }
 
 // Update implements the UserServiceImpl interface.
@@ -158,19 +216,20 @@ func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp
 // 绑定整个更新为事务,如果出错就进行回滚
 func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp *user.UpdateResp, err error) {
 
-	info, err := s.GetUserInfo(ctx, &user.GetUserInfoReq{UserId: req.UserId})
+	//清理缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+
+	if req.UserId == 0 {
+		return nil, UserNotExists
+	}
+
+	info, err := GetUserInfoWithCache(ctx, req.UserId)
 
 	if err != nil {
-		klog.Error("用户不存在")
 		return nil, UserNotExists
 	}
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
-
-		if req.UserId == 0 {
-			klog.Error("用户不存在")
-			return UserNotExists
-		}
 
 		//更新用户信息部分
 		tx = DB.Model(&models.User{}).Where("id=?", req.UserId)
@@ -187,7 +246,7 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 			updates["name"] = req.Nickname
 		}
 		if err := tx.Updates(updates).Error; err != nil {
-			klog.Error("更新用户发生错误")
+			util.LogError("更新用户出错", "Update", "", err)
 			return err
 		}
 
@@ -195,7 +254,7 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 		if req.Password != "" {
 			where := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId)
 			if err = where.Update("password", encryption(req.Password)).Update("updated_at", time.Now()).Error; err != nil {
-				klog.Error("更新用户密码错误")
+				util.LogError("更新用户密码错误", "Update", "", err)
 				return err
 			}
 		}
@@ -212,6 +271,9 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 // 删除用户接口
 // 绑定事务
 func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp *user.DeleteResp, err error) {
+
+	//清理缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
 
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).Update("phone", nil).Update("email", nil).Delete(&models.User{}).Error; err != nil {

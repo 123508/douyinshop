@@ -33,7 +33,7 @@ func init() {
 // SearchProduct 搜索商品
 // name: 商品名称
 // 返回值: 商品id列表
-func SearchProduct(name string, page int, size int) ([]uint32, error) {
+func SearchProduct(name string, page int, size int) ([]uint64, error) {
 	if es == nil {
 		return nil, fmt.Errorf("ElasticSearch client is nil")
 	}
@@ -87,7 +87,7 @@ func SearchProduct(name string, page int, size int) ([]uint32, error) {
 	}
 
 	// 获取res中所有搜索结果的id
-	result := make([]uint32, 0)
+	result := make([]uint64, 0)
 	var r map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
 		return nil, fmt.Errorf("error parsing the response body: %s", err)
@@ -96,7 +96,7 @@ func SearchProduct(name string, page int, size int) ([]uint32, error) {
 	for _, hit := range hits {
 		hit1 := hit.(map[string]interface{})
 		id, _ := strconv.Atoi(hit1["_id"].(string))
-		result = append(result, uint32(id))
+		result = append(result, uint64(id))
 	}
 	return result, nil
 }
@@ -174,7 +174,7 @@ func UpdateProduct(product *product.Product) error {
 // DeleteProduct 删除ElasticSearch中的商品信息
 // id: 商品id
 // 返回值: 错误信息
-func DeleteProduct(id uint32) error {
+func DeleteProduct(id uint64) error {
 	if es == nil {
 		return fmt.Errorf("ElasticSearch client is nil")
 	}

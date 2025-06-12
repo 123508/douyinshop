@@ -2,15 +2,19 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
-	cart "github.com/123508/douyinshop/kitex_gen/cart"
+	"github.com/123508/douyinshop/kitex_gen/cart"
 	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/123508/douyinshop/pkg/myredis"
+	"github.com/123508/douyinshop/pkg/util"
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 // CartServiceImpl implements the last service interface defined in the IDL.
@@ -22,36 +26,12 @@ const (
 	serviceName = "cart"
 )
 
-func logError(description, funcName, step string, err error) {
-
-	param := map[string]interface{}{}
-	if description != "" {
-		param["问题描述"] = description
-	}
-	if funcName != "" {
-		param["报错函数"] = funcName
-	}
-	if step != "" {
-		param["报错步骤"] = step
-	}
-	if err != nil {
-		param["错误原因"] = err
-	}
-
-	field := log.Fields{}
-	for k, v := range param {
-		field[k] = v
-	}
-
-	log.WithFields(field).Error()
-}
-
 var rds = connectWithRedis()
 
 func connectWithRedis() *redis.Client {
 	rds, err := myredis.InitRedis()
 	if err != nil {
-		log.Fatal(err)
+		util.LogError("打开Redis连接失败", "connectWithRedis", "", err)
 	}
 	return rds
 }
@@ -96,6 +76,10 @@ func IsDuplicateKeyError(err error) bool {
 // AddItem implements the CartServiceImpl interface.
 // 添加商品接口
 func (s *CartServiceImpl) AddItem(ctx context.Context, req *cart.AddItemReq) (*cart.AddItemResp, error) {
+
+	//清理缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+
 	// 1. 输入验证
 	if err := validateAddItemReq(req); err != nil {
 		return nil, err
@@ -139,6 +123,7 @@ func (s *CartServiceImpl) AddItem(ctx context.Context, req *cart.AddItemReq) (*c
 // GetCart implements the CartServiceImpl interface.
 // 查看购物车接口
 func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*cart.GetCartResp, error) {
+
 	if req.UserId == 0 {
 		return nil, NilUserIdError
 	}
@@ -152,8 +137,54 @@ func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*c
 
 	// 查询用户的所有购物车商品
 	var cartItems []models.Cart
-	if err := s.db.WithContext(ctx).Where("user_id = ?", req.UserId).Find(&cartItems).Error; err != nil {
-		return nil, err
+
+	//查询缓存部分
+	key := util.TakeKey(serviceName, req.UserId)
+
+	data, err := rds.HGetAll(ctx, key).Result()
+
+	if err != nil {
+		util.LogError("查询缓存失败", "GetCart", "", err)
+	}
+
+	for _, v := range data {
+		t := models.Cart{}
+		err = json.Unmarshal([]byte(v), &t)
+		if err != nil {
+			cartItems = make([]models.Cart, 0)
+			break
+		}
+		cartItems = append(cartItems, t)
+	}
+
+	//查询缓存失败,查找数据库
+	if err != nil {
+		if err := s.db.WithContext(ctx).Where("user_id = ?", req.UserId).Find(&cartItems).Error; err != nil {
+			return nil, err
+		}
+
+		//将数据放入缓存
+		cache := map[string]string{}
+
+		for _, v := range cartItems {
+			jsonData, _ := json.Marshal(&v)
+			cache[util.TakeKey(v.ID)] = string(jsonData)
+		}
+
+		//存储哈希
+		err := rds.HMSet(ctx, key, cache).Err()
+
+		if err != nil {
+			util.LogError("存储缓存出错", "GetAddressList", "存储缓存hash", err)
+		}
+
+		// 设置随机过期时间，30~45 分钟
+		rds.Expire(ctx, key, time.Duration(rand.Intn(15)+30)*time.Minute)
+
+	} else {
+		log.WithFields(log.Fields{
+			"方法名": "GetCart",
+		}).Info("查询缓存成功")
 	}
 
 	// 预分配切片容量，提高性能
@@ -170,6 +201,10 @@ func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*c
 // EmptyCart implements the CartServiceImpl interface.
 // 清空购物车接口
 func (s *CartServiceImpl) EmptyCart(ctx context.Context, req *cart.EmptyCartReq) (*cart.EmptyCartResp, error) {
+
+	//清理缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+
 	if req.UserId == 0 {
 		return nil, NilUserIdError
 	}
@@ -185,6 +220,10 @@ func (s *CartServiceImpl) EmptyCart(ctx context.Context, req *cart.EmptyCartReq)
 // DeleteItem implements the CartServiceImpl interface.
 // 删除指定商品接口
 func (s *CartServiceImpl) DeleteItem(ctx context.Context, req *cart.DeleteItemReq) (*cart.EmptyCartResp, error) {
+
+	//清理缓存
+	defer util.CleanCache(rds, ctx, util.TakeKey(serviceName, req.UserId))
+
 	if req.UserId == 0 {
 		return nil, NilUserIdError
 	}

@@ -21,7 +21,7 @@ func Detail(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	result, err := client.GetProductDetail(ctx, productId)
+	result, err := client.GetProductDetail(ctx, uint64(productId))
 	if err != nil {
 		errorno.DealWithError(err, c)
 		return

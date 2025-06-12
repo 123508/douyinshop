@@ -118,7 +118,7 @@ ReadFieldError:
 }
 
 func (x *Product) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Id, offset, err = fastpb.ReadUint32(buf, _type)
+	x.Id, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -143,7 +143,7 @@ func (x *Product) fastReadField5(buf []byte, _type int8) (offset int, err error)
 }
 
 func (x *Product) fastReadField6(buf []byte, _type int8) (offset int, err error) {
-	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.ShopId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -218,7 +218,7 @@ ReadFieldError:
 }
 
 func (x *GetProductReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Id, offset, err = fastpb.ReadUint32(buf, _type)
+	x.Id, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -381,7 +381,7 @@ func (x *Product) fastWriteField1(buf []byte) (offset int) {
 	if x.Id == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetId())
 	return offset
 }
 
@@ -421,7 +421,7 @@ func (x *Product) fastWriteField6(buf []byte) (offset int) {
 	if x.ShopId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 6, x.GetShopId())
+	offset += fastpb.WriteUint64(buf[offset:], 6, x.GetShopId())
 	return offset
 }
 
@@ -481,7 +481,7 @@ func (x *GetProductReq) fastWriteField1(buf []byte) (offset int) {
 	if x.Id == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetId())
 	return offset
 }
 
@@ -607,7 +607,7 @@ func (x *Product) sizeField1() (n int) {
 	if x.Id == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetId())
+	n += fastpb.SizeUint64(1, x.GetId())
 	return n
 }
 
@@ -647,7 +647,7 @@ func (x *Product) sizeField6() (n int) {
 	if x.ShopId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(6, x.GetShopId())
+	n += fastpb.SizeUint64(6, x.GetShopId())
 	return n
 }
 
@@ -707,7 +707,7 @@ func (x *GetProductReq) sizeField1() (n int) {
 	if x.Id == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetId())
+	n += fastpb.SizeUint64(1, x.GetId())
 	return n
 }
 

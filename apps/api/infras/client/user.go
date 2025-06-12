@@ -42,7 +42,7 @@ func Register(ctx context.Context, req *user.RegisterReq) (bool, error) {
 	return true, nil
 }
 
-func Login(ctx context.Context, req *user.LoginReq) (uint32, error) {
+func Login(ctx context.Context, req *user.LoginReq) (uint64, error) {
 	resp, err := userClient.Login(ctx, req)
 	if err != nil {
 		return 0, err

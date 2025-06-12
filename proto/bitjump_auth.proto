@@ -12,7 +12,7 @@ service AuthService {
 }
 
 message DeliverTokenReq {
-    uint32 user_id = 1;
+    uint64 user_id = 1;
 }
 
 message VerifyTokenReq {
@@ -26,5 +26,5 @@ message DeliveryResp {
 message VerifyResp {
     bool res = 1;
     string token=2;
-    uint32 user_id=3;
+    uint64 user_id=3;
 }

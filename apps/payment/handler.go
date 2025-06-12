@@ -10,6 +10,7 @@ import (
 	"github.com/smartwalle/alipay/v3"
 	"log"
 	"math/rand"
+	"strconv"
 	"sync/atomic"
 	"time"
 )
@@ -40,7 +41,7 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 		// 支付链接参数
 		var p = alipay.TradePagePay{}
 		p.Subject = "抖音商城购物"
-		p.OutTradeNo = req.OrderId
+		p.OutTradeNo = strconv.FormatUint(req.OrderId, 10)
 		p.TotalAmount = fmt.Sprintf("%.2f", req.Amount)
 		p.ProductCode = "FAST_INSTANT_TRADE_PAY"
 		p.ReturnURL = ""
@@ -82,7 +83,7 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 		}
 		var orderDetail models.OrderDetail
 		result = database.Model(&models.OrderDetail{}).Where("order_id = ?", Id).First(&orderDetail)
-		Id = uint32(orderDetail.ID)
+		Id = orderDetail.ID
 
 		// OrderStatusLog表的更改:改一个，加一个
 		result = database.Model(&models.OrderStatusLog{}).Where("order_detail_id = ? AND status = ?", Id, 0).Update("end_time", time.Now())
@@ -130,7 +131,7 @@ func (s *PaymentServiceImpl) Notify(ctx context.Context, req *payment.NotifyReq)
 	}
 	var orderDetail models.OrderDetail
 	result = database.Model(&models.OrderDetail{}).Where("order_id = ?", Id).First(&orderDetail)
-	Id = uint32(orderDetail.ID)
+	Id = orderDetail.ID
 
 	// OrderStatusLog表的更改:改一个，加一个
 	result = database.Model(&models.OrderStatusLog{}).Where("order_detail_id = ? AND status = ?", Id, 0).Update("end_time", time.Now())

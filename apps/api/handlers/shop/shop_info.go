@@ -21,7 +21,7 @@ func GetInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req := &shop.GetShopInfoReq{
-		ShopId: uint32(shopID),
+		ShopId: uint64(shopID),
 	}
 	shopInfo, err := client.GetShopInfo(ctx, req)
 	if err != nil {

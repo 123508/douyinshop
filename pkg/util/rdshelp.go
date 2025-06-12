@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"fmt"
 	"github.com/redis/go-redis/v9"
 	"strconv"
 	"strings"
@@ -33,6 +34,8 @@ func TakeKey(data ...any) string {
 			builder.WriteString(strconv.FormatInt(v.(time.Time).Unix(), 10))
 		case byte:
 			builder.WriteString(strconv.FormatInt(int64(v.(byte)), 10))
+		case interface{}:
+			builder.WriteString(fmt.Sprintf("%v", v))
 		}
 		if i != len(data)-1 {
 			builder.WriteString(":")

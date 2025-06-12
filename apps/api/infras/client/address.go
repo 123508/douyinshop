@@ -41,9 +41,9 @@ type AddressItem struct {
 	City          string `json:"city"`
 	State         string `json:"state"`
 	Country       string `json:"country"`
-	ZipCode       int    `json:"zip_code"`
+	ZipCode       string `json:"zip_code"`
 	Consignee     string `json:"consignee"`
-	Gender        int    `json:"gender"`
+	Gender        uint32 `json:"gender"`
 	Phone         string `json:"phone"`
 	Label         string `json:"label"`
 	IsDefault     bool   `json:"is_default"`
@@ -53,16 +53,16 @@ type AddressItem struct {
 // item 地址信息
 // userID 用户ID
 // 返回地址ID
-func AddAddress(ctx context.Context, item *AddressItem, userID uint32) (uint64, error) {
+func AddAddress(ctx context.Context, item *AddressItem, userID uint64) (uint64, error) {
 	req := &address.AddAddressReq{
 		Address: &address.Address{
 			StreetAddress: item.StreetAddress,
 			City:          item.City,
 			State:         item.State,
 			Country:       item.Country,
-			ZipCode:       int32(item.ZipCode),
+			ZipCode:       item.ZipCode,
 			Consignee:     item.Consignee,
-			Gender:        uint32(item.Gender),
+			Gender:        item.Gender,
 			Phone:         item.Phone,
 			Label:         item.Label,
 		},
@@ -78,7 +78,7 @@ func AddAddress(ctx context.Context, item *AddressItem, userID uint32) (uint64, 
 // GetAddressList 获取用户地址列表
 // userID 用户ID
 // 返回地址列表
-func GetAddressList(ctx context.Context, userID uint32) ([]AddressItem, error) {
+func GetAddressList(ctx context.Context, userID uint64) ([]AddressItem, error) {
 	req := &address.GetAddressListReq{
 		UserId: userID,
 	}
@@ -94,9 +94,9 @@ func GetAddressList(ctx context.Context, userID uint32) ([]AddressItem, error) {
 			City:          a.Address.City,
 			State:         a.Address.State,
 			Country:       a.Address.Country,
-			ZipCode:       int(a.Address.ZipCode),
+			ZipCode:       a.Address.ZipCode,
 			Consignee:     a.Address.Consignee,
-			Gender:        int(a.Address.Gender),
+			Gender:        a.Address.Gender,
 			Phone:         a.Address.Phone,
 			Label:         a.Address.Label,
 			IsDefault:     a.Address.IsDefault,
@@ -109,7 +109,7 @@ func GetAddressList(ctx context.Context, userID uint32) ([]AddressItem, error) {
 // addrID 地址ID
 // userID 用户ID
 // 返回是否删除成功
-func DeleteAddress(ctx context.Context, addrID int, userID uint32) (bool, error) {
+func DeleteAddress(ctx context.Context, addrID int, userID uint64) (bool, error) {
 	req := &address.DeleteAddressReq{
 		AddrId: uint64(addrID),
 		UserId: userID,
@@ -126,16 +126,16 @@ func DeleteAddress(ctx context.Context, addrID int, userID uint32) (bool, error)
 // userID 用户ID
 // addrID 地址ID
 // 返回是否更新成功
-func UpdateAddress(ctx context.Context, item *AddressItem, userID uint32) (bool, error) {
+func UpdateAddress(ctx context.Context, item *AddressItem, userID uint64) (bool, error) {
 	req := &address.UpdateAddressReq{
 		Address: &address.Address{
 			StreetAddress: item.StreetAddress,
 			City:          item.City,
 			State:         item.State,
 			Country:       item.Country,
-			ZipCode:       int32(item.ZipCode),
+			ZipCode:       item.ZipCode,
 			Consignee:     item.Consignee,
-			Gender:        uint32(item.Gender),
+			Gender:        item.Gender,
 			Phone:         item.Phone,
 			Label:         item.Label,
 			IsDefault:     item.IsDefault,
@@ -154,7 +154,7 @@ func UpdateAddress(ctx context.Context, item *AddressItem, userID uint32) (bool,
 // addrID 地址ID
 // userID 用户ID
 // 返回是否设置成功
-func SetDefaultAddress(ctx context.Context, addrID int, userID uint32) (bool, error) {
+func SetDefaultAddress(ctx context.Context, addrID int, userID uint64) (bool, error) {
 	req := &address.SetDefaultAddressReq{
 		AddrId: uint64(addrID),
 		UserId: userID,

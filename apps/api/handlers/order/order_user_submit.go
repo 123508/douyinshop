@@ -12,7 +12,7 @@ import (
 func Submit(ctx context.Context, c *app.RequestContext) {
 
 	// 获取并解析 user_id 参数
-	userId, ok := ctx.Value("userId").(uint32)
+	userId, ok := ctx.Value("userId").(uint64)
 	if !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",
@@ -21,8 +21,8 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 	}
 
 	type ReqParam struct {
-		AddressBookId int `json:"address_book_id"`
-		PayMethod     int `json:"pay_method"`
+		AddressBookId uint64 `json:"address_book_id"`
+		PayMethod     int    `json:"pay_method"`
 		Remark        string
 	}
 
@@ -35,7 +35,7 @@ func Submit(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用 UserSubmit 函数提交订单
-	result, err := client.UserSubmit(ctx, userId, int32(param.AddressBookId), int32(param.PayMethod), param.Remark)
+	result, err := client.UserSubmit(ctx, userId, param.AddressBookId, int32(param.PayMethod), param.Remark)
 
 	if err != nil {
 		errorno.DealWithError(err, c)

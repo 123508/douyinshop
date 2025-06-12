@@ -17,7 +17,6 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	_ "go.opentelemetry.io/otel"
 	_ "go.opentelemetry.io/otel/propagation"
-	"strconv"
 	"sync"
 
 	checkout "github.com/123508/douyinshop/kitex_gen/checkout"
@@ -105,13 +104,13 @@ func (s *CheckoutServiceImpl) Checkout(ctx context.Context, req *checkout.Checko
 	}
 	klog.Info(emptyResult)
 	// charge
-	var orderId uint32
-	if orderResult != nil || orderResult.OrderId != 0 {
+	var orderId uint64
+	if orderResult != nil && orderResult.OrderId != 0 {
 		orderId = orderResult.OrderId
 	}
 	payReq := &payment.ChargeReq{
 		UserId:  req.UserId,
-		OrderId: strconv.Itoa(int(orderId)),
+		OrderId: orderId,
 		Amount:  total,
 		CreditCard: &payment.CreditCardInfo{
 			CreditCardNumber:          req.CreditCard.CreditCardNumber,
@@ -133,7 +132,7 @@ func (s *CheckoutServiceImpl) Checkout(ctx context.Context, req *checkout.Checko
 	klog.Info(orderResult)
 
 	resp = &checkout.CheckoutResp{
-		OrderId:       strconv.Itoa(int(orderId)),
+		OrderId:       orderId,
 		TransactionId: paymentResult.TransactionId,
 	}
 	return

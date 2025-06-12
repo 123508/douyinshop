@@ -7,8 +7,8 @@ option go_package = "order/userOrder";
 import "order/bitjump_order_common.proto";
 
 message OrderSubmitReq{
-    uint32 user_id=1;
-    uint32 address_book_id=2;
+    uint64 user_id=1;
+    uint64 address_book_id=2;
     int32 pay_method=3;
     string remark=4;
     float amount=5;
@@ -16,13 +16,13 @@ message OrderSubmitReq{
 }
 
 message OrderSubmitResp{
-    uint32 order_id=1;
+    uint64 order_id=1;
     string number=2;
     float  order_amount=3;
 }
 
 message HistoryReq{
-    uint32 user_id=1;
+    uint64 user_id=1;
     uint32 page=2;
     uint32 page_size=3;
     int32 status=4;
@@ -36,12 +36,12 @@ message HistoryResp{
 }
 
 message ReminderReq{
-    uint32 user_id=1;
-    uint32 order_id=2;
+    uint64 user_id=1;
+    uint64 order_id=2;
 }
 
 message CompleteReq{
-    uint32 order_id=1;
+    uint64 order_id=1;
 }
 
 service OrderUserService{

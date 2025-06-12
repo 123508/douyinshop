@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-	
+
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime"
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime/model"
@@ -18,11 +18,11 @@ type DouyinAI struct {
 
 // 商品推荐请求的结构
 type ProductRecommendation struct {
-	ProductID   int64   `json:"product_id"`
-	Name        string  `json:"name"`
-	Price       float64 `json:"price"`
-	Quantity    int     `json:"quantity"`
-	Confidence  float64 `json:"confidence"`
+	ProductID  int64   `json:"product_id"`
+	Name       string  `json:"name"`
+	Price      float64 `json:"price"`
+	Quantity   int     `json:"quantity"`
+	Confidence float64 `json:"confidence"`
 }
 
 // 初始化豆包模型客户端
@@ -35,9 +35,9 @@ func NewDouyinAI() (*DouyinAI, error) {
 	// 初始化客户端
 	client := arkruntime.NewClientWithApiKey(
 		config.Conf.VolcengineConfig.ApiKey,
-		arkruntime.WithTimeout(time.Duration(config.Conf.VolcengineConfig.Timeout) * time.Second),
+		arkruntime.WithTimeout(time.Duration(config.Conf.VolcengineConfig.Timeout)*time.Second),
 	)
-	
+
 	return &DouyinAI{
 		client: client,
 	}, nil
@@ -54,7 +54,7 @@ func (d *DouyinAI) AnalyzeOrderRequest(userRequest string) ([]ProductRecommendat
 	if d.client == nil {
 		return nil, fmt.Errorf("AI客户端未初始化")
 	}
-	
+
 	if userRequest == "" {
 		return nil, fmt.Errorf("用户请求不能为空")
 	}
@@ -77,6 +77,7 @@ func (d *DouyinAI) AnalyzeOrderRequest(userRequest string) ([]ProductRecommendat
 }`, userRequest)
 
 	ctx := context.Background()
+
 	// 构建聊天请求
 	req := model.ChatCompletionRequest{
 		Model: config.Conf.VolcengineConfig.DouyinModel,
@@ -89,7 +90,8 @@ func (d *DouyinAI) AnalyzeOrderRequest(userRequest string) ([]ProductRecommendat
 			},
 		},
 		// 设置温度为0.7，增加一些创造性
-		Temperature: volcengine.Float64(0.7),
+
+		Temperature: float32(*volcengine.Float64(0.7)),
 	}
 
 	// 调用模型
@@ -123,7 +125,7 @@ func (d *DouyinAI) FormatOrderDetails(orderDetails map[string]interface{}) (stri
 	if d.client == nil {
 		return "", fmt.Errorf("AI客户端未初始化")
 	}
-	
+
 	if orderDetails == nil {
 		return "", fmt.Errorf("订单详情不能为空")
 	}
@@ -156,7 +158,7 @@ func (d *DouyinAI) FormatOrderDetails(orderDetails map[string]interface{}) (stri
 			},
 		},
 		// 设置较低的温度，保持输出的一致性
-		Temperature: volcengine.Float64(0.3),
+		Temperature: float32(*volcengine.Float64(0.3)),
 	}
 
 	resp, err := d.client.CreateChatCompletion(ctx, req)

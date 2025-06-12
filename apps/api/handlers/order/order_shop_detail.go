@@ -15,7 +15,7 @@ import (
 func DetailShop(ctx context.Context, c *app.RequestContext) {
 
 	// 获取并解析 user_id 参数
-	_, ok := ctx.Value("userId").(uint32)
+	_, ok := ctx.Value("userId").(uint64)
 	if !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",
@@ -39,7 +39,7 @@ func DetailShop(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	orderResp, err := client.ShopDetail(ctx, uint32(orderId), orderDetails)
+	orderResp, err := client.ShopDetail(ctx, uint64(orderId), orderDetails)
 	if err != nil {
 		errorno.DealWithError(err, c)
 		return

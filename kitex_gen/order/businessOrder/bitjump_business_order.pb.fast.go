@@ -44,7 +44,7 @@ ReadFieldError:
 }
 
 func (x *ConfirmReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -54,7 +54,7 @@ func (x *ConfirmReq) fastReadField2(buf []byte, _type int8) (offset int, err err
 }
 
 func (x *ConfirmReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
-	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.ShopId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -89,7 +89,7 @@ ReadFieldError:
 }
 
 func (x *RejectionReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -99,7 +99,7 @@ func (x *RejectionReq) fastReadField2(buf []byte, _type int8) (offset int, err e
 }
 
 func (x *RejectionReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
-	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.ShopId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -129,12 +129,12 @@ ReadFieldError:
 }
 
 func (x *DeliveryReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *DeliveryReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.ShopId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -164,12 +164,12 @@ ReadFieldError:
 }
 
 func (x *ReceiveReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *ReceiveReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.ShopId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -204,7 +204,7 @@ ReadFieldError:
 }
 
 func (x *GetOrderListReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.ShopId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.ShopId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -274,7 +274,7 @@ ReadFieldError:
 }
 
 func (x *Notify) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -304,7 +304,7 @@ ReadFieldError:
 }
 
 func (x *GetNotifyReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -352,7 +352,7 @@ func (x *ConfirmReq) fastWriteField1(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -368,7 +368,7 @@ func (x *ConfirmReq) fastWriteField3(buf []byte) (offset int) {
 	if x.ShopId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetShopId())
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetShopId())
 	return offset
 }
 
@@ -386,7 +386,7 @@ func (x *RejectionReq) fastWriteField1(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -402,7 +402,7 @@ func (x *RejectionReq) fastWriteField3(buf []byte) (offset int) {
 	if x.ShopId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetShopId())
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetShopId())
 	return offset
 }
 
@@ -419,7 +419,7 @@ func (x *DeliveryReq) fastWriteField1(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -427,7 +427,7 @@ func (x *DeliveryReq) fastWriteField2(buf []byte) (offset int) {
 	if x.ShopId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetShopId())
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetShopId())
 	return offset
 }
 
@@ -444,7 +444,7 @@ func (x *ReceiveReq) fastWriteField1(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -452,7 +452,7 @@ func (x *ReceiveReq) fastWriteField2(buf []byte) (offset int) {
 	if x.ShopId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetShopId())
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetShopId())
 	return offset
 }
 
@@ -470,7 +470,7 @@ func (x *GetOrderListReq) fastWriteField1(buf []byte) (offset int) {
 	if x.ShopId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetShopId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetShopId())
 	return offset
 }
 
@@ -521,7 +521,7 @@ func (x *Notify) fastWriteField1(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -545,7 +545,7 @@ func (x *GetNotifyReq) fastWriteField2(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetOrderId())
 	return offset
 }
 
@@ -579,7 +579,7 @@ func (x *ConfirmReq) sizeField1() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 
@@ -595,7 +595,7 @@ func (x *ConfirmReq) sizeField3() (n int) {
 	if x.ShopId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(3, x.GetShopId())
+	n += fastpb.SizeUint64(3, x.GetShopId())
 	return n
 }
 
@@ -613,7 +613,7 @@ func (x *RejectionReq) sizeField1() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 
@@ -629,7 +629,7 @@ func (x *RejectionReq) sizeField3() (n int) {
 	if x.ShopId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(3, x.GetShopId())
+	n += fastpb.SizeUint64(3, x.GetShopId())
 	return n
 }
 
@@ -646,7 +646,7 @@ func (x *DeliveryReq) sizeField1() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 
@@ -654,7 +654,7 @@ func (x *DeliveryReq) sizeField2() (n int) {
 	if x.ShopId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(2, x.GetShopId())
+	n += fastpb.SizeUint64(2, x.GetShopId())
 	return n
 }
 
@@ -671,7 +671,7 @@ func (x *ReceiveReq) sizeField1() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 
@@ -679,7 +679,7 @@ func (x *ReceiveReq) sizeField2() (n int) {
 	if x.ShopId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(2, x.GetShopId())
+	n += fastpb.SizeUint64(2, x.GetShopId())
 	return n
 }
 
@@ -697,7 +697,7 @@ func (x *GetOrderListReq) sizeField1() (n int) {
 	if x.ShopId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetShopId())
+	n += fastpb.SizeUint64(1, x.GetShopId())
 	return n
 }
 
@@ -748,7 +748,7 @@ func (x *Notify) sizeField1() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 
@@ -772,7 +772,7 @@ func (x *GetNotifyReq) sizeField2() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(2, x.GetOrderId())
+	n += fastpb.SizeUint64(2, x.GetOrderId())
 	return n
 }
 

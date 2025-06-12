@@ -26,13 +26,13 @@ message Address {
     string city = 2; // 城市
     string state = 3; // 省份/州
     string country = 4; // 国家
-    int32 zip_code = 5; // 邮编
+    string zip_code = 5; // 邮编
     string consignee = 6; // 收货人
     uint32 gender = 7; // 性别 1:男 0:女
     string phone = 8; // 电话
     string Label = 9; // 标签
     bool is_default = 10; // 是否默认地址
-    uint32 address_id = 11; // 地址ID
+    uint64 address_id = 11; // 地址ID
 }
 
 message AddressItem {
@@ -41,7 +41,7 @@ message AddressItem {
 }
 
 message AddAddressReq {
-    uint32 user_id = 1;
+    uint64 user_id = 1;
     Address address = 2;
 }
 
@@ -50,7 +50,7 @@ message AddAddressResp {
 }
 
 message GetAddressListReq {
-    uint32 user_id = 1;
+    uint64 user_id = 1;
 }
 
 message GetAddressListResp {
@@ -58,7 +58,7 @@ message GetAddressListResp {
 }
 
 message DeleteAddressReq {
-    uint32 user_id = 1;
+    uint64 user_id = 1;
     uint64 addr_id = 2;
 }
 
@@ -67,7 +67,7 @@ message DeleteAddressResp {
 }
 
 message UpdateAddressReq {
-    uint32 user_id = 1;
+    uint64 user_id = 1;
     uint64 addr_id = 2;
     Address address = 3;
 }
@@ -77,7 +77,7 @@ message UpdateAddressResp {
 }
 
 message SetDefaultAddressReq {
-    uint32 user_id = 1;
+    uint64 user_id = 1;
     uint64 addr_id = 2;
 }
 
@@ -86,7 +86,7 @@ message SetDefaultAddressResp {
 }
 
 message GetAddressInfoReq{
-    uint32 user_id=1;
+    uint64 user_id=1;
     uint64 addr_id=2;
 }
 
@@ -95,7 +95,7 @@ message GetAddressInfoResp{
 }
 
 message GetDefaultAddressReq{
-    uint32 user_id=1;
+    uint64 user_id=1;
 }
 
 message GetDefaultAddressResp{

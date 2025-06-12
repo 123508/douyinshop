@@ -45,7 +45,7 @@ func initOrderUserRpc() {
 // amount 产品数量
 // order 订单信息
 // 返回订单提交resp
-func UserSubmit(ctx context.Context, userId uint32, addressBookId int32, payMethod int32, remark string) (*userOrder.OrderSubmitResp, error) {
+func UserSubmit(ctx context.Context, userId uint64, addressBookId uint64, payMethod int32, remark string) (*userOrder.OrderSubmitResp, error) {
 
 	// 获取并绑定订单信息
 	order := &order_common.OrderReq{}
@@ -113,7 +113,7 @@ func UserSubmit(ctx context.Context, userId uint32, addressBookId int32, payMeth
 // pageSize 每页数量
 // status 订单状态
 // 返回用户历史订单列表 HistoryResp
-func UserHistory(ctx context.Context, userId uint32, page uint32, pageSize uint32, status int32) (*userOrder.HistoryResp, error) {
+func UserHistory(ctx context.Context, userId uint64, page uint32, pageSize uint32, status int32) (*userOrder.HistoryResp, error) {
 
 	req := &userOrder.HistoryReq{
 		UserId:   userId,
@@ -154,7 +154,7 @@ func UserHistory(ctx context.Context, userId uint32, page uint32, pageSize uint3
 // orderId 订单ID
 // List 订单详细信息列表
 // 返回订单详情 OrderResp
-func UserDetail(ctx context.Context, orderId uint32) (*order_common.OrderResp, error) {
+func UserDetail(ctx context.Context, orderId uint64) (*order_common.OrderResp, error) {
 
 	req := &order_common.OrderReq{OrderId: orderId}
 
@@ -199,7 +199,7 @@ func UserDetail(ctx context.Context, orderId uint32) (*order_common.OrderResp, e
 // orderId 订单ID
 // CancelReason 取消原因
 // 返回空结构体 Empty 表示取消结果
-func UserCancel(ctx context.Context, orderId uint32, CancelReason string) (order_common.Empty, error) {
+func UserCancel(ctx context.Context, orderId uint64, CancelReason string) (order_common.Empty, error) {
 
 	req := &order_common.CancelReq{
 		OrderId:      orderId,
@@ -218,7 +218,7 @@ func UserCancel(ctx context.Context, orderId uint32, CancelReason string) (order
 // userid 用户ID
 // orderId 订单ID
 // 返回空结构体 Empty 表示提醒成功
-func UserReminder(ctx context.Context, userid uint32, orderId uint32) (order_common.Empty, error) {
+func UserReminder(ctx context.Context, userid uint64, orderId uint64) (order_common.Empty, error) {
 
 	req := &userOrder.ReminderReq{
 		UserId:  userid,
@@ -236,7 +236,7 @@ func UserReminder(ctx context.Context, userid uint32, orderId uint32) (order_com
 // UserComplete 用户确认收货
 // orderId 订单ID
 // 返回空结构体 Empty 表示确认收货成功
-func UserComplete(ctx context.Context, orderId uint32) (order_common.Empty, error) {
+func UserComplete(ctx context.Context, orderId uint64) (order_common.Empty, error) {
 
 	req := &userOrder.CompleteReq{
 		OrderId: orderId,

@@ -19,7 +19,7 @@ var secretKey = config.Conf.Jwt.AdminSecretKey
 type AuthServiceImpl struct{}
 
 type UserClaims struct {
-	UserId uint32 `json:"user_id"`
+	UserId uint64 `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
@@ -34,7 +34,7 @@ var RedisError = &errorno.BasicMessageError{Code: 500, Message: "Redis数据库�
 var RedisConnectionError = &errorno.BasicMessageError{Code: 404, Message: "Redis数据库连接异常"}
 
 // GenerateJWT 产生一个jwt令牌
-func GenerateJWT(userId uint32) (string, error) {
+func GenerateJWT(userId uint64) (string, error) {
 
 	claims := UserClaims{
 		UserId: userId,

@@ -40,7 +40,7 @@ func initOrderShopRpc() {
 // Page 页码
 // PageSize 每页数量
 // 返回商家订单列表 GetOrderListResp
-func GetOrderList(ctx context.Context, ShopId uint32, Page uint32, PageSize uint32) (*businessOrder.GetOrderListResp, error) {
+func GetOrderList(ctx context.Context, ShopId uint64, Page uint32, PageSize uint32) (*businessOrder.GetOrderListResp, error) {
 
 	req := &businessOrder.GetOrderListReq{
 		ShopId:   ShopId,
@@ -77,7 +77,7 @@ func GetOrderList(ctx context.Context, ShopId uint32, Page uint32, PageSize uint
 // OrderId 订单ID
 // List 订单详情列表
 // 返回订单详情 OrderResp
-func ShopDetail(ctx context.Context, OrderId uint32, List []order_common.OrderDetail) (*order_common.OrderResp, error) {
+func ShopDetail(ctx context.Context, OrderId uint64, List []order_common.OrderDetail) (*order_common.OrderResp, error) {
 
 	var orderDetails []*order_common.OrderDetail
 	for i := range List {
@@ -124,7 +124,7 @@ func ShopDetail(ctx context.Context, OrderId uint32, List []order_common.OrderDe
 // OrderId 订单ID
 // Status 订单状态
 // 返回空结构体 Empty，表示操作成功
-func ShopConfirm(ctx context.Context, OrderId uint32, Status int32) (*order_common.Empty, error) {
+func ShopConfirm(ctx context.Context, OrderId uint64, Status int32) (*order_common.Empty, error) {
 
 	req := &businessOrder.ConfirmReq{
 		OrderId: OrderId,
@@ -147,7 +147,7 @@ func ShopConfirm(ctx context.Context, OrderId uint32, Status int32) (*order_comm
 // ShopDelivery 商家发货
 // OrderId 订单ID
 // 返回空结构体 Empty，表示操作成功
-func ShopDelivery(ctx context.Context, OrderId uint32) (*order_common.Empty, error) {
+func ShopDelivery(ctx context.Context, OrderId uint64) (*order_common.Empty, error) {
 
 	req := &businessOrder.DeliveryReq{
 		OrderId: OrderId,
@@ -169,7 +169,7 @@ func ShopDelivery(ctx context.Context, OrderId uint32) (*order_common.Empty, err
 // ShopReceive 商家确认收货
 // OrderId 订单ID
 // 返回空结构体 Empty，表示操作成功
-func ShopReceive(ctx context.Context, OrderId uint32) (*order_common.Empty, error) {
+func ShopReceive(ctx context.Context, OrderId uint64) (*order_common.Empty, error) {
 
 	req := &businessOrder.ReceiveReq{
 		OrderId: OrderId,
@@ -191,7 +191,7 @@ func ShopReceive(ctx context.Context, OrderId uint32) (*order_common.Empty, erro
 // OrderId 订单ID
 // RejectionReason 拒绝原因
 // 返回空结构体 Empty，表示操作成功
-func ShopRejection(ctx context.Context, OrderId uint32, RejectionReason string) (*order_common.Empty, error) {
+func ShopRejection(ctx context.Context, OrderId uint64, RejectionReason string) (*order_common.Empty, error) {
 
 	req := &businessOrder.RejectionReq{
 		OrderId:         OrderId,
@@ -214,7 +214,7 @@ func ShopRejection(ctx context.Context, OrderId uint32, RejectionReason string) 
 // OrderId 订单ID
 // CancelReason 取消原因
 // 返回空结构体 Empty，表示操作成功
-func ShopCancel(ctx context.Context, OrderId uint32, CancelReason string) (*order_common.Empty, error) {
+func ShopCancel(ctx context.Context, OrderId uint64, CancelReason string) (*order_common.Empty, error) {
 
 	req := &order_common.CancelReq{
 		OrderId:      OrderId,

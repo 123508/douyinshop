@@ -36,14 +36,14 @@ func initProductRpc() {
 }
 
 type ProductItem struct {
-	Id           uint32   `json:"id"`
+	Id           uint64   `json:"id"`
 	Name         string   `json:"name"`
 	Description  string   `json:"description"`
 	Picture      string   `json:"picture"`
 	Price        string   `json:"price"`
 	CategoryName []string `json:"categories"`
 	Sales        int      `json:"sales"`
-	ShopId       uint32   `json:"shop_id"`
+	ShopId       uint64   `json:"shop_id"`
 }
 
 // ListProducts 获取商品列表
@@ -51,10 +51,10 @@ type ProductItem struct {
 // size 每页数量
 // category 分类
 // 返回商品列表
-func ListProducts(ctx context.Context, page int, size int, category string) ([]ProductItem, error) {
+func ListProducts(ctx context.Context, page int32, size int64, category string) ([]ProductItem, error) {
 	req := &product.ListProductsReq{
-		Page:         int32(page),
-		PageSize:     int64(size),
+		Page:         page,
+		PageSize:     size,
 		CategoryName: category,
 	}
 	resp, err := productClient.ListProducts(ctx, req)
@@ -79,9 +79,9 @@ func ListProducts(ctx context.Context, page int, size int, category string) ([]P
 // GetProductDetail 获取商品详情
 // productId 商品ID
 // 返回商品详情
-func GetProductDetail(ctx context.Context, productId int) (*ProductItem, error) {
+func GetProductDetail(ctx context.Context, productId uint64) (*ProductItem, error) {
 	req := &product.GetProductReq{
-		Id: uint32(productId),
+		Id: productId,
 	}
 	resp, err := productClient.GetProduct(ctx, req)
 	if err != nil {
@@ -105,11 +105,11 @@ func GetProductDetail(ctx context.Context, productId int) (*ProductItem, error) 
 // page 页码
 // pageSize 每页数量
 // 返回商品列表
-func SearchProducts(ctx context.Context, keyword string, page int, pageSize int) ([]ProductItem, error) {
+func SearchProducts(ctx context.Context, keyword string, page uint32, pageSize uint32) ([]ProductItem, error) {
 	req := &product.SearchProductsReq{
 		Query:    keyword,
-		Page:     uint32(page),
-		PageSize: uint32(pageSize),
+		Page:     page,
+		PageSize: pageSize,
 	}
 	resp, err := productClient.SearchProducts(ctx, req)
 	if err != nil {

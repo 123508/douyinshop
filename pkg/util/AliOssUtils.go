@@ -80,7 +80,7 @@ func CheckFileSize(filePath string) error {
 
 // UploadImages 阿里OSS对象存储上传图片(本地上传)
 // 最大上传限制5MB
-func UploadImages(localFilePath string, serviceName string, userId uint32) (string, error) {
+func UploadImages(localFilePath string, serviceName string, userId uint64) (string, error) {
 
 	if localFilePath == "" {
 		return "", nil
