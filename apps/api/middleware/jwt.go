@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"github.com/123508/douyinshop/apps/api/infras/client"
-	auth "github.com/123508/douyinshop/kitex_gen/auth"
+	"github.com/123508/douyinshop/kitex_gen/user"
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol"
@@ -15,7 +15,7 @@ func ParseToken() app.HandlerFunc {
 		token := string(c.Cookie("token"))
 
 		// 解析jwt
-		userId, newToken, err := client.VerifyToken(ctx, &auth.VerifyTokenReq{Token: token})
+		userId, newToken, err := client.VerifyToken(ctx, &user.VerifyTokenReq{Token: token})
 		if err != nil || userId == 0 {
 			c.JSON(401, map[string]interface{}{
 				"error": "请先登录",

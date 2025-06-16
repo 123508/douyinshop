@@ -22,6 +22,16 @@ var UpdatePasswordError = &errorno.BasicMessageError{Code: 500, Message: "更新
 
 var SearchMySQLError = &errorno.BasicMessageError{Code: 500, Message: "查询数据库异常"}
 
-var UserStatusError = &errorno.BasicMessageError{Code: 400, Message: "用户状态异常,不允许被修改"}
+var UserFreezeError = &errorno.BasicMessageError{Code: 400, Message: "用户被冻结,不允许被修改"}
 
 var UpdateUserInfoError = &errorno.BasicMessageError{Code: 500, Message: "更新用户信息错误"}
+
+var RedisSetError = &errorno.BasicMessageError{Code: 500, Message: "redis放入参数失败"}
+
+var SearchRedisError = &errorno.BasicMessageError{Code: 500, Message: "查询redis异常"}
+
+var VerifyCodeTimeOutError = &errorno.BasicMessageError{Code: 404, Message: "验证码已超时"}
+
+var VerifyCodeError = &errorno.BasicMessageError{Code: 404, Message: "验证码错误"}
+
+var BadPageOrPageSize = &errorno.BasicMessageError{Code: 400, Message: "请求页数或页长错误"}

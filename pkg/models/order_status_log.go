@@ -19,3 +19,7 @@ type OrderStatusLog struct {
 func (o OrderStatusLog) GetID() uint64 {
 	return o.ID
 }
+
+func (o OrderStatusLog) GetCreatedTime() time.Time {
+	return o.CreatedAt
+}

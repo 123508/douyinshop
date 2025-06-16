@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/123508/douyinshop/pkg/component/pub"
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
@@ -11,15 +12,9 @@ import (
 	"time"
 )
 
-type IntegerNumber interface {
-	~int | ~uint | ~int64 | ~uint64 | ~int32 | ~uint32 | ~int16 | ~uint16 | ~int8 | ~uint8
-}
+//修改全量查询和分批查询
 
-type ItemType[E IntegerNumber] interface {
-	GetID() E
-}
-
-type ListCacheComponent[Id IntegerNumber, Item ItemType[Id]] struct {
+type ListCacheComponent[Id pub.IntegerNumber, Item pub.ItemType[Id]] struct {
 	Rds              *redis.Client
 	Ctx              context.Context
 	IdListKey        string
@@ -89,7 +84,7 @@ func (c *ListCacheComponent[Id, Item]) checkAndRepair() error {
 	return nil
 }
 
-func (c *ListCacheComponent[Id, Item]) QueryListWithCache() ([]Item, error) {
+func (c *ListCacheComponent[Id, Item]) QueryListWithCache(ctx context.Context) ([]Item, error) {
 
 	err := c.checkAndRepair()
 
@@ -219,7 +214,7 @@ func (c *ListCacheComponent[Id, Item]) QueryListWithCache() ([]Item, error) {
 	return c.Sort(res), nil
 }
 
-type SimpleCacheComponent[Id IntegerNumber, E any] struct {
+type SimpleCacheComponent[Id pub.IntegerNumber, E any] struct {
 	Rds       *redis.Client
 	Ctx       context.Context
 	Key       string
@@ -251,7 +246,7 @@ func (c *SimpleCacheComponent[Id, E]) checkAndRepair() error {
 	return nil
 }
 
-func (c *SimpleCacheComponent[Id, E]) QueryWithCache() (E, error) {
+func (c *SimpleCacheComponent[Id, E]) QueryWithCache(ctx context.Context) (E, error) {
 
 	var items E
 

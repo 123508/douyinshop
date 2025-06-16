@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 // User 用户表
@@ -18,4 +19,8 @@ type User struct {
 
 func (u User) GetID() uint64 {
 	return u.ID
+}
+
+func (u User) GetCreatedTime() time.Time {
+	return u.CreatedAt
 }

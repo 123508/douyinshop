@@ -107,12 +107,3 @@ func GetUserInfo(ctx context.Context, userId uint64) (models.User, error) {
 	return row, nil
 
 }
-
-func GetUserPassword(ctx context.Context, userId uint64) (models.UserLogin, error) {
-	var userLogin models.UserLogin
-	if err := DB.Model(&models.UserLogin{}).Where("user_id = ?", userId).First(&userLogin).Error; err != nil {
-		util.LogError("查询用户密码异常", "GetUserPassword", "", err)
-		return models.UserLogin{}, err
-	}
-	return userLogin, nil
-}

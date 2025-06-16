@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type Order struct {
@@ -25,4 +26,8 @@ type Order struct {
 
 func (o Order) GetID() uint64 {
 	return o.ID
+}
+
+func (o Order) GetCreatedTime() time.Time {
+	return o.CreatedAt
 }

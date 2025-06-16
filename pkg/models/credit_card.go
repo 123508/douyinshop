@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type CreditCard struct {
@@ -15,4 +16,8 @@ type CreditCard struct {
 
 func (c CreditCard) GetID() uint64 {
 	return c.ID
+}
+
+func (c CreditCard) GetCreatedTime() time.Time {
+	return c.CreatedAt
 }

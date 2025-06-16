@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type Role struct {
@@ -16,4 +17,8 @@ type Role struct {
 
 func (r Role) GetID() uint64 {
 	return r.ID
+}
+
+func (r Role) GetCreatedTime() time.Time {
+	return r.CreatedAt
 }

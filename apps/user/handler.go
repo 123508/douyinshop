@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/123508/douyinshop/pkg/component/condition"
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/123508/douyinshop/pkg/util"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"math/rand"
 	"time"
@@ -104,7 +108,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 		Expires: time.Duration(rand.Intn(10)+5) * time.Minute,
 	}
 
-	row, err := simple.QueryWithCache()
+	row, err := simple.QueryWithCache(ctx)
 
 	if err != nil {
 		return nil, err
@@ -182,8 +186,8 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 		return nil, err
 	}
 
-	if info.Status != 0 {
-		return nil, UserStatusError
+	if info.Status == 1 {
+		return nil, UserFreezeError
 	}
 
 	//更新用户信息
@@ -303,13 +307,76 @@ func (s *UserServiceImpl) VerifyTokenByRPC(ctx context.Context, req *user.Verify
 
 // ListUsers implements the UserServiceImpl interface.
 func (s *UserServiceImpl) ListUsers(ctx context.Context, req *user.ListUsersReq) (resp *user.ListUsersResp, err error) {
-	// TODO: Your code here...
-	return
+	//请求页长有问题
+	if req.Page < 1 || req.PageSize < 1 {
+		return nil, BadPageOrPageSize
+	}
+
+	builder := condition.NewConditionBuilder()
+
+	for _, v := range req.Filter {
+		builder = builder.And(v.FieldName, v.Operator, v.Value)
+	}
+
+	sql, params := builder.Build().ToSQL()
+
+	listQuery := util.ListCacheComponent[uint64, models.User]{
+		Rds:             Rds,
+		Ctx:             ctx,
+		IdListKey:       util.TakeKey(serviceName, util.Md5Hash(util.TakeKey(req.PageSize, req.PageSize))),
+		DetailKeyPrefix: util.TakeKey(serviceName),
+		Marshal:         json.Marshal,
+		Unmarshal:       json.Unmarshal,
+		FullQueryExec: func() ([]models.User, error) {
+			var users []models.User
+			offset := int((req.Page - 1) * req.PageSize)
+			if err := DB.Model(&models.User{}).Where(sql, params...).Offset(offset).Limit(int(req.PageSize)).Find(&users).Error; err != nil {
+				return nil, err
+			}
+			return users, nil
+		},
+		PartialQueryExec: func(fail []uint64) ([]models.User, error) {
+			users := make([]models.User, 0, len(fail))
+			if err := DB.Model(&user.User{}).Where(sql, params...).Where("id in ?", fail).Find(&users).Error; err != nil {
+				return nil, err
+			}
+			return users, nil
+		},
+		Expires:     time.Duration(rand.Intn(3)+3) * time.Minute,
+		MaxLostRate: 30,
+		Sort:        nil,
+	}
+
+	listWithCache, err := listQuery.QueryListWithCache(ctx)
+
+	userList := make([]*user.User, 0, len(listWithCache))
+
+	for _, v := range listWithCache {
+		u := &user.User{
+			Email:  v.Email,
+			Name:   v.Name,
+			Avatar: v.Avatar,
+			Phone:  v.Phone,
+			Gender: v.Gender,
+			Status: v.Status,
+			Id:     v.ID,
+		}
+
+		userList = append(userList, u)
+	}
+
+	total := uint32(len(userList))
+
+	return &user.ListUsersResp{
+		Users: userList,
+		Total: total,
+	}, nil
 }
 
 // ChangePassword implements the UserServiceImpl interface.
 func (s *UserServiceImpl) ChangePassword(ctx context.Context, req *user.ChangePasswordReq) (resp *user.Empty, err error) {
 
+	//查询传入条件错误
 	if req.UserId == 0 {
 		return nil, UserNotExists
 	}
@@ -320,21 +387,25 @@ func (s *UserServiceImpl) ChangePassword(ctx context.Context, req *user.ChangePa
 	//用户状态合法性校验
 	info, err := GetUserInfo(ctx, req.UserId)
 
+	//查询错误
 	if err != nil {
 		return nil, err
 	}
 
-	if info.Status != 0 {
-		return nil, UserStatusError
+	//用户被冻结
+	if info.Status == 1 {
+		return nil, UserFreezeError
 	}
 
 	//查询用户密码
-	userLogin, err := GetUserPassword(ctx, req.UserId)
+	var userLogin models.UserLogin
 
-	if err != nil {
+	if err := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId).First(&userLogin).Error; err != nil {
+		util.LogError("查询用户密码异常", "GetUserPassword", "", err)
 		return nil, err
 	}
 
+	//用户密码不正确
 	if userLogin.Password != Encryption(req.OldPassword) {
 		return nil, PasswordNotEqual
 	}
@@ -350,15 +421,128 @@ func (s *UserServiceImpl) ChangePassword(ctx context.Context, req *user.ChangePa
 }
 
 // ForgotPassword implements the UserServiceImpl interface.
+// 这里需要发送验证码
 func (s *UserServiceImpl) ForgotPassword(ctx context.Context, req *user.ForgotPasswordReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+	//请求邮箱不正确
+	if req.Email == "" {
+		return nil, UserNotExists
+	}
+
+	//用户状态合法性校验
+	var info models.User
+
+	if err = DB.Model(&models.User{}).Where("email = ?", req.Email).Find(&info).Error; err != nil {
+		return nil, err
+	}
+
+	//用户状态异常
+	if info.Status == 1 {
+		return nil, UserFreezeError
+	}
+
+	vCode := rand.Intn(6)
+
+	if err = Rds.Set(ctx, util.TakeKey(serviceName, req.Email, util.Md5Hash("params")), vCode, 10*time.Minute).Err(); err != nil {
+		return nil, RedisSetError
+	} else {
+		fmt.Println("发送验证码成功:", vCode, "用户邮箱为:", req.Email)
+	}
+
+	//TODO 这里之后调用发送验证码的逻辑
+
+	return &user.Empty{}, nil
+}
+
+// VerifySmsCode implements the UserServiceImpl interface.
+// 这里判定验证码是否成功,成功就返回一个一次性的ResetToken
+func (s *UserServiceImpl) VerifySmsCode(ctx context.Context, req *user.VerifySmsCodeReq) (resp *user.VerifySmsCodeResp, err error) {
+
+	//获取存储好的验证码
+	vCodeKey := util.TakeKey(serviceName, req.Email, util.Md5Hash("params"))
+	vCode, err := Rds.Get(ctx, vCodeKey).Result()
+
+	//redis查询失败
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return nil, SearchRedisError
+	}
+
+	//验证码已过期的情况
+	if vCode == "" {
+		return nil, VerifyCodeTimeOutError
+	}
+
+	//用户状态合法性校验
+	var info models.User
+
+	if err = DB.Model(&models.User{}).Where("email = ?", req.Email).Find(&info).Error; err != nil {
+		return nil, err
+	}
+
+	//用户状态异常
+	if info.Status == 1 {
+		return nil, UserFreezeError
+	}
+
+	//验证码错误
+	if vCode != req.VerifyCode {
+		return nil, VerifyCodeError
+	}
+
+	ResetToken := util.Md5Hash(util.TakeKey(serviceName, req.Email, util.Md5Hash("params")))
+
+	//写入重置token
+	if err = Rds.Set(ctx, ResetToken, "1", 10*time.Minute).Err(); err != nil {
+		return nil, RedisSetError
+	}
+
+	//删除对应的短信验证码
+	Rds.Del(ctx, vCodeKey)
+
+	return &user.VerifySmsCodeResp{
+		ResetToken: ResetToken,
+	}, nil
 }
 
 // ResetPassword implements the UserServiceImpl interface.
+// 这里进行重置密码,重置完成后删除ResetToken
 func (s *UserServiceImpl) ResetPassword(ctx context.Context, req *user.ResetPasswordReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+
+	//获取存储好的验证码
+	_, err = Rds.Get(ctx, req.ResetToken).Result()
+
+	//验证码已过期的情况
+	if errors.Is(err, redis.Nil) {
+		return nil, VerifyCodeTimeOutError
+	}
+
+	//redis查询失败
+	if err != nil {
+		return nil, SearchRedisError
+	}
+
+	//用户状态合法性校验
+	var info models.User
+
+	if err = DB.Model(&models.User{}).Where("email = ?", req.Email).Find(&info).Error; err != nil {
+		return nil, err
+	}
+
+	//用户状态异常
+	if info.Status == 1 {
+		return nil, UserFreezeError
+	}
+
+	//更新用户密码
+	where := DB.Model(&models.UserLogin{}).Where("user_id = ?", info.ID)
+	if err = where.Update("password", Encryption(req.NewPassword)).Update("updated_at", time.Now()).Error; err != nil {
+		util.LogError("更新用户密码错误", "ChangePassword", "", err)
+		return nil, UpdatePasswordError
+	}
+
+	//删除重置Token,保证其只可用一次
+	Rds.Del(ctx, req.ResetToken)
+
+	return &user.Empty{}, nil
 }
 
 // BindEmail implements the UserServiceImpl interface.

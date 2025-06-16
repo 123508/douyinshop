@@ -22,6 +22,7 @@ type Client interface {
 	VerifyTokenByRPC(ctx context.Context, Req *user.VerifyTokenReq, callOptions ...callopt.Option) (r *user.VerifyResp, err error)
 	ChangePassword(ctx context.Context, Req *user.ChangePasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 	ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	VerifySmsCode(ctx context.Context, Req *user.VerifySmsCodeReq, callOptions ...callopt.Option) (r *user.VerifySmsCodeResp, err error)
 	ResetPassword(ctx context.Context, Req *user.ResetPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 	BindEmail(ctx context.Context, Req *user.BindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 	UnbindEmail(ctx context.Context, Req *user.UnbindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error)
@@ -111,6 +112,11 @@ func (p *kUserServiceClient) ChangePassword(ctx context.Context, Req *user.Chang
 func (p *kUserServiceClient) ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.ForgotPassword(ctx, Req)
+}
+
+func (p *kUserServiceClient) VerifySmsCode(ctx context.Context, Req *user.VerifySmsCodeReq, callOptions ...callopt.Option) (r *user.VerifySmsCodeResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.VerifySmsCode(ctx, Req)
 }
 
 func (p *kUserServiceClient) ResetPassword(ctx context.Context, Req *user.ResetPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error) {

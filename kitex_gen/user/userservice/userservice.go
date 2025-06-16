@@ -92,6 +92,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"VerifySmsCode": kitex.NewMethodInfo(
+		verifySmsCodeHandler,
+		newVerifySmsCodeArgs,
+		newVerifySmsCodeResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 	"ResetPassword": kitex.NewMethodInfo(
 		resetPasswordHandler,
 		newResetPasswordArgs,
@@ -1876,6 +1883,159 @@ func (p *ForgotPasswordResult) GetResult() interface{} {
 	return p.Success
 }
 
+func verifySmsCodeHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.VerifySmsCodeReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).VerifySmsCode(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *VerifySmsCodeArgs:
+		success, err := handler.(user.UserService).VerifySmsCode(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*VerifySmsCodeResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newVerifySmsCodeArgs() interface{} {
+	return &VerifySmsCodeArgs{}
+}
+
+func newVerifySmsCodeResult() interface{} {
+	return &VerifySmsCodeResult{}
+}
+
+type VerifySmsCodeArgs struct {
+	Req *user.VerifySmsCodeReq
+}
+
+func (p *VerifySmsCodeArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.VerifySmsCodeReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *VerifySmsCodeArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *VerifySmsCodeArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *VerifySmsCodeArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *VerifySmsCodeArgs) Unmarshal(in []byte) error {
+	msg := new(user.VerifySmsCodeReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var VerifySmsCodeArgs_Req_DEFAULT *user.VerifySmsCodeReq
+
+func (p *VerifySmsCodeArgs) GetReq() *user.VerifySmsCodeReq {
+	if !p.IsSetReq() {
+		return VerifySmsCodeArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *VerifySmsCodeArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *VerifySmsCodeArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type VerifySmsCodeResult struct {
+	Success *user.VerifySmsCodeResp
+}
+
+var VerifySmsCodeResult_Success_DEFAULT *user.VerifySmsCodeResp
+
+func (p *VerifySmsCodeResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.VerifySmsCodeResp)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *VerifySmsCodeResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *VerifySmsCodeResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *VerifySmsCodeResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *VerifySmsCodeResult) Unmarshal(in []byte) error {
+	msg := new(user.VerifySmsCodeResp)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *VerifySmsCodeResult) GetSuccess() *user.VerifySmsCodeResp {
+	if !p.IsSetSuccess() {
+		return VerifySmsCodeResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *VerifySmsCodeResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.VerifySmsCodeResp)
+}
+
+func (p *VerifySmsCodeResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *VerifySmsCodeResult) GetResult() interface{} {
+	return p.Success
+}
+
 func resetPasswordHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	switch s := arg.(type) {
 	case *streaming.Args:
@@ -2756,6 +2916,16 @@ func (p *kClient) ForgotPassword(ctx context.Context, Req *user.ForgotPasswordRe
 	_args.Req = Req
 	var _result ForgotPasswordResult
 	if err = p.c.Call(ctx, "ForgotPassword", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) VerifySmsCode(ctx context.Context, Req *user.VerifySmsCodeReq) (r *user.VerifySmsCodeResp, err error) {
+	var _args VerifySmsCodeArgs
+	_args.Req = Req
+	var _result VerifySmsCodeResult
+	if err = p.c.Call(ctx, "VerifySmsCode", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

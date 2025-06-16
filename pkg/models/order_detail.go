@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type OrderDetail struct {
 	gorm.Model
@@ -15,4 +18,8 @@ type OrderDetail struct {
 
 func (o OrderDetail) GetID() uint64 {
 	return o.ID
+}
+
+func (o OrderDetail) GetCreatedTime() time.Time {
+	return o.CreatedAt
 }

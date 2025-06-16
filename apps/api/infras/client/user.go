@@ -42,12 +42,19 @@ func Register(ctx context.Context, req *user.RegisterReq) (bool, error) {
 	return true, nil
 }
 
-func Login(ctx context.Context, req *user.LoginReq) (uint64, error) {
+func Login(ctx context.Context, req *user.LoginReq) (string, error) {
 	resp, err := userClient.Login(ctx, req)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-	return resp.UserId, nil
+
+	tokenResp, err := userClient.DeliverTokenByRPC(ctx, &user.DeliverTokenReq{UserId: resp.UserId})
+
+	if err != nil {
+		return "", err
+	}
+
+	return tokenResp.Token, nil
 }
 
 func Delete(ctx context.Context, req *user.DeleteReq) (bool, error) {
@@ -74,14 +81,6 @@ func Logout(ctx context.Context, req *user.LogoutReq) (bool, error) {
 		return false, err
 	}
 	return true, nil
-}
-
-func DeliverToken(ctx context.Context, req *user.DeliverTokenReq) (string, error) {
-	resp, err := userClient.DeliverTokenByRPC(ctx, req)
-	if err != nil {
-		return "", err
-	}
-	return resp.Token, nil
 }
 
 func VerifyToken(ctx context.Context, req *user.VerifyTokenReq) (uint64, string, error) {

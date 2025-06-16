@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type Permission struct {
 	gorm.Model
@@ -17,4 +20,8 @@ type Permission struct {
 
 func (p Permission) GetID() uint64 {
 	return p.ID
+}
+
+func (p Permission) GetCreatedTime() time.Time {
+	return p.CreatedAt
 }

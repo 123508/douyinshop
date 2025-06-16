@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type Cart struct {
@@ -16,4 +17,8 @@ type Cart struct {
 
 func (c Cart) GetID() uint64 {
 	return c.ID
+}
+
+func (c Cart) GetCreatedTime() time.Time {
+	return c.CreatedAt
 }
