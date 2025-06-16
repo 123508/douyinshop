@@ -137,7 +137,7 @@ func (c *ListCacheComponent[Id, Item]) QueryListWithCache(ctx context.Context) (
 		rate = len(fail) * 100 / len(list)
 	}
 
-	if ok != nil || len(res) == 0 || rate > c.MaxLostRate {
+	if ok != nil || rate > c.MaxLostRate {
 		// 执行查询并处理错误
 		result, err := c.FullQueryExec()
 
