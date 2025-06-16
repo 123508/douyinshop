@@ -6,11 +6,14 @@ import (
 	"strings"
 )
 
+// Expr 查询基础表达式,将 id = 1 分解为了  id , = , 1 三个部分
 type Expr struct {
 	Field    string
 	Operator string
 	Value    interface{}
 }
+
+//将表达式转换为sql查询
 
 func (e Expr) ToSQL() (string, []interface{}) {
 	switch strings.ToLower(e.Operator) {

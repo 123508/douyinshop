@@ -35,3 +35,5 @@ var VerifyCodeTimeOutError = &errorno.BasicMessageError{Code: 404, Message: "验
 var VerifyCodeError = &errorno.BasicMessageError{Code: 404, Message: "验证码错误"}
 
 var BadPageOrPageSize = &errorno.BasicMessageError{Code: 400, Message: "请求页数或页长错误"}
+
+var NotAllowedBindEmail = &errorno.BasicMessageError{Code: 400, Message: "请先解绑邮箱"}

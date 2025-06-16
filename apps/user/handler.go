@@ -75,7 +75,9 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *
 
 	//从user_logins表中获取Password信息
 	var res models.UserLogin
-	DB.Model(&models.UserLogin{}).Where("user_id = ? and password = ?", row.ID, Encryption(req.Password)).Find(&res)
+	DB.Model(&models.UserLogin{}).
+		Where("user_id = ? and password = ?", row.ID, Encryption(req.Password)).
+		Find(&res)
 
 	//如果用户已经被删除也返回空
 	if res.ID == 0 {
@@ -97,9 +99,12 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 		Key:       util.TakeKey(serviceName, req.UserId),
 		Marshal:   json.Marshal,
 		Unmarshal: json.Unmarshal,
+		FuncName:  "GetUserInfo",
 		QueryExec: func() (models.User, error) {
 			var row models.User
-			if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).First(&row).Error; err != nil {
+			if err := DB.Model(&models.User{}).
+				Where("id = ?", req.UserId).
+				First(&row).Error; err != nil {
 				util.LogError("用户不存在", "GetUserInfo", "", err)
 				return models.User{}, UserNotExists
 			}
@@ -202,7 +207,9 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 	if req.Nickname != "" {
 		updates["name"] = req.Nickname
 	}
-	if err := DB.Model(&models.User{}).Where("id=?", req.UserId).Updates(updates).Error; err != nil {
+	if err := DB.Model(&models.User{}).
+		Where("id=?", req.UserId).
+		Updates(updates).Error; err != nil {
 		util.LogError("更新用户出错", "Update", "", err)
 		return nil, UpdateUserInfoError
 	}
@@ -327,17 +334,25 @@ func (s *UserServiceImpl) ListUsers(ctx context.Context, req *user.ListUsersReq)
 		DetailKeyPrefix: util.TakeKey(serviceName),
 		Marshal:         json.Marshal,
 		Unmarshal:       json.Unmarshal,
+		FuncName:        "ListUsers",
 		FullQueryExec: func() ([]models.User, error) {
 			var users []models.User
 			offset := int((req.Page - 1) * req.PageSize)
-			if err := DB.Model(&models.User{}).Where(sql, params...).Offset(offset).Limit(int(req.PageSize)).Find(&users).Error; err != nil {
+			if err := DB.Model(&models.User{}).
+				Where(sql, params...).
+				Offset(offset).
+				Limit(int(req.PageSize)).
+				Find(&users).Error; err != nil {
 				return nil, err
 			}
 			return users, nil
 		},
 		PartialQueryExec: func(fail []uint64) ([]models.User, error) {
 			users := make([]models.User, 0, len(fail))
-			if err := DB.Model(&user.User{}).Where(sql, params...).Where("id in ?", fail).Find(&users).Error; err != nil {
+			if err := DB.Model(&user.User{}).
+				Where(sql, params...).
+				Where("id in ?", fail).
+				Find(&users).Error; err != nil {
 				return nil, err
 			}
 			return users, nil
@@ -533,7 +548,7 @@ func (s *UserServiceImpl) ResetPassword(ctx context.Context, req *user.ResetPass
 	}
 
 	//更新用户密码
-	where := DB.Model(&models.UserLogin{}).Where("user_id = ?", info.ID)
+	where := DB.Model(&models.UserLogin{}).Where("id = ?", info.ID)
 	if err = where.Update("password", Encryption(req.NewPassword)).Update("updated_at", time.Now()).Error; err != nil {
 		util.LogError("更新用户密码错误", "ChangePassword", "", err)
 		return nil, UpdatePasswordError
@@ -547,24 +562,113 @@ func (s *UserServiceImpl) ResetPassword(ctx context.Context, req *user.ResetPass
 
 // BindEmail implements the UserServiceImpl interface.
 func (s *UserServiceImpl) BindEmail(ctx context.Context, req *user.BindEmailReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
+
+	defer Rds.Del(ctx, util.TakeKey(serviceName, req.UserId))
+
+	info, err := GetUserInfo(ctx, req.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//用户为冻结态
+	if info.Status == 1 {
+		return nil, UserFreezeError
+	}
+
+	//存在邮箱则不允许直接修改
+	if info.Email != "" {
+		return nil, NotAllowedBindEmail
+	}
+
+	//绑定邮箱
+	if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).
+		Update("updated_at", time.Now()).
+		Update("email", req.Email).Error; err != nil {
+		util.LogError("绑定邮箱错误", "BindEmail", "", err)
+		return nil, err
+	}
+
 	return
 }
 
 // UnbindEmail implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UnbindEmail(ctx context.Context, req *user.UnbindEmailReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+	//清理缓存
+	defer Rds.Del(ctx, util.TakeKey(serviceName, req.UserId))
+
+	info, err := GetUserInfo(ctx, req.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//用户为冻结态
+	if info.Status == 1 {
+		return nil, UserFreezeError
+	}
+
+	//解绑邮箱
+	if err := DB.Model(&models.User{}).Where("user_id", req.UserId).
+		Update("updated_at", time.Now()).
+		Update("email", "").Error; err != nil {
+		util.LogError("解绑邮箱错误", "UnbindEmail", "", err)
+		return nil, err
+	}
+
+	return &user.Empty{}, nil
 }
 
 // FreezeUser implements the UserServiceImpl interface.
 func (s *UserServiceImpl) FreezeUser(ctx context.Context, req *user.FreezeUserReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+	//清理缓存
+	defer Rds.Del(ctx, util.TakeKey(serviceName, req.UserId))
+
+	info, err := GetUserInfo(ctx, req.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//状态已经修改
+	if info.Status == 1 {
+		return &user.Empty{}, nil
+	}
+
+	if err := DB.Model(&models.User{}).
+		Where("id = ?", req.UserId).
+		Update("status", 1).
+		Update("updated_at", time.Now()).Error; err != nil {
+		util.LogError("冻结用户失败", "FreezeUser", "", err)
+		return nil, err
+	}
+
+	return &user.Empty{}, nil
 }
 
 // UnfreezeUser implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UnfreezeUser(ctx context.Context, req *user.UnfreezeUserReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+	//清理缓存
+	defer Rds.Del(ctx, util.TakeKey(serviceName, req.UserId))
+
+	info, err := GetUserInfo(ctx, req.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//状态已经修改
+	if info.Status == 0 {
+		return &user.Empty{}, nil
+	}
+
+	if err := DB.Model(&models.User{}).
+		Where("id = ?", req.UserId).
+		Update("status", 0).
+		Update("updated_at", time.Now()).Error; err != nil {
+		util.LogError("解冻用户失败", "UnfreezeUser", "", err)
+		return nil, err
+	}
+
+	return &user.Empty{}, nil
 }
