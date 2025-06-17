@@ -29,7 +29,7 @@ func Search(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	products, err := client.SearchProducts(ctx, query, page, pageSize)
+	products, err := client.SearchProducts(ctx, query, uint32(page), uint32(pageSize))
 	if err != nil {
 		errorno.DealWithError(err, c)
 		return

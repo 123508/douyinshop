@@ -12,7 +12,7 @@ import (
 )
 
 func UpdateProductInfo(ctx context.Context, c *app.RequestContext) {
-	userId, ok := ctx.Value("userId").(uint32)
+	userId, ok := ctx.Value("userId").(uint64)
 	if !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",
@@ -20,8 +20,8 @@ func UpdateProductInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	type ProductInfo struct {
-		ShopID      uint32   `json:"shop_id"`
-		ProductID   uint32   `json:"product_id"`
+		ShopID      uint64   `json:"shop_id"`
+		ProductID   uint64   `json:"product_id"`
 		Name        string   `json:"product_name"`
 		Description string   `json:"product_description"`
 		Picture     string   `json:"product_picture"`

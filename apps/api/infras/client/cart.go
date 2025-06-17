@@ -36,7 +36,7 @@ func initCartRpc() {
 }
 
 type CartReq struct {
-	ProductId uint32 `json:"product_id"`
+	ProductId uint64 `json:"product_id"`
 	Quantity  uint32 `json:"number"`
 }
 
@@ -49,7 +49,7 @@ func AddItem(ctx context.Context, req *cart.AddItemReq) (*cart.AddItemResp, erro
 	return resp, nil
 }
 
-// GetCart获取购物车内容
+// GetCart 获取购物车内容
 func GetCart(ctx context.Context, req *cart.GetCartReq) (*cart.GetCartResp, error) {
 	resp, err := cartClient.GetCart(ctx, req)
 	if err != nil {

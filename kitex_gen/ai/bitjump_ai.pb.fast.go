@@ -33,7 +33,7 @@ ReadFieldError:
 }
 
 func (x *OrderQueryReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadString(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -88,7 +88,7 @@ ReadFieldError:
 }
 
 func (x *AutoPlaceOrderReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -118,7 +118,7 @@ ReadFieldError:
 }
 
 func (x *AutoPlaceOrderResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadString(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -181,10 +181,10 @@ func (x *OrderQueryReq) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *OrderQueryReq) fastWriteField1(buf []byte) (offset int) {
-	if x.OrderId == "" {
+	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -217,7 +217,7 @@ func (x *AutoPlaceOrderReq) fastWriteField1(buf []byte) (offset int) {
 	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
@@ -238,10 +238,10 @@ func (x *AutoPlaceOrderResp) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *AutoPlaceOrderResp) fastWriteField1(buf []byte) (offset int) {
-	if x.OrderId == "" {
+	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -286,10 +286,10 @@ func (x *OrderQueryReq) Size() (n int) {
 }
 
 func (x *OrderQueryReq) sizeField1() (n int) {
-	if x.OrderId == "" {
+	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 
@@ -322,7 +322,7 @@ func (x *AutoPlaceOrderReq) sizeField1() (n int) {
 	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetUserId())
 	return n
 }
 
@@ -343,10 +343,10 @@ func (x *AutoPlaceOrderResp) Size() (n int) {
 }
 
 func (x *AutoPlaceOrderResp) sizeField1() (n int) {
-	if x.OrderId == "" {
+	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 

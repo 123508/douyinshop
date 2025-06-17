@@ -7,7 +7,7 @@ import (
 )
 
 type OrderQueryRequest struct {
-	OrderId string `json:"order_id" query:"order_id" vd:"$!=''"` // 订单ID
+	OrderId uint64 `json:"order_id" query:"order_id" vd:"$!=''"` // 订单ID
 }
 
 // OrderQuery 查询订单详情

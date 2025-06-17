@@ -2,21 +2,66 @@ package main
 
 import (
 	"context"
-	product "github.com/123508/douyinshop/kitex_gen/product"
-	"github.com/123508/douyinshop/pkg/els"
-	"github.com/123508/douyinshop/pkg/models"
+	"encoding/json"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/123508/douyinshop/kitex_gen/product"
+	"github.com/123508/douyinshop/pkg/els"
+	"github.com/123508/douyinshop/pkg/models"
+	"github.com/123508/douyinshop/pkg/util"
+)
+
+const (
+	Category = "category"
 )
 
 // ProductCatalogServiceImpl implements the last service interface defined in the IDL.
 type ProductCatalogServiceImpl struct{}
 
+func (s *ProductCatalogServiceImpl) GetCategoryFromProduct(ctx context.Context, Categories string, productId uint64) ([]models.Category, error) {
+
+	simple := util.SimpleCacheComponent[uint64, []models.Category]{
+		Rds:       Rds,
+		Ctx:       ctx,
+		Key:       util.TakeKey(Category, productId),
+		Marshal:   json.Marshal,
+		Unmarshal: json.Unmarshal,
+		QueryExec: func() ([]models.Category, error) {
+
+			categoryIdList := make([]uint64, 0)
+			for _, categoryIdStr := range strings.Split(Categories, ",") {
+				categoryId, _ := strconv.Atoi(strings.Trim(categoryIdStr, " "))
+				categoryIdList = append(categoryIdList, uint64(categoryId))
+			}
+
+			category := make([]models.Category, 0)
+
+			if err := database.Model(&models.Category{}).Where("id IN ?", categoryIdList).Find(&category).Error; err != nil {
+				return nil, err
+			}
+			return category, nil
+		},
+		Expires: time.Duration(rand.Intn(3)+3) * time.Second,
+	}
+
+	return simple.QueryWithCache(ctx)
+}
+
 // ListProducts implements the ProductCatalogServiceImpl interface.
+// 获取商品列表接口
 // 若分类名为空，则返回所以商品中的第page页的pageSize个商品
 // 若分类名不为空，则返回指定分类名的第page页的pageSize个商品
 // 当商品不存在时，返回空列表
 func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *product.ListProductsReq) (resp *product.ListProductsResp, err error) {
+
+	//对请求页数和页长进行判断
+	if req.Page < 1 || req.PageSize < 1 {
+		return nil, BadPageOrPageSize
+	}
+
 	var products []models.Product
 	page := int(req.Page)
 	pageSize := int(req.PageSize)
@@ -32,14 +77,14 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 				category = append(category, categoryResult.Name)
 			}
 			productList = append(productList, &product.Product{
-				Id:          productItem.Id,
+				Id:          productItem.ID,
 				Name:        productItem.Name,
 				Description: productItem.Description,
 				Picture:     productItem.Picture,
 				Price:       productItem.Price,
 				Categories:  category,
 				Sales:       productItem.Sales,
-				ShopId:      uint32(productItem.ShopId),
+				ShopId:      productItem.ShopId,
 			})
 		}
 	} else { // 分类名不为空时，返回指定类型商品
@@ -53,14 +98,14 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 				category = append(category, categoryResult.Name)
 			}
 			productList = append(productList, &product.Product{
-				Id:          productItem.Id,
+				Id:          productItem.ID,
 				Name:        productItem.Name,
 				Description: productItem.Description,
 				Picture:     productItem.Picture,
 				Price:       productItem.Price,
 				Categories:  category,
 				Sales:       productItem.Sales,
-				ShopId:      uint32(productItem.ShopId),
+				ShopId:      productItem.ShopId,
 			})
 		}
 	}
@@ -71,12 +116,13 @@ func (s *ProductCatalogServiceImpl) ListProducts(ctx context.Context, req *produ
 }
 
 // GetProduct implements the ProductCatalogServiceImpl interface.
+// 查找指定商品接口
 // 当商品不存在时，返回nil
 // 当商品存在时，返回商品信息
 func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product.GetProductReq) (resp *product.GetProductResp, err error) {
 	result := models.Product{}
 	database.First(&result, req.Id)
-	if result.Id == 0 {
+	if result.ID == 0 {
 		resp = &product.GetProductResp{
 			Product: nil,
 		}
@@ -90,14 +136,14 @@ func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product
 		}
 		resp = &product.GetProductResp{
 			Product: &product.Product{
-				Id:          result.Id,
+				Id:          result.ID,
 				Name:        result.Name,
 				Description: result.Description,
 				Picture:     result.Picture,
 				Price:       result.Price,
 				Categories:  category,
 				Sales:       result.Sales,
-				ShopId:      uint32(result.ShopId),
+				ShopId:      result.ShopId,
 			},
 		}
 	}
@@ -105,6 +151,7 @@ func (s *ProductCatalogServiceImpl) GetProduct(ctx context.Context, req *product
 }
 
 // SearchProducts implements the ProductCatalogServiceImpl interface.
+// 搜索商品接口
 // 当搜索结果为空时，返回空列表
 // 当搜索结果不为空时，返回搜索结果
 func (s *ProductCatalogServiceImpl) SearchProducts(ctx context.Context, req *product.SearchProductsReq) (resp *product.SearchProductsResp, err error) {
@@ -124,14 +171,14 @@ func (s *ProductCatalogServiceImpl) SearchProducts(ctx context.Context, req *pro
 			category = append(category, categoryResult.Name)
 		}
 		productList = append(productList, &product.Product{
-			Id:          productResult.Id,
+			Id:          productResult.ID,
 			Name:        productResult.Name,
 			Description: productResult.Description,
 			Picture:     productResult.Picture,
 			Price:       productResult.Price,
 			Categories:  category,
 			Sales:       productResult.Sales,
-			ShopId:      uint32(productResult.ShopId),
+			ShopId:      productResult.ShopId,
 		})
 	}
 	resp = &product.SearchProductsResp{

@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
+	"github.com/123508/douyinshop/pkg/db"
+	"github.com/123508/douyinshop/pkg/models"
 	"log"
 	"net"
 	"time"
 
 	auth "github.com/123508/douyinshop/kitex_gen/auth/authservice"
 	"github.com/123508/douyinshop/pkg/config"
-	"github.com/123508/douyinshop/pkg/redis"
+	"github.com/123508/douyinshop/pkg/myredis"
 
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
@@ -18,7 +20,17 @@ import (
 )
 
 func main() {
-	rdb, err := redis.InitRedis()
+
+	db, err := db.InitDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db.AutoMigrate(&models.Role{})
+	db.AutoMigrate(&models.Permission{})
+	db.AutoMigrate(&models.RolePermission{})
+
+	rdb, err := myredis.InitRedis()
 	if err != nil {
 		log.Fatal(err)
 	}

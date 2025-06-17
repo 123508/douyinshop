@@ -23,6 +23,7 @@ func main() {
 	}
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.UserLogin{})
+	db.AutoMigrate(&models.UserRole{})
 	r, err := etcd.NewEtcdRegistryWithAuth(config.Conf.EtcdConfig.Endpoints, config.Conf.EtcdConfig.Username, config.Conf.EtcdConfig.Password)
 	if err != nil {
 		log.Fatal(err)

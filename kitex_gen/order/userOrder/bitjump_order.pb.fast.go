@@ -59,12 +59,12 @@ ReadFieldError:
 }
 
 func (x *OrderSubmitReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *OrderSubmitReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.AddressBookId, offset, err = fastpb.ReadInt32(buf, _type)
+	x.AddressBookId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -124,7 +124,7 @@ ReadFieldError:
 }
 
 func (x *OrderSubmitResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -174,7 +174,7 @@ ReadFieldError:
 }
 
 func (x *HistoryReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -279,12 +279,12 @@ ReadFieldError:
 }
 
 func (x *ReminderReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *ReminderReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -309,7 +309,7 @@ ReadFieldError:
 }
 
 func (x *CompleteReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.OrderId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -330,7 +330,7 @@ func (x *OrderSubmitReq) fastWriteField1(buf []byte) (offset int) {
 	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
@@ -338,7 +338,7 @@ func (x *OrderSubmitReq) fastWriteField2(buf []byte) (offset int) {
 	if x.AddressBookId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteInt32(buf[offset:], 2, x.GetAddressBookId())
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetAddressBookId())
 	return offset
 }
 
@@ -388,7 +388,7 @@ func (x *OrderSubmitResp) fastWriteField1(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -423,7 +423,7 @@ func (x *HistoryReq) fastWriteField1(buf []byte) (offset int) {
 	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
@@ -509,7 +509,7 @@ func (x *ReminderReq) fastWriteField1(buf []byte) (offset int) {
 	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
@@ -517,7 +517,7 @@ func (x *ReminderReq) fastWriteField2(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetOrderId())
 	return offset
 }
 
@@ -533,7 +533,7 @@ func (x *CompleteReq) fastWriteField1(buf []byte) (offset int) {
 	if x.OrderId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetOrderId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
 	return offset
 }
 
@@ -554,7 +554,7 @@ func (x *OrderSubmitReq) sizeField1() (n int) {
 	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetUserId())
 	return n
 }
 
@@ -562,7 +562,7 @@ func (x *OrderSubmitReq) sizeField2() (n int) {
 	if x.AddressBookId == 0 {
 		return n
 	}
-	n += fastpb.SizeInt32(2, x.GetAddressBookId())
+	n += fastpb.SizeUint64(2, x.GetAddressBookId())
 	return n
 }
 
@@ -612,7 +612,7 @@ func (x *OrderSubmitResp) sizeField1() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 
@@ -647,7 +647,7 @@ func (x *HistoryReq) sizeField1() (n int) {
 	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetUserId())
 	return n
 }
 
@@ -733,7 +733,7 @@ func (x *ReminderReq) sizeField1() (n int) {
 	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetUserId())
 	return n
 }
 
@@ -741,7 +741,7 @@ func (x *ReminderReq) sizeField2() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(2, x.GetOrderId())
+	n += fastpb.SizeUint64(2, x.GetOrderId())
 	return n
 }
 
@@ -757,7 +757,7 @@ func (x *CompleteReq) sizeField1() (n int) {
 	if x.OrderId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetOrderId())
+	n += fastpb.SizeUint64(1, x.GetOrderId())
 	return n
 }
 

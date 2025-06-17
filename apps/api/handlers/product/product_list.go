@@ -29,7 +29,7 @@ func List(ctx context.Context, c *app.RequestContext) {
 	}
 	category := c.Query("category")
 
-	products, err := client.ListProducts(ctx, page, pageSize, category)
+	products, err := client.ListProducts(ctx, int32(page), int64(pageSize), category)
 	if err != nil {
 		errorno.DealWithError(err, c)
 		return

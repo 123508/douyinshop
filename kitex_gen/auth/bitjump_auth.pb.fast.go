@@ -12,7 +12,250 @@ var (
 	_ = fastpb.Skip
 )
 
-func (x *DeliverTokenReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+func (x *Role) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 5:
+		offset, err = x.fastReadField5(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_Role[number], err)
+}
+
+func (x *Role) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Id, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *Role) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.RoleName, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *Role) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.Description, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *Role) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	x.Status, offset, err = fastpb.ReadBool(buf, _type)
+	return offset, err
+}
+
+func (x *Role) fastReadField5(buf []byte, _type int8) (offset int, err error) {
+	x.CreatedBy, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *Permission) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 5:
+		offset, err = x.fastReadField5(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 6:
+		offset, err = x.fastReadField6(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 7:
+		offset, err = x.fastReadField7(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 8:
+		offset, err = x.fastReadField8(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_Permission[number], err)
+}
+
+func (x *Permission) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Id, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *Permission) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.PermissionName, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *Permission) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.Description, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *Permission) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	x.ParentId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *Permission) fastReadField5(buf []byte, _type int8) (offset int, err error) {
+	x.Type, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *Permission) fastReadField6(buf []byte, _type int8) (offset int, err error) {
+	x.Resource, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *Permission) fastReadField7(buf []byte, _type int8) (offset int, err error) {
+	x.Method, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *Permission) fastReadField8(buf []byte, _type int8) (offset int, err error) {
+	x.Status, offset, err = fastpb.ReadBool(buf, _type)
+	return offset, err
+}
+
+func (x *Empty) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+}
+
+func (x *AssignRoleToUserReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_AssignRoleToUserReq[number], err)
+}
+
+func (x *AssignRoleToUserReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *AssignRoleToUserReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.RoleId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *RemoveRoleFromUserReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_RemoveRoleFromUserReq[number], err)
+}
+
+func (x *RemoveRoleFromUserReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *RemoveRoleFromUserReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.RoleId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *GetUserRolesReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
 		offset, err = x.fastReadField1(buf, _type)
@@ -29,15 +272,15 @@ func (x *DeliverTokenReq) FastRead(buf []byte, _type int8, number int32) (offset
 SkipFieldError:
 	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
 ReadFieldError:
-	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_DeliverTokenReq[number], err)
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetUserRolesReq[number], err)
 }
 
-func (x *DeliverTokenReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint32(buf, _type)
+func (x *GetUserRolesReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
-func (x *VerifyTokenReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+func (x *GetUserRolesResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
 		offset, err = x.fastReadField1(buf, _type)
@@ -54,15 +297,90 @@ func (x *VerifyTokenReq) FastRead(buf []byte, _type int8, number int32) (offset 
 SkipFieldError:
 	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
 ReadFieldError:
-	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_VerifyTokenReq[number], err)
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetUserRolesResp[number], err)
 }
 
-func (x *VerifyTokenReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+func (x *GetUserRolesResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	var v Role
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.Roles = append(x.Roles, &v)
+	return offset, nil
+}
+
+func (x *GrantPermissionToRoleReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GrantPermissionToRoleReq[number], err)
+}
+
+func (x *GrantPermissionToRoleReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.RoleId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
-func (x *DeliveryResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+func (x *GrantPermissionToRoleReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.PermissionId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *RevokePermissionFromRoleReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_RevokePermissionFromRoleReq[number], err)
+}
+
+func (x *RevokePermissionFromRoleReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.RoleId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *RevokePermissionFromRoleReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.PermissionId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *GetRolePermissionsReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
 		offset, err = x.fastReadField1(buf, _type)
@@ -79,15 +397,160 @@ func (x *DeliveryResp) FastRead(buf []byte, _type int8, number int32) (offset in
 SkipFieldError:
 	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
 ReadFieldError:
-	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_DeliveryResp[number], err)
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetRolePermissionsReq[number], err)
 }
 
-func (x *DeliveryResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+func (x *GetRolePermissionsReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.RoleId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
-func (x *VerifyResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+func (x *GetRolePermissionsResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetRolePermissionsResp[number], err)
+}
+
+func (x *GetRolePermissionsResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	var v Permission
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.Permissions = append(x.Permissions, &v)
+	return offset, nil
+}
+
+func (x *GetUserPermissionsReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetUserPermissionsReq[number], err)
+}
+
+func (x *GetUserPermissionsReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *GetUserPermissionsResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetUserPermissionsResp[number], err)
+}
+
+func (x *GetUserPermissionsResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	var v Permission
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.Permissions = append(x.Permissions, &v)
+	return offset, nil
+}
+
+func (x *HasPermissionReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_HasPermissionReq[number], err)
+}
+
+func (x *HasPermissionReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *HasPermissionReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.PermissionCode, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *HasPermissionResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_HasPermissionResp[number], err)
+}
+
+func (x *HasPermissionResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Ok, offset, err = fastpb.ReadBool(buf, _type)
+	return offset, err
+}
+
+func (x *CanAccessReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
 		offset, err = x.fastReadField1(buf, _type)
@@ -114,41 +577,348 @@ func (x *VerifyResp) FastRead(buf []byte, _type int8, number int32) (offset int,
 SkipFieldError:
 	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
 ReadFieldError:
-	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_VerifyResp[number], err)
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_CanAccessReq[number], err)
 }
 
-func (x *VerifyResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Res, offset, err = fastpb.ReadBool(buf, _type)
+func (x *CanAccessReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
-func (x *VerifyResp) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+func (x *CanAccessReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.Resource, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
-func (x *VerifyResp) fastReadField3(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint32(buf, _type)
+func (x *CanAccessReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.Action, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
-func (x *DeliverTokenReq) FastWrite(buf []byte) (offset int) {
+func (x *CanAccessResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_CanAccessResp[number], err)
+}
+
+func (x *CanAccessResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Ok, offset, err = fastpb.ReadBool(buf, _type)
+	return offset, err
+}
+
+func (x *ListRolesResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_ListRolesResp[number], err)
+}
+
+func (x *ListRolesResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	var v Role
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.R = append(x.R, &v)
+	return offset, nil
+}
+
+func (x *ListPermissionsResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_ListPermissionsResp[number], err)
+}
+
+func (x *ListPermissionsResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	var v Permission
+	offset, err = fastpb.ReadMessage(buf, _type, &v)
+	if err != nil {
+		return offset, err
+	}
+	x.P = append(x.P, &v)
+	return offset, nil
+}
+
+func (x *IsSuperAdminReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_IsSuperAdminReq[number], err)
+}
+
+func (x *IsSuperAdminReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *IsSuperAdminResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_IsSuperAdminResp[number], err)
+}
+
+func (x *IsSuperAdminResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Ok, offset, err = fastpb.ReadBool(buf, _type)
+	return offset, err
+}
+
+func (x *Role) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
+	offset += x.fastWriteField5(buf[offset:])
 	return offset
 }
 
-func (x *DeliverTokenReq) fastWriteField1(buf []byte) (offset int) {
+func (x *Role) fastWriteField1(buf []byte) (offset int) {
+	if x.Id == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetId())
+	return offset
+}
+
+func (x *Role) fastWriteField2(buf []byte) (offset int) {
+	if x.RoleName == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetRoleName())
+	return offset
+}
+
+func (x *Role) fastWriteField3(buf []byte) (offset int) {
+	if x.Description == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 3, x.GetDescription())
+	return offset
+}
+
+func (x *Role) fastWriteField4(buf []byte) (offset int) {
+	if !x.Status {
+		return offset
+	}
+	offset += fastpb.WriteBool(buf[offset:], 4, x.GetStatus())
+	return offset
+}
+
+func (x *Role) fastWriteField5(buf []byte) (offset int) {
+	if x.CreatedBy == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 5, x.GetCreatedBy())
+	return offset
+}
+
+func (x *Permission) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
+	offset += x.fastWriteField5(buf[offset:])
+	offset += x.fastWriteField6(buf[offset:])
+	offset += x.fastWriteField7(buf[offset:])
+	offset += x.fastWriteField8(buf[offset:])
+	return offset
+}
+
+func (x *Permission) fastWriteField1(buf []byte) (offset int) {
+	if x.Id == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetId())
+	return offset
+}
+
+func (x *Permission) fastWriteField2(buf []byte) (offset int) {
+	if x.PermissionName == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetPermissionName())
+	return offset
+}
+
+func (x *Permission) fastWriteField3(buf []byte) (offset int) {
+	if x.Description == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 3, x.GetDescription())
+	return offset
+}
+
+func (x *Permission) fastWriteField4(buf []byte) (offset int) {
+	if x.ParentId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetParentId())
+	return offset
+}
+
+func (x *Permission) fastWriteField5(buf []byte) (offset int) {
+	if x.Type == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 5, x.GetType())
+	return offset
+}
+
+func (x *Permission) fastWriteField6(buf []byte) (offset int) {
+	if x.Resource == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 6, x.GetResource())
+	return offset
+}
+
+func (x *Permission) fastWriteField7(buf []byte) (offset int) {
+	if x.Method == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 7, x.GetMethod())
+	return offset
+}
+
+func (x *Permission) fastWriteField8(buf []byte) (offset int) {
+	if !x.Status {
+		return offset
+	}
+	offset += fastpb.WriteBool(buf[offset:], 8, x.GetStatus())
+	return offset
+}
+
+func (x *Empty) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	return offset
+}
+
+func (x *AssignRoleToUserReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *AssignRoleToUserReq) fastWriteField1(buf []byte) (offset int) {
 	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
-func (x *VerifyTokenReq) FastWrite(buf []byte) (offset int) {
+func (x *AssignRoleToUserReq) fastWriteField2(buf []byte) (offset int) {
+	if x.RoleId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetRoleId())
+	return offset
+}
+
+func (x *RemoveRoleFromUserReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *RemoveRoleFromUserReq) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *RemoveRoleFromUserReq) fastWriteField2(buf []byte) (offset int) {
+	if x.RoleId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetRoleId())
+	return offset
+}
+
+func (x *GetUserRolesReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
@@ -156,15 +926,15 @@ func (x *VerifyTokenReq) FastWrite(buf []byte) (offset int) {
 	return offset
 }
 
-func (x *VerifyTokenReq) fastWriteField1(buf []byte) (offset int) {
-	if x.Token == "" {
+func (x *GetUserRolesReq) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetToken())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
-func (x *DeliveryResp) FastWrite(buf []byte) (offset int) {
+func (x *GetUserRolesResp) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
@@ -172,15 +942,176 @@ func (x *DeliveryResp) FastWrite(buf []byte) (offset int) {
 	return offset
 }
 
-func (x *DeliveryResp) fastWriteField1(buf []byte) (offset int) {
-	if x.Token == "" {
+func (x *GetUserRolesResp) fastWriteField1(buf []byte) (offset int) {
+	if x.Roles == nil {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetToken())
+	for i := range x.GetRoles() {
+		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetRoles()[i])
+	}
 	return offset
 }
 
-func (x *VerifyResp) FastWrite(buf []byte) (offset int) {
+func (x *GrantPermissionToRoleReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *GrantPermissionToRoleReq) fastWriteField1(buf []byte) (offset int) {
+	if x.RoleId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetRoleId())
+	return offset
+}
+
+func (x *GrantPermissionToRoleReq) fastWriteField2(buf []byte) (offset int) {
+	if x.PermissionId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetPermissionId())
+	return offset
+}
+
+func (x *RevokePermissionFromRoleReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *RevokePermissionFromRoleReq) fastWriteField1(buf []byte) (offset int) {
+	if x.RoleId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetRoleId())
+	return offset
+}
+
+func (x *RevokePermissionFromRoleReq) fastWriteField2(buf []byte) (offset int) {
+	if x.PermissionId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetPermissionId())
+	return offset
+}
+
+func (x *GetRolePermissionsReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *GetRolePermissionsReq) fastWriteField1(buf []byte) (offset int) {
+	if x.RoleId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetRoleId())
+	return offset
+}
+
+func (x *GetRolePermissionsResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *GetRolePermissionsResp) fastWriteField1(buf []byte) (offset int) {
+	if x.Permissions == nil {
+		return offset
+	}
+	for i := range x.GetPermissions() {
+		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetPermissions()[i])
+	}
+	return offset
+}
+
+func (x *GetUserPermissionsReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *GetUserPermissionsReq) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *GetUserPermissionsResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *GetUserPermissionsResp) fastWriteField1(buf []byte) (offset int) {
+	if x.Permissions == nil {
+		return offset
+	}
+	for i := range x.GetPermissions() {
+		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetPermissions()[i])
+	}
+	return offset
+}
+
+func (x *HasPermissionReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *HasPermissionReq) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *HasPermissionReq) fastWriteField2(buf []byte) (offset int) {
+	if x.PermissionCode == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetPermissionCode())
+	return offset
+}
+
+func (x *HasPermissionResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *HasPermissionResp) fastWriteField1(buf []byte) (offset int) {
+	if !x.Ok {
+		return offset
+	}
+	offset += fastpb.WriteBool(buf[offset:], 1, x.GetOk())
+	return offset
+}
+
+func (x *CanAccessReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
@@ -190,47 +1121,303 @@ func (x *VerifyResp) FastWrite(buf []byte) (offset int) {
 	return offset
 }
 
-func (x *VerifyResp) fastWriteField1(buf []byte) (offset int) {
-	if !x.Res {
-		return offset
-	}
-	offset += fastpb.WriteBool(buf[offset:], 1, x.GetRes())
-	return offset
-}
-
-func (x *VerifyResp) fastWriteField2(buf []byte) (offset int) {
-	if x.Token == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 2, x.GetToken())
-	return offset
-}
-
-func (x *VerifyResp) fastWriteField3(buf []byte) (offset int) {
+func (x *CanAccessReq) fastWriteField1(buf []byte) (offset int) {
 	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
-func (x *DeliverTokenReq) Size() (n int) {
+func (x *CanAccessReq) fastWriteField2(buf []byte) (offset int) {
+	if x.Resource == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetResource())
+	return offset
+}
+
+func (x *CanAccessReq) fastWriteField3(buf []byte) (offset int) {
+	if x.Action == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 3, x.GetAction())
+	return offset
+}
+
+func (x *CanAccessResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *CanAccessResp) fastWriteField1(buf []byte) (offset int) {
+	if !x.Ok {
+		return offset
+	}
+	offset += fastpb.WriteBool(buf[offset:], 1, x.GetOk())
+	return offset
+}
+
+func (x *ListRolesResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *ListRolesResp) fastWriteField1(buf []byte) (offset int) {
+	if x.R == nil {
+		return offset
+	}
+	for i := range x.GetR() {
+		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetR()[i])
+	}
+	return offset
+}
+
+func (x *ListPermissionsResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *ListPermissionsResp) fastWriteField1(buf []byte) (offset int) {
+	if x.P == nil {
+		return offset
+	}
+	for i := range x.GetP() {
+		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetP()[i])
+	}
+	return offset
+}
+
+func (x *IsSuperAdminReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *IsSuperAdminReq) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *IsSuperAdminResp) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *IsSuperAdminResp) fastWriteField1(buf []byte) (offset int) {
+	if !x.Ok {
+		return offset
+	}
+	offset += fastpb.WriteBool(buf[offset:], 1, x.GetOk())
+	return offset
+}
+
+func (x *Role) Size() (n int) {
 	if x == nil {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
+	n += x.sizeField4()
+	n += x.sizeField5()
 	return n
 }
 
-func (x *DeliverTokenReq) sizeField1() (n int) {
+func (x *Role) sizeField1() (n int) {
+	if x.Id == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetId())
+	return n
+}
+
+func (x *Role) sizeField2() (n int) {
+	if x.RoleName == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetRoleName())
+	return n
+}
+
+func (x *Role) sizeField3() (n int) {
+	if x.Description == "" {
+		return n
+	}
+	n += fastpb.SizeString(3, x.GetDescription())
+	return n
+}
+
+func (x *Role) sizeField4() (n int) {
+	if !x.Status {
+		return n
+	}
+	n += fastpb.SizeBool(4, x.GetStatus())
+	return n
+}
+
+func (x *Role) sizeField5() (n int) {
+	if x.CreatedBy == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(5, x.GetCreatedBy())
+	return n
+}
+
+func (x *Permission) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
+	n += x.sizeField4()
+	n += x.sizeField5()
+	n += x.sizeField6()
+	n += x.sizeField7()
+	n += x.sizeField8()
+	return n
+}
+
+func (x *Permission) sizeField1() (n int) {
+	if x.Id == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetId())
+	return n
+}
+
+func (x *Permission) sizeField2() (n int) {
+	if x.PermissionName == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetPermissionName())
+	return n
+}
+
+func (x *Permission) sizeField3() (n int) {
+	if x.Description == "" {
+		return n
+	}
+	n += fastpb.SizeString(3, x.GetDescription())
+	return n
+}
+
+func (x *Permission) sizeField4() (n int) {
+	if x.ParentId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(4, x.GetParentId())
+	return n
+}
+
+func (x *Permission) sizeField5() (n int) {
+	if x.Type == "" {
+		return n
+	}
+	n += fastpb.SizeString(5, x.GetType())
+	return n
+}
+
+func (x *Permission) sizeField6() (n int) {
+	if x.Resource == "" {
+		return n
+	}
+	n += fastpb.SizeString(6, x.GetResource())
+	return n
+}
+
+func (x *Permission) sizeField7() (n int) {
+	if x.Method == "" {
+		return n
+	}
+	n += fastpb.SizeString(7, x.GetMethod())
+	return n
+}
+
+func (x *Permission) sizeField8() (n int) {
+	if !x.Status {
+		return n
+	}
+	n += fastpb.SizeBool(8, x.GetStatus())
+	return n
+}
+
+func (x *Empty) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	return n
+}
+
+func (x *AssignRoleToUserReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *AssignRoleToUserReq) sizeField1() (n int) {
 	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetUserId())
 	return n
 }
 
-func (x *VerifyTokenReq) Size() (n int) {
+func (x *AssignRoleToUserReq) sizeField2() (n int) {
+	if x.RoleId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetRoleId())
+	return n
+}
+
+func (x *RemoveRoleFromUserReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *RemoveRoleFromUserReq) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetUserId())
+	return n
+}
+
+func (x *RemoveRoleFromUserReq) sizeField2() (n int) {
+	if x.RoleId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetRoleId())
+	return n
+}
+
+func (x *GetUserRolesReq) Size() (n int) {
 	if x == nil {
 		return n
 	}
@@ -238,15 +1425,15 @@ func (x *VerifyTokenReq) Size() (n int) {
 	return n
 }
 
-func (x *VerifyTokenReq) sizeField1() (n int) {
-	if x.Token == "" {
+func (x *GetUserRolesReq) sizeField1() (n int) {
+	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(1, x.GetToken())
+	n += fastpb.SizeUint64(1, x.GetUserId())
 	return n
 }
 
-func (x *DeliveryResp) Size() (n int) {
+func (x *GetUserRolesResp) Size() (n int) {
 	if x == nil {
 		return n
 	}
@@ -254,15 +1441,176 @@ func (x *DeliveryResp) Size() (n int) {
 	return n
 }
 
-func (x *DeliveryResp) sizeField1() (n int) {
-	if x.Token == "" {
+func (x *GetUserRolesResp) sizeField1() (n int) {
+	if x.Roles == nil {
 		return n
 	}
-	n += fastpb.SizeString(1, x.GetToken())
+	for i := range x.GetRoles() {
+		n += fastpb.SizeMessage(1, x.GetRoles()[i])
+	}
 	return n
 }
 
-func (x *VerifyResp) Size() (n int) {
+func (x *GrantPermissionToRoleReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *GrantPermissionToRoleReq) sizeField1() (n int) {
+	if x.RoleId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetRoleId())
+	return n
+}
+
+func (x *GrantPermissionToRoleReq) sizeField2() (n int) {
+	if x.PermissionId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetPermissionId())
+	return n
+}
+
+func (x *RevokePermissionFromRoleReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *RevokePermissionFromRoleReq) sizeField1() (n int) {
+	if x.RoleId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetRoleId())
+	return n
+}
+
+func (x *RevokePermissionFromRoleReq) sizeField2() (n int) {
+	if x.PermissionId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetPermissionId())
+	return n
+}
+
+func (x *GetRolePermissionsReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *GetRolePermissionsReq) sizeField1() (n int) {
+	if x.RoleId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetRoleId())
+	return n
+}
+
+func (x *GetRolePermissionsResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *GetRolePermissionsResp) sizeField1() (n int) {
+	if x.Permissions == nil {
+		return n
+	}
+	for i := range x.GetPermissions() {
+		n += fastpb.SizeMessage(1, x.GetPermissions()[i])
+	}
+	return n
+}
+
+func (x *GetUserPermissionsReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *GetUserPermissionsReq) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetUserId())
+	return n
+}
+
+func (x *GetUserPermissionsResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *GetUserPermissionsResp) sizeField1() (n int) {
+	if x.Permissions == nil {
+		return n
+	}
+	for i := range x.GetPermissions() {
+		n += fastpb.SizeMessage(1, x.GetPermissions()[i])
+	}
+	return n
+}
+
+func (x *HasPermissionReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *HasPermissionReq) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetUserId())
+	return n
+}
+
+func (x *HasPermissionReq) sizeField2() (n int) {
+	if x.PermissionCode == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetPermissionCode())
+	return n
+}
+
+func (x *HasPermissionResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *HasPermissionResp) sizeField1() (n int) {
+	if !x.Ok {
+		return n
+	}
+	n += fastpb.SizeBool(1, x.GetOk())
+	return n
+}
+
+func (x *CanAccessReq) Size() (n int) {
 	if x == nil {
 		return n
 	}
@@ -272,44 +1620,210 @@ func (x *VerifyResp) Size() (n int) {
 	return n
 }
 
-func (x *VerifyResp) sizeField1() (n int) {
-	if !x.Res {
-		return n
-	}
-	n += fastpb.SizeBool(1, x.GetRes())
-	return n
-}
-
-func (x *VerifyResp) sizeField2() (n int) {
-	if x.Token == "" {
-		return n
-	}
-	n += fastpb.SizeString(2, x.GetToken())
-	return n
-}
-
-func (x *VerifyResp) sizeField3() (n int) {
+func (x *CanAccessReq) sizeField1() (n int) {
 	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint32(3, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetUserId())
 	return n
 }
 
-var fieldIDToName_DeliverTokenReq = map[int32]string{
+func (x *CanAccessReq) sizeField2() (n int) {
+	if x.Resource == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetResource())
+	return n
+}
+
+func (x *CanAccessReq) sizeField3() (n int) {
+	if x.Action == "" {
+		return n
+	}
+	n += fastpb.SizeString(3, x.GetAction())
+	return n
+}
+
+func (x *CanAccessResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *CanAccessResp) sizeField1() (n int) {
+	if !x.Ok {
+		return n
+	}
+	n += fastpb.SizeBool(1, x.GetOk())
+	return n
+}
+
+func (x *ListRolesResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *ListRolesResp) sizeField1() (n int) {
+	if x.R == nil {
+		return n
+	}
+	for i := range x.GetR() {
+		n += fastpb.SizeMessage(1, x.GetR()[i])
+	}
+	return n
+}
+
+func (x *ListPermissionsResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *ListPermissionsResp) sizeField1() (n int) {
+	if x.P == nil {
+		return n
+	}
+	for i := range x.GetP() {
+		n += fastpb.SizeMessage(1, x.GetP()[i])
+	}
+	return n
+}
+
+func (x *IsSuperAdminReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *IsSuperAdminReq) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(1, x.GetUserId())
+	return n
+}
+
+func (x *IsSuperAdminResp) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *IsSuperAdminResp) sizeField1() (n int) {
+	if !x.Ok {
+		return n
+	}
+	n += fastpb.SizeBool(1, x.GetOk())
+	return n
+}
+
+var fieldIDToName_Role = map[int32]string{
+	1: "Id",
+	2: "RoleName",
+	3: "Description",
+	4: "Status",
+	5: "CreatedBy",
+}
+
+var fieldIDToName_Permission = map[int32]string{
+	1: "Id",
+	2: "PermissionName",
+	3: "Description",
+	4: "ParentId",
+	5: "Type",
+	6: "Resource",
+	7: "Method",
+	8: "Status",
+}
+
+var fieldIDToName_Empty = map[int32]string{}
+
+var fieldIDToName_AssignRoleToUserReq = map[int32]string{
+	1: "UserId",
+	2: "RoleId",
+}
+
+var fieldIDToName_RemoveRoleFromUserReq = map[int32]string{
+	1: "UserId",
+	2: "RoleId",
+}
+
+var fieldIDToName_GetUserRolesReq = map[int32]string{
 	1: "UserId",
 }
 
-var fieldIDToName_VerifyTokenReq = map[int32]string{
-	1: "Token",
+var fieldIDToName_GetUserRolesResp = map[int32]string{
+	1: "Roles",
 }
 
-var fieldIDToName_DeliveryResp = map[int32]string{
-	1: "Token",
+var fieldIDToName_GrantPermissionToRoleReq = map[int32]string{
+	1: "RoleId",
+	2: "PermissionId",
 }
 
-var fieldIDToName_VerifyResp = map[int32]string{
-	1: "Res",
-	2: "Token",
-	3: "UserId",
+var fieldIDToName_RevokePermissionFromRoleReq = map[int32]string{
+	1: "RoleId",
+	2: "PermissionId",
+}
+
+var fieldIDToName_GetRolePermissionsReq = map[int32]string{
+	1: "RoleId",
+}
+
+var fieldIDToName_GetRolePermissionsResp = map[int32]string{
+	1: "Permissions",
+}
+
+var fieldIDToName_GetUserPermissionsReq = map[int32]string{
+	1: "UserId",
+}
+
+var fieldIDToName_GetUserPermissionsResp = map[int32]string{
+	1: "Permissions",
+}
+
+var fieldIDToName_HasPermissionReq = map[int32]string{
+	1: "UserId",
+	2: "PermissionCode",
+}
+
+var fieldIDToName_HasPermissionResp = map[int32]string{
+	1: "Ok",
+}
+
+var fieldIDToName_CanAccessReq = map[int32]string{
+	1: "UserId",
+	2: "Resource",
+	3: "Action",
+}
+
+var fieldIDToName_CanAccessResp = map[int32]string{
+	1: "Ok",
+}
+
+var fieldIDToName_ListRolesResp = map[int32]string{
+	1: "R",
+}
+
+var fieldIDToName_ListPermissionsResp = map[int32]string{
+	1: "P",
+}
+
+var fieldIDToName_IsSuperAdminReq = map[int32]string{
+	1: "UserId",
+}
+
+var fieldIDToName_IsSuperAdminResp = map[int32]string{
+	1: "Ok",
 }

@@ -10,8 +10,8 @@ import (
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	etcd "github.com/kitex-contrib/registry-etcd"
+	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"log"
 	"net"
 	"sync"
 )
@@ -23,6 +23,17 @@ func (t RabbitmqHandler) HandlerMessage(msg amqp.Delivery) {
 	fmt.Println(msg.Body)
 }
 
+func init() {
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+		FieldMap: log.FieldMap{
+			log.FieldKeyTime:  "时间",
+			log.FieldKeyLevel: "日志类型",
+			log.FieldKeyMsg:   "日志内容",
+		},
+	})
+}
+
 func main() {
 
 	var wg sync.WaitGroup
@@ -32,7 +43,6 @@ func main() {
 		defer wg.Done()
 
 		util.ReceiveMessages("order.direct", util.Direct, "order.queue", "message", &RabbitmqHandler{})
-
 	}()
 
 	go func() {

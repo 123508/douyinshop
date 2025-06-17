@@ -11,8 +11,18 @@ import (
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
-	DeliverTokenByRPC(ctx context.Context, Req *auth.DeliverTokenReq, callOptions ...callopt.Option) (r *auth.DeliveryResp, err error)
-	VerifyTokenByRPC(ctx context.Context, Req *auth.VerifyTokenReq, callOptions ...callopt.Option) (r *auth.VerifyResp, err error)
+	AssignRoleToUser(ctx context.Context, Req *auth.AssignRoleToUserReq, callOptions ...callopt.Option) (r *auth.Empty, err error)
+	RemoveRoleFromUser(ctx context.Context, Req *auth.RemoveRoleFromUserReq, callOptions ...callopt.Option) (r *auth.Empty, err error)
+	GetUserRoles(ctx context.Context, Req *auth.GetUserRolesReq, callOptions ...callopt.Option) (r *auth.GetUserRolesResp, err error)
+	GrantPermissionToRole(ctx context.Context, Req *auth.GrantPermissionToRoleReq, callOptions ...callopt.Option) (r *auth.Empty, err error)
+	RevokePermissionFromRole(ctx context.Context, Req *auth.RevokePermissionFromRoleReq, callOptions ...callopt.Option) (r *auth.Empty, err error)
+	GetRolePermissions(ctx context.Context, Req *auth.GetRolePermissionsReq, callOptions ...callopt.Option) (r *auth.GetRolePermissionsResp, err error)
+	GetUserPermissions(ctx context.Context, Req *auth.GetUserPermissionsReq, callOptions ...callopt.Option) (r *auth.GetUserPermissionsResp, err error)
+	HasPermission(ctx context.Context, Req *auth.HasPermissionReq, callOptions ...callopt.Option) (r *auth.HasPermissionResp, err error)
+	CanAccess(ctx context.Context, Req *auth.CanAccessReq, callOptions ...callopt.Option) (r *auth.CanAccessResp, err error)
+	ListRoles(ctx context.Context, Req *auth.Empty, callOptions ...callopt.Option) (r *auth.ListRolesResp, err error)
+	ListPermissions(ctx context.Context, Req *auth.Empty, callOptions ...callopt.Option) (r *auth.ListPermissionsResp, err error)
+	IsSuperAdmin(ctx context.Context, Req *auth.IsSuperAdminReq, callOptions ...callopt.Option) (r *auth.IsSuperAdminResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -44,12 +54,62 @@ type kAuthServiceClient struct {
 	*kClient
 }
 
-func (p *kAuthServiceClient) DeliverTokenByRPC(ctx context.Context, Req *auth.DeliverTokenReq, callOptions ...callopt.Option) (r *auth.DeliveryResp, err error) {
+func (p *kAuthServiceClient) AssignRoleToUser(ctx context.Context, Req *auth.AssignRoleToUserReq, callOptions ...callopt.Option) (r *auth.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.DeliverTokenByRPC(ctx, Req)
+	return p.kClient.AssignRoleToUser(ctx, Req)
 }
 
-func (p *kAuthServiceClient) VerifyTokenByRPC(ctx context.Context, Req *auth.VerifyTokenReq, callOptions ...callopt.Option) (r *auth.VerifyResp, err error) {
+func (p *kAuthServiceClient) RemoveRoleFromUser(ctx context.Context, Req *auth.RemoveRoleFromUserReq, callOptions ...callopt.Option) (r *auth.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.VerifyTokenByRPC(ctx, Req)
+	return p.kClient.RemoveRoleFromUser(ctx, Req)
+}
+
+func (p *kAuthServiceClient) GetUserRoles(ctx context.Context, Req *auth.GetUserRolesReq, callOptions ...callopt.Option) (r *auth.GetUserRolesResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetUserRoles(ctx, Req)
+}
+
+func (p *kAuthServiceClient) GrantPermissionToRole(ctx context.Context, Req *auth.GrantPermissionToRoleReq, callOptions ...callopt.Option) (r *auth.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GrantPermissionToRole(ctx, Req)
+}
+
+func (p *kAuthServiceClient) RevokePermissionFromRole(ctx context.Context, Req *auth.RevokePermissionFromRoleReq, callOptions ...callopt.Option) (r *auth.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.RevokePermissionFromRole(ctx, Req)
+}
+
+func (p *kAuthServiceClient) GetRolePermissions(ctx context.Context, Req *auth.GetRolePermissionsReq, callOptions ...callopt.Option) (r *auth.GetRolePermissionsResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetRolePermissions(ctx, Req)
+}
+
+func (p *kAuthServiceClient) GetUserPermissions(ctx context.Context, Req *auth.GetUserPermissionsReq, callOptions ...callopt.Option) (r *auth.GetUserPermissionsResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetUserPermissions(ctx, Req)
+}
+
+func (p *kAuthServiceClient) HasPermission(ctx context.Context, Req *auth.HasPermissionReq, callOptions ...callopt.Option) (r *auth.HasPermissionResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.HasPermission(ctx, Req)
+}
+
+func (p *kAuthServiceClient) CanAccess(ctx context.Context, Req *auth.CanAccessReq, callOptions ...callopt.Option) (r *auth.CanAccessResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.CanAccess(ctx, Req)
+}
+
+func (p *kAuthServiceClient) ListRoles(ctx context.Context, Req *auth.Empty, callOptions ...callopt.Option) (r *auth.ListRolesResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.ListRoles(ctx, Req)
+}
+
+func (p *kAuthServiceClient) ListPermissions(ctx context.Context, Req *auth.Empty, callOptions ...callopt.Option) (r *auth.ListPermissionsResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.ListPermissions(ctx, Req)
+}
+
+func (p *kAuthServiceClient) IsSuperAdmin(ctx context.Context, Req *auth.IsSuperAdminReq, callOptions ...callopt.Option) (r *auth.IsSuperAdminResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.IsSuperAdmin(ctx, Req)
 }

@@ -36,7 +36,7 @@ func List(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req := shop.GetProductListReq{
-		ShopId:   uint32(shopID),
+		ShopId:   uint64(shopID),
 		Page:     uint32(page),
 		PageSize: uint32(pageSize),
 	}

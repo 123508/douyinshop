@@ -16,12 +16,12 @@ type Request struct {
 	CreditCardExpirationMonth int    `json:"credit_card_expiration_month"`
 	CreditCardExpirationYear  int    `json:"credit_card_expiration_year"`
 	CreditCardNumber          string `json:"credit_card_number"`
-	OrderID                   string `json:"order_id"`
+	OrderID                   uint64 `json:"order_id"`
 	PayMethod                 int32  `json:"pay_method"`
 }
 
 func Charge(ctx context.Context, c *app.RequestContext) {
-	userId, ok := ctx.Value("userId").(uint32)
+	userId, ok := ctx.Value("userId").(uint64)
 	if !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",

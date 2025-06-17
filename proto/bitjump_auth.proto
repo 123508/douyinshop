@@ -5,26 +5,125 @@ package auth;
 option go_package="/auth";
 
 service AuthService {
-    // 分发token
-    rpc DeliverTokenByRPC(DeliverTokenReq) returns (DeliveryResp) {}
-    // 验证token/续期
-    rpc VerifyTokenByRPC(VerifyTokenReq) returns (VerifyResp) {}
+    // 用户角色相关
+    rpc AssignRoleToUser(AssignRoleToUserReq) returns (Empty){}                     // 给用户分配角色
+    rpc RemoveRoleFromUser(RemoveRoleFromUserReq) returns (Empty){}                 // 移除用户的角色
+    rpc GetUserRoles(GetUserRolesReq) returns (GetUserRolesResp){}                  // 查询用户所有角色
+
+    // 角色权限相关
+    rpc GrantPermissionToRole(GrantPermissionToRoleReq) returns (Empty){}           // 给角色分配权限
+    rpc RevokePermissionFromRole(RevokePermissionFromRoleReq) returns (Empty){}     // 移除角色的权限
+    rpc GetRolePermissions(GetRolePermissionsReq) returns (GetRolePermissionsResp){}// 查询角色所有权限
+
+    // 用户权限相关
+    rpc GetUserPermissions(GetUserPermissionsReq) returns(GetUserPermissionsResp){} // 查询用户所有权限（含角色下权限）
+    rpc HasPermission(HasPermissionReq) returns (HasPermissionResp){}               // 判断用户是否拥有某个权限
+    rpc CanAccess(CanAccessReq) returns (CanAccessResp){}                           // 判断用户是否可对某资源执行操作
+
+    // 查询辅助
+    rpc ListRoles(Empty) returns (ListRolesResp){}                                   // 查询所有角色
+    rpc ListPermissions(Empty) returns (ListPermissionsResp){}                       // 查询所有权限
+
+    // 超级管理员判断
+    rpc IsSuperAdmin(IsSuperAdminReq) returns (IsSuperAdminResp){}                   // 判断是否超级管理员
 }
 
-message DeliverTokenReq {
-    uint32 user_id = 1;
+message Role{
+    uint64 id=1;
+    string role_name=2;
+    string description=3;
+    bool   status=4;
+    uint64 created_by=5;
 }
 
-message VerifyTokenReq {
-    string token = 1;
+message Permission{
+    uint64 id=1;
+    string permission_name=2;
+    string description=3;
+    uint64 parent_id=4;
+    string type=5;
+    string resource=6;
+    string method=7;
+    bool   status=8;
 }
 
-message DeliveryResp {
-    string token = 1;
+message Empty{}
+
+message AssignRoleToUserReq{
+    uint64 user_id=1;
+    uint64 role_id=2;
 }
 
-message VerifyResp {
-    bool res = 1;
-    string token=2;
-    uint32 user_id=3;
+message RemoveRoleFromUserReq{
+    uint64 user_id=1;
+    uint64 role_id=2;
+}
+
+message GetUserRolesReq{
+    uint64 user_id=1;
+}
+
+message GetUserRolesResp{
+    repeated Role roles=1;
+}
+
+message GrantPermissionToRoleReq{
+    uint64 role_id=1;
+    uint64 permission_id=2;
+}
+
+message RevokePermissionFromRoleReq{
+    uint64 role_id=1;
+    uint64 permission_id=2;
+}
+
+message GetRolePermissionsReq{
+    uint64 role_id=1;
+}
+
+message GetRolePermissionsResp{
+    repeated Permission permissions=1;
+}
+
+message GetUserPermissionsReq{
+    uint64 user_id=1;
+}
+
+message GetUserPermissionsResp{
+    repeated Permission permissions=1;
+}
+
+message HasPermissionReq{
+    uint64 user_id=1;
+    string permission_code=2;
+}
+
+message  HasPermissionResp{
+    bool  ok=1;
+}
+
+message CanAccessReq{
+    uint64 user_id=1;
+    string resource=2;
+    string action=3;
+}
+
+message CanAccessResp{
+    bool ok=1;
+}
+
+message ListRolesResp{
+    repeated Role r=1;
+}
+
+message ListPermissionsResp{
+    repeated Permission p=1;
+}
+
+message IsSuperAdminReq{
+    uint64 user_id=1;
+}
+
+message IsSuperAdminResp{
+    bool ok=1;
 }

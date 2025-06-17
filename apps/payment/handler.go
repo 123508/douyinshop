@@ -3,25 +3,22 @@ package main
 import (
 	"context"
 	"fmt"
-	payment "github.com/123508/douyinshop/kitex_gen/payment"
+	"github.com/123508/douyinshop/kitex_gen/payment"
 	"github.com/123508/douyinshop/pkg/config"
-	"github.com/123508/douyinshop/pkg/errorno"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/smartwalle/alipay/v3"
 	"log"
 	"math/rand"
+	"strconv"
 	"sync/atomic"
 	"time"
 )
-
-var NoShopping = &errorno.BasicMessageError{Message: "没有该购物记录"}
-
-var NotSupportWechatPay = &errorno.BasicMessageError{Code: 400, Message: "暂时不支持微信支付"}
 
 // PaymentServiceImpl implements the last service interface defined in the IDL.
 type PaymentServiceImpl struct{}
 
 // Charge implements the PaymentServiceImpl interface.
+// 支付接口
 func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq) (resp *payment.ChargeResp, err error) {
 	var order models.Order
 	if err = database.Model(&models.Order{}).Where("user_id = ? and number = ?", req.UserId, req.OrderId).First(&order).Error; err != nil {
@@ -39,7 +36,7 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 		// 支付链接参数
 		var p = alipay.TradePagePay{}
 		p.Subject = "抖音商城购物"
-		p.OutTradeNo = req.OrderId
+		p.OutTradeNo = strconv.FormatUint(req.OrderId, 10)
 		p.TotalAmount = fmt.Sprintf("%.2f", req.Amount)
 		p.ProductCode = "FAST_INSTANT_TRADE_PAY"
 		p.ReturnURL = ""
@@ -107,6 +104,7 @@ func (s *PaymentServiceImpl) Charge(ctx context.Context, req *payment.ChargeReq)
 }
 
 // Notify implements the PaymentServiceImpl interface.
+// 通知接口
 func (s *PaymentServiceImpl) Notify(ctx context.Context, req *payment.NotifyReq) (resp *payment.NotifyResp, err error) {
 	orderId := req.OrderId
 	transactionId := req.TransactionId

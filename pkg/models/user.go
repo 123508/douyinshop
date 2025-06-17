@@ -2,14 +2,25 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
+// User 用户表
 type User struct {
 	gorm.Model
-	ID     uint32 `gorm:"primary_key;auto_increment;comment '用户ID'"`
+	ID     uint64 `gorm:"primary_key;auto_increment;comment '用户ID'"`
 	Name   string `gorm:"type:varchar(60) comment '用户名称'"`
 	Email  string `gorm:"unique;comment '用户邮箱'"`
 	Phone  string `gorm:"type:varchar(11) unique comment '用户手机号'"`
 	Gender uint32 `gorm:"comment '用户性别 1男 0女'"`
 	Avatar string `gorm:"type varchar(200) comment '用户头像'"`
+	Status uint32 `gorm:"comment '用户状态 0正常 1冻结'"`
+}
+
+func (u User) GetID() uint64 {
+	return u.ID
+}
+
+func (u User) GetCreatedTime() time.Time {
+	return u.CreatedAt
 }

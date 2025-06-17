@@ -14,7 +14,7 @@ service AiService {
 }
 
 message OrderQueryReq {
-    string order_id = 1;
+    uint64 order_id = 1;
 }
 
 message OrderQueryResp {
@@ -22,12 +22,12 @@ message OrderQueryResp {
 }
 
 message AutoPlaceOrderReq {
-    uint32 user_id = 1;
+    uint64 user_id = 1;
     string request = 2;
 }
 
 message AutoPlaceOrderResp {
-    string order_id = 1;
+    uint64 order_id = 1;
 }
 
 message AIChatReq {

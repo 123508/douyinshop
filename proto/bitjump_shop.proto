@@ -26,7 +26,7 @@ service ShopService {
 }
 
 message RegisterShopReq {
-  uint32 user_id = 1;
+  uint64 user_id = 1;
   string shop_name = 2;
   string shop_address = 3;
   string shop_description = 4;
@@ -34,15 +34,15 @@ message RegisterShopReq {
 }
 
 message RegisterShopResp {
-  uint32 shop_id = 1;
+  uint64 shop_id = 1;
 }
 
 message GetShopIdReq {
-  uint32 user_id = 1;
+  uint64 user_id = 1;
 }
 
 message UpdateShopInfoReq {
-  uint32 shop_id = 1;
+  uint64 shop_id = 1;
   string shop_name = 2;
   string shop_address = 3;
   string shop_description = 4;
@@ -54,11 +54,11 @@ message UpdateShopInfoResp {
 }
 
 message GetShopIdResp {
-  uint32 shop_id = 1;
+  uint64 shop_id = 1;
 }
 
 message GetShopInfoReq {
-  uint32 shop_id = 1;
+  uint64 shop_id = 1;
 }
 
 message GetShopInfoResp {
@@ -69,18 +69,18 @@ message GetShopInfoResp {
 }
 
 message AddProductReq {
-  uint32 shop_id = 1;
+  uint64 shop_id = 1;
   product.Product product = 2;
   bool status = 3;
 }
 
 message AddProductResp {
-  uint32 product_id = 1;
+  uint64 product_id = 1;
 }
 
 message DeleteProductReq {
-  uint32 shop_id = 1;
-  uint32 product_id = 2;
+  uint64 shop_id = 1;
+  uint64 product_id = 2;
 }
 
 message DeleteProductResp {
@@ -88,7 +88,7 @@ message DeleteProductResp {
 }
 
 message UpdateProductReq {
-  uint32 shop_id = 1;
+  uint64 shop_id = 1;
   product.Product product = 2;
 }
 
@@ -97,7 +97,7 @@ message UpdateProductResp {
 }
 
 message GetProductListReq {
-  uint32 shop_id = 1;
+  uint64 shop_id = 1;
   uint32 page = 2;
   uint32 page_size = 3;
 }

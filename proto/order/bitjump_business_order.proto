@@ -7,25 +7,29 @@ import "order/bitjump_order_common.proto";
 option go_package = "order/businessOrder";
 
 message ConfirmReq{
-  uint32 order_id=1;
+  uint64 order_id=1;
   int32 status=2;
+  uint64 shop_id=3;
 }
 
 message RejectionReq{
-  uint32 order_id=1;
+  uint64 order_id=1;
   string rejection_reason=2;
+  uint64 shop_id=3;
 }
 
 message DeliveryReq{
-  uint32 order_id=1;
+  uint64 order_id=1;
+  uint64 shop_id=2;
 }
 
 message ReceiveReq{
-  uint32 order_id=1;
+  uint64 order_id=1;
+  uint64 shop_id=2;
 }
 
 message GetOrderListReq{
-  uint32 shop_id=1;
+  uint64 shop_id=1;
   uint32 page=2;
   uint32 page_size=3;
 }
@@ -36,12 +40,12 @@ message GetOrderListResp{
 
 // 提醒消息
 message Notify{
-  uint32 order_id=1;
+  uint64 order_id=1;
   string content=2;
 }
 
 message GetNotifyReq{
-  uint32 order_id=2;
+  uint64 order_id=2;
 }
 
 message GetNotifyResp{

@@ -14,7 +14,7 @@ import (
 func Delivery(ctx context.Context, c *app.RequestContext) {
 
 	// 获取并解析 user_id 参数
-	_, ok := ctx.Value("userId").(uint32)
+	_, ok := ctx.Value("userId").(uint64)
 	if !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",
@@ -30,7 +30,7 @@ func Delivery(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := client.ShopDelivery(ctx, uint32(orderId))
+	resp, err := client.ShopDelivery(ctx, uint64(orderId))
 	if err != nil {
 		errorno.DealWithError(err, c)
 		return

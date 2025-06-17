@@ -12,7 +12,7 @@ import (
 func CancelShop(ctx context.Context, c *app.RequestContext) {
 
 	// 获取并解析 user_id 参数
-	_, ok := ctx.Value("userId").(uint32)
+	_, ok := ctx.Value("userId").(uint64)
 	if !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",
@@ -21,7 +21,7 @@ func CancelShop(ctx context.Context, c *app.RequestContext) {
 	}
 
 	type Param struct {
-		OrderId      uint32 `json:"order_id"`
+		OrderId      uint64 `json:"order_id"`
 		CancelReason string `json:"cancel_reason"`
 	}
 

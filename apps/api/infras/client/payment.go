@@ -36,7 +36,7 @@ func initPaymentRpc() {
 	paymentClient = c
 }
 
-func Charge(ctx context.Context, amount float32, orderId string, userId uint32, payMethod int32) (resp *payment.ChargeResp, err error) {
+func Charge(ctx context.Context, amount float32, orderId uint64, userId uint64, payMethod int32) (resp *payment.ChargeResp, err error) {
 	req := &payment.ChargeReq{
 		Amount:    amount,
 		OrderId:   orderId,

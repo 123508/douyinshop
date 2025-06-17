@@ -1,8 +1,9 @@
 package els
 
 import (
-	"github.com/123508/douyinshop/kitex_gen/product"
 	"testing"
+
+	"github.com/123508/douyinshop/kitex_gen/product"
 )
 
 func TestSearchProduct(t *testing.T) {
@@ -34,7 +35,7 @@ func TestUpdateProduct(t *testing.T) {
 }
 
 func TestDeleteProduct(t *testing.T) {
-	id := uint32(7)
+	id := uint64(7)
 	err := DeleteProduct(id)
 	if err != nil {
 		t.Errorf("DeleteProduct() error = %v", err)

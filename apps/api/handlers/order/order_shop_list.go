@@ -14,7 +14,7 @@ import (
 func List(ctx context.Context, c *app.RequestContext) {
 
 	// 获取并解析 user_id 参数
-	_, ok := ctx.Value("userId").(uint32)
+	_, ok := ctx.Value("userId").(uint64)
 	if !ok {
 		c.JSON(consts.StatusBadRequest, utils.H{
 			"error": "userId must be a number",
@@ -46,7 +46,7 @@ func List(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	orderResp, err := client.GetOrderList(ctx, uint32(shopId), uint32(page), uint32(pageSize))
+	orderResp, err := client.GetOrderList(ctx, uint64(shopId), uint32(page), uint32(pageSize))
 	if err != nil {
 		errorno.DealWithError(err, c)
 		return

@@ -20,7 +20,7 @@ service CheckoutService {
 //}
 
 message CheckoutReq {
-    uint32 user_id = 1;
+    uint64 user_id = 1;
     string firstname = 2;
     string lastname = 3;
     string email = 4;
@@ -29,6 +29,6 @@ message CheckoutReq {
 }
 
 message CheckoutResp {
-    string order_id = 1;
+    uint64 order_id = 1;
     string transaction_id = 2;
 }

@@ -40,12 +40,12 @@ func initAiRpc() {
 // OrderQuery 查询订单详情
 // orderId 订单ID
 // 返回AI格式化后的订单信息
-func OrderQuery(ctx context.Context, orderId string) (string, error) {
+func OrderQuery(ctx context.Context, orderId uint64) (string, error) {
 	if aiClient == nil {
 		//return "", errors.New("AI客户端未初始化")
 	}
 
-	if orderId == "" {
+	if orderId == 0 {
 		//return "", errors.New("订单ID不能为空")
 	}
 
@@ -63,7 +63,7 @@ func OrderQuery(ctx context.Context, orderId string) (string, error) {
 // userId 用户ID
 // request 用户的下单请求描述
 // 返回订单ID
-func AutoPlaceOrder(ctx context.Context, userId uint32, request string) (string, error) {
+func AutoPlaceOrder(ctx context.Context, userId uint64, request string) (uint64, error) {
 	if aiClient == nil {
 		//return "", errors.New("AI客户端未初始化")
 	}
@@ -82,7 +82,7 @@ func AutoPlaceOrder(ctx context.Context, userId uint32, request string) (string,
 	}
 	resp, err := aiClient.AutoPlaceOrder(ctx, req)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	return resp.OrderId, nil
 }
