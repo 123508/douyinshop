@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/123508/douyinshop/kitex_gen/product"
-	"github.com/123508/douyinshop/pkg/els"
-	"github.com/123508/douyinshop/pkg/models"
-	"github.com/123508/douyinshop/pkg/util"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/123508/douyinshop/kitex_gen/product"
+	"github.com/123508/douyinshop/pkg/els"
+	"github.com/123508/douyinshop/pkg/models"
+	"github.com/123508/douyinshop/pkg/util"
 )
 
 const (
@@ -46,7 +47,7 @@ func (s *ProductCatalogServiceImpl) GetCategoryFromProduct(ctx context.Context, 
 		Expires: time.Duration(rand.Intn(3)+3) * time.Second,
 	}
 
-	return simple.QueryWithCache()
+	return simple.QueryWithCache(ctx)
 }
 
 // ListProducts implements the ProductCatalogServiceImpl interface.
