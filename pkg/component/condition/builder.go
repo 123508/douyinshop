@@ -1,5 +1,7 @@
 package condition
 
+//条件构建器,使用时默认会线性向后拼接,一般不用做复杂场景下
+
 type ConditionBuilder struct {
 	cond Condition
 }

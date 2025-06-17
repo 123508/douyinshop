@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/123508/douyinshop/kitex_gen/cart"
 	_ "github.com/123508/douyinshop/kitex_gen/cart/cartservice"
-	checkout "github.com/123508/douyinshop/kitex_gen/checkout"
+	"github.com/123508/douyinshop/kitex_gen/checkout"
 	_ "github.com/123508/douyinshop/kitex_gen/order/order_common"
 	"github.com/123508/douyinshop/kitex_gen/order/userOrder"
 	"github.com/123508/douyinshop/kitex_gen/payment"

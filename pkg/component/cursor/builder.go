@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+//游标构建器
+
 type CursorStructBuilder struct {
 	cur *StandCursor
 }

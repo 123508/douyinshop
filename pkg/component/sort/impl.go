@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+//对添加排序字段的实现
+
 type SortOrder string
 
 const (
@@ -87,7 +89,8 @@ func (s *SortOnMySQL) SetCreatedTimeName(createdTime string) *SortOnMySQL {
 }
 
 func (s *SortOnMySQL) SetSortsItems(sorts []Sort) *SortOnMySQL {
-	s.Sorts = sorts
+	s.Sorts = make([]Sort, len(sorts))
+	copy(s.Sorts, sorts)
 	return s
 }
 
@@ -110,6 +113,7 @@ func (s *SortOnMySQL) ToSorts(reverse bool) []string {
 		s.CreatedAt = SortExpr{}
 	}
 
+	//这里是正常字段的添加
 	for _, v := range s.Sorts {
 		if reverse {
 			parts = append(parts, v.Reverse())
@@ -118,6 +122,7 @@ func (s *SortOnMySQL) ToSorts(reverse bool) []string {
 		}
 	}
 
+	//这里是id和createdAt字段的添加
 	if reverse {
 		parts = append(parts, s.Id.Reverse(), s.CreatedAt.Reverse())
 	} else {

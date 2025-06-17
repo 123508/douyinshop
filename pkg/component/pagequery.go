@@ -20,7 +20,7 @@ type PageResult[Item pub.ItemType[Id], Id pub.IntegerNumber] struct {
 }
 
 // CursorPaginate 需要改造
-func (p *PageQuery[Item, Id]) cursorPaginate(ctx context.Context) (res PageResult[Item, Id], err error) {
+func (p *PageQuery[Item, Id]) CursorPaginate(ctx context.Context, cur string) (res PageResult[Item, Id], err error) {
 
 	if p.QueryExec == nil {
 		p.QueryExec = &queryexec.QueryExecStructMySQL[Item, Id]{
@@ -28,7 +28,7 @@ func (p *PageQuery[Item, Id]) cursorPaginate(ctx context.Context) (res PageResul
 			PageSize:      100,
 			Sort:          nil,
 			Database:      nil,
-			Cur:           "",
+			Cur:           cur,
 		}
 	}
 

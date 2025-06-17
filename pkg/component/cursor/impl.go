@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// 游标字段基类,要求每个字段都必须是这个类型
 type Base struct {
 	FieldName string
 	Value     interface{}
@@ -15,12 +16,12 @@ type Base struct {
 }
 
 type StandCursor struct {
-	Id          Base
-	CreatedTime Base
-	Values      []Base
-	Serializer  *serializer.SerializerWrapper
-	RightBound  bool
-	LeftBound   bool
+	Id          Base                          //primary_key,默认强制持有,需要可以删除,删除时请注意处理sort包内的排序
+	CreatedTime Base                          //与id同理
+	Values      []Base                        //自定义字段
+	Serializer  *serializer.SerializerWrapper //序列化器包装器,直接选择序列化类型就可以使用
+	RightBound  bool                          //右边界判定
+	LeftBound   bool                          //左边界判定
 }
 
 func NewBase(FieldName string, value interface{}, isDesc bool) Base {
@@ -81,6 +82,7 @@ func (c *StandCursor) ToCondition(reverse bool) condition.Condition {
 
 	cpy := *c // 浅拷贝一份
 
+	//强制设置默认id和createdAt字段,如果要修改可以删除(一直删除到for前)
 	if cpy.Id.FieldName == "" {
 		cpy.Id.FieldName = "id"
 	}

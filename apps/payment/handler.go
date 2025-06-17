@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	payment "github.com/123508/douyinshop/kitex_gen/payment"
+	"github.com/123508/douyinshop/kitex_gen/payment"
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/smartwalle/alipay/v3"
