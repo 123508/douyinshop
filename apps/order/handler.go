@@ -71,13 +71,11 @@ func (s *OrderUserServiceImpl) Submit(ctx context.Context, req *userOrder.OrderS
 
 		current := time.Now()
 
-		task := time.Now().Add(15 * time.Minute)
-
 		orderStatusLog := models.OrderStatusLog{
 			OrderId:     order.ID,
 			Status:      0, // 初始状态为待付款
 			StartTime:   &current,
-			EndTime:     &task,
+			EndTime:     nil,
 			Description: "订单创建，待付款",
 			Version:     0,
 		}
@@ -381,10 +379,9 @@ func (s *OrderUserServiceImpl) Cancel(ctx context.Context, req *order_common.Can
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
 		//将原有状态的结束时间修改
-		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Error; err != nil {
+		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Update("status", Status).Error; err != nil {
 			return err
 		}
-
 		//插入新的状态
 		if err = DB.Create(&newStatus).Error; err != nil {
 			return err
@@ -494,7 +491,7 @@ func (s *OrderUserServiceImpl) Complete(ctx context.Context, req *userOrder.Comp
 	err = DB.Transaction(func(tx *gorm.DB) error {
 
 		//将原有状态的结束时间修改
-		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Error; err != nil {
+		if err = DB.Model(&models.OrderStatusLog{}).Where("id = ?", status.ID).Update("end_time", currentTime).Update("status", 5).Error; err != nil {
 			return err
 		}
 
