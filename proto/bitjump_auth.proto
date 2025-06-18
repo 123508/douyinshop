@@ -21,8 +21,8 @@ service AuthService {
     rpc CanAccess(CanAccessReq) returns (CanAccessResp){}                           // 判断用户是否可对某资源执行操作
 
     // 查询辅助
-    rpc ListRoles(Empty) returns (ListRolesResp){}                                   // 查询所有角色
-    rpc ListPermissions(Empty) returns (ListPermissionsResp){}                       // 查询所有权限
+    rpc ListRoles(ListRolesReq) returns (ListRolesResp){}                                   // 查询所有角色
+    rpc ListPermissions(ListPermissionsReq) returns (ListPermissionsResp){}                       // 查询所有权限
 
     // 超级管理员判断
     rpc IsSuperAdmin(IsSuperAdminReq) returns (IsSuperAdminResp){}                   // 判断是否超级管理员
@@ -34,6 +34,7 @@ message Role{
     string description=3;
     bool   status=4;
     uint64 created_by=5;
+    string code=6;
 }
 
 message Permission{
@@ -45,6 +46,7 @@ message Permission{
     string resource=6;
     string method=7;
     bool   status=8;
+    string code=9;
 }
 
 message Empty{}
@@ -52,11 +54,13 @@ message Empty{}
 message AssignRoleToUserReq{
     uint64 user_id=1;
     uint64 role_id=2;
+    uint64 update_user_id=3;
 }
 
 message RemoveRoleFromUserReq{
     uint64 user_id=1;
     uint64 role_id=2;
+    uint64 update_user_id=3;
 }
 
 message GetUserRolesReq{
@@ -70,11 +74,13 @@ message GetUserRolesResp{
 message GrantPermissionToRoleReq{
     uint64 role_id=1;
     uint64 permission_id=2;
+    uint64 update_user_id=3;
 }
 
 message RevokePermissionFromRoleReq{
     uint64 role_id=1;
     uint64 permission_id=2;
+    uint64 update_user_id=3;
 }
 
 message GetRolePermissionsReq{
@@ -112,12 +118,22 @@ message CanAccessResp{
     bool ok=1;
 }
 
+message ListRolesReq{
+    uint32 page=1;
+    uint32 pageSize=2;
+}
+
 message ListRolesResp{
-    repeated Role r=1;
+    repeated Role roles=1;
+}
+
+message ListPermissionsReq{
+    uint32 page=1;
+    uint32 pageSize=2;
 }
 
 message ListPermissionsResp{
-    repeated Permission p=1;
+    repeated Permission perms=1;
 }
 
 message IsSuperAdminReq{
@@ -127,3 +143,6 @@ message IsSuperAdminReq{
 message IsSuperAdminResp{
     bool ok=1;
 }
+
+
+

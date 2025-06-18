@@ -49,6 +49,6 @@ func TakeKey(data ...any) string {
 func CleanCache(rds *redis.Client, ctx context.Context, key string) {
 	err := rds.Del(ctx, key).Err()
 	if err != nil {
-		LogError("删除缓存错误", "cleanCache", "", err)
+		LogError("删除缓存错误", "cleanCache", err)
 	}
 }

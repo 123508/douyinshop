@@ -137,46 +137,6 @@ func (x *Address) fastReadField11(buf []byte, _type int8) (offset int, err error
 	return offset, err
 }
 
-func (x *AddressItem) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
-	switch number {
-	case 1:
-		offset, err = x.fastReadField1(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	case 2:
-		offset, err = x.fastReadField2(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	default:
-		offset, err = fastpb.Skip(buf, _type, number)
-		if err != nil {
-			goto SkipFieldError
-		}
-	}
-	return offset, nil
-SkipFieldError:
-	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
-ReadFieldError:
-	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_AddressItem[number], err)
-}
-
-func (x *AddressItem) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.AddrId, offset, err = fastpb.ReadUint64(buf, _type)
-	return offset, err
-}
-
-func (x *AddressItem) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	var v Address
-	offset, err = fastpb.ReadMessage(buf, _type, &v)
-	if err != nil {
-		return offset, err
-	}
-	x.Address = &v
-	return offset, nil
-}
-
 func (x *AddAddressReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
@@ -288,7 +248,7 @@ ReadFieldError:
 }
 
 func (x *GetAddressListResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	var v AddressItem
+	var v Address
 	offset, err = fastpb.ReadMessage(buf, _type, &v)
 	if err != nil {
 		return offset, err
@@ -718,31 +678,6 @@ func (x *Address) fastWriteField11(buf []byte) (offset int) {
 	return offset
 }
 
-func (x *AddressItem) FastWrite(buf []byte) (offset int) {
-	if x == nil {
-		return offset
-	}
-	offset += x.fastWriteField1(buf[offset:])
-	offset += x.fastWriteField2(buf[offset:])
-	return offset
-}
-
-func (x *AddressItem) fastWriteField1(buf []byte) (offset int) {
-	if x.AddrId == 0 {
-		return offset
-	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetAddrId())
-	return offset
-}
-
-func (x *AddressItem) fastWriteField2(buf []byte) (offset int) {
-	if x.Address == nil {
-		return offset
-	}
-	offset += fastpb.WriteMessage(buf[offset:], 2, x.GetAddress())
-	return offset
-}
-
 func (x *AddAddressReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -1129,31 +1064,6 @@ func (x *Address) sizeField11() (n int) {
 	return n
 }
 
-func (x *AddressItem) Size() (n int) {
-	if x == nil {
-		return n
-	}
-	n += x.sizeField1()
-	n += x.sizeField2()
-	return n
-}
-
-func (x *AddressItem) sizeField1() (n int) {
-	if x.AddrId == 0 {
-		return n
-	}
-	n += fastpb.SizeUint64(1, x.GetAddrId())
-	return n
-}
-
-func (x *AddressItem) sizeField2() (n int) {
-	if x.Address == nil {
-		return n
-	}
-	n += fastpb.SizeMessage(2, x.GetAddress())
-	return n
-}
-
 func (x *AddAddressReq) Size() (n int) {
 	if x == nil {
 		return n
@@ -1446,11 +1356,6 @@ var fieldIDToName_Address = map[int32]string{
 	9:  "Label",
 	10: "IsDefault",
 	11: "AddressId",
-}
-
-var fieldIDToName_AddressItem = map[int32]string{
-	1: "AddrId",
-	2: "Address",
 }
 
 var fieldIDToName_AddAddressReq = map[int32]string{

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"gorm.io/gorm"
 	"log"
 	"net"
+	"time"
 
 	user "github.com/123508/douyinshop/kitex_gen/user/userservice"
 	"github.com/123508/douyinshop/pkg/config"
@@ -24,6 +26,38 @@ func main() {
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.UserLogin{})
 	db.AutoMigrate(&models.UserRole{})
+
+	db.Model(&models.User{}).FirstOrCreate(&models.User{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+		},
+		ID:     1,
+		Name:   "管理员",
+		Email:  "admin",
+		Phone:  "admin",
+		Gender: 1,
+		Avatar: "",
+		Status: 1,
+	})
+
+	db.Model(&models.UserLogin{}).FirstOrCreate(&models.UserLogin{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+		},
+		ID:       1,
+		UserId:   1,
+		Password: "admin",
+	})
+
+	db.Model(&models.UserRole{}).FirstOrCreate(&models.UserRole{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+		},
+		ID:     1,
+		UserID: 1,
+		RoleID: 1,
+	})
+
 	r, err := etcd.NewEtcdRegistryWithAuth(config.Conf.EtcdConfig.Endpoints, config.Conf.EtcdConfig.Username, config.Conf.EtcdConfig.Password)
 	if err != nil {
 		log.Fatal(err)

@@ -65,9 +65,10 @@ type EtcdConfig struct {
 }
 
 type Jwt struct {
-	AdminSecretKey string `mapstructure:"admin_secret_key"`
-	AdminTtl       int    `mapstructure:"admin_ttl"`
-	AdminSuv       int    `mapstructure:"admin_suv"`
+	AdminSecretKey   string `mapstructure:"admin_secret_key"`
+	AdminTtl         int    `mapstructure:"admin_ttl"`
+	AdminSuv         int    `mapstructure:"admin_suv"`
+	ServiceSecretKey string `mapstructure:"service_secret_key"`
 }
 
 type ElasticSearch struct {

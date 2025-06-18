@@ -39,6 +39,11 @@ func (x *Role) FastRead(buf []byte, _type int8, number int32) (offset int, err e
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 6:
+		offset, err = x.fastReadField6(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -74,6 +79,11 @@ func (x *Role) fastReadField4(buf []byte, _type int8) (offset int, err error) {
 
 func (x *Role) fastReadField5(buf []byte, _type int8) (offset int, err error) {
 	x.CreatedBy, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *Role) fastReadField6(buf []byte, _type int8) (offset int, err error) {
+	x.Code, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
@@ -116,6 +126,11 @@ func (x *Permission) FastRead(buf []byte, _type int8, number int32) (offset int,
 		}
 	case 8:
 		offset, err = x.fastReadField8(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 9:
+		offset, err = x.fastReadField9(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -172,6 +187,11 @@ func (x *Permission) fastReadField8(buf []byte, _type int8) (offset int, err err
 	return offset, err
 }
 
+func (x *Permission) fastReadField9(buf []byte, _type int8) (offset int, err error) {
+	x.Code, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
 func (x *Empty) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	default:
@@ -194,6 +214,11 @@ func (x *AssignRoleToUserReq) FastRead(buf []byte, _type int8, number int32) (of
 		}
 	case 2:
 		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -220,6 +245,11 @@ func (x *AssignRoleToUserReq) fastReadField2(buf []byte, _type int8) (offset int
 	return offset, err
 }
 
+func (x *AssignRoleToUserReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.UpdateUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
 func (x *RemoveRoleFromUserReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
@@ -229,6 +259,11 @@ func (x *RemoveRoleFromUserReq) FastRead(buf []byte, _type int8, number int32) (
 		}
 	case 2:
 		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -252,6 +287,11 @@ func (x *RemoveRoleFromUserReq) fastReadField1(buf []byte, _type int8) (offset i
 
 func (x *RemoveRoleFromUserReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.RoleId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *RemoveRoleFromUserReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.UpdateUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -322,6 +362,11 @@ func (x *GrantPermissionToRoleReq) FastRead(buf []byte, _type int8, number int32
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -345,6 +390,11 @@ func (x *GrantPermissionToRoleReq) fastReadField2(buf []byte, _type int8) (offse
 	return offset, err
 }
 
+func (x *GrantPermissionToRoleReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.UpdateUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
 func (x *RevokePermissionFromRoleReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
@@ -354,6 +404,11 @@ func (x *RevokePermissionFromRoleReq) FastRead(buf []byte, _type int8, number in
 		}
 	case 2:
 		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -377,6 +432,11 @@ func (x *RevokePermissionFromRoleReq) fastReadField1(buf []byte, _type int8) (of
 
 func (x *RevokePermissionFromRoleReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.PermissionId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *RevokePermissionFromRoleReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.UpdateUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -620,6 +680,41 @@ func (x *CanAccessResp) fastReadField1(buf []byte, _type int8) (offset int, err 
 	return offset, err
 }
 
+func (x *ListRolesReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_ListRolesReq[number], err)
+}
+
+func (x *ListRolesReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Page, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *ListRolesReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.PageSize, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
 func (x *ListRolesResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
@@ -646,8 +741,43 @@ func (x *ListRolesResp) fastReadField1(buf []byte, _type int8) (offset int, err 
 	if err != nil {
 		return offset, err
 	}
-	x.R = append(x.R, &v)
+	x.Roles = append(x.Roles, &v)
 	return offset, nil
+}
+
+func (x *ListPermissionsReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_ListPermissionsReq[number], err)
+}
+
+func (x *ListPermissionsReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.Page, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *ListPermissionsReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.PageSize, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
 }
 
 func (x *ListPermissionsResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
@@ -676,7 +806,7 @@ func (x *ListPermissionsResp) fastReadField1(buf []byte, _type int8) (offset int
 	if err != nil {
 		return offset, err
 	}
-	x.P = append(x.P, &v)
+	x.Perms = append(x.Perms, &v)
 	return offset, nil
 }
 
@@ -739,6 +869,7 @@ func (x *Role) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField3(buf[offset:])
 	offset += x.fastWriteField4(buf[offset:])
 	offset += x.fastWriteField5(buf[offset:])
+	offset += x.fastWriteField6(buf[offset:])
 	return offset
 }
 
@@ -782,6 +913,14 @@ func (x *Role) fastWriteField5(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *Role) fastWriteField6(buf []byte) (offset int) {
+	if x.Code == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 6, x.GetCode())
+	return offset
+}
+
 func (x *Permission) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -794,6 +933,7 @@ func (x *Permission) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField6(buf[offset:])
 	offset += x.fastWriteField7(buf[offset:])
 	offset += x.fastWriteField8(buf[offset:])
+	offset += x.fastWriteField9(buf[offset:])
 	return offset
 }
 
@@ -861,6 +1001,14 @@ func (x *Permission) fastWriteField8(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *Permission) fastWriteField9(buf []byte) (offset int) {
+	if x.Code == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 9, x.GetCode())
+	return offset
+}
+
 func (x *Empty) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -874,6 +1022,7 @@ func (x *AssignRoleToUserReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -893,12 +1042,21 @@ func (x *AssignRoleToUserReq) fastWriteField2(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *AssignRoleToUserReq) fastWriteField3(buf []byte) (offset int) {
+	if x.UpdateUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetUpdateUserId())
+	return offset
+}
+
 func (x *RemoveRoleFromUserReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -915,6 +1073,14 @@ func (x *RemoveRoleFromUserReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetRoleId())
+	return offset
+}
+
+func (x *RemoveRoleFromUserReq) fastWriteField3(buf []byte) (offset int) {
+	if x.UpdateUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetUpdateUserId())
 	return offset
 }
 
@@ -958,6 +1124,7 @@ func (x *GrantPermissionToRoleReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -977,12 +1144,21 @@ func (x *GrantPermissionToRoleReq) fastWriteField2(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *GrantPermissionToRoleReq) fastWriteField3(buf []byte) (offset int) {
+	if x.UpdateUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetUpdateUserId())
+	return offset
+}
+
 func (x *RevokePermissionFromRoleReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -999,6 +1175,14 @@ func (x *RevokePermissionFromRoleReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetPermissionId())
+	return offset
+}
+
+func (x *RevokePermissionFromRoleReq) fastWriteField3(buf []byte) (offset int) {
+	if x.UpdateUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetUpdateUserId())
 	return offset
 }
 
@@ -1161,6 +1345,31 @@ func (x *CanAccessResp) fastWriteField1(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *ListRolesReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *ListRolesReq) fastWriteField1(buf []byte) (offset int) {
+	if x.Page == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetPage())
+	return offset
+}
+
+func (x *ListRolesReq) fastWriteField2(buf []byte) (offset int) {
+	if x.PageSize == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetPageSize())
+	return offset
+}
+
 func (x *ListRolesResp) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -1170,12 +1379,37 @@ func (x *ListRolesResp) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *ListRolesResp) fastWriteField1(buf []byte) (offset int) {
-	if x.R == nil {
+	if x.Roles == nil {
 		return offset
 	}
-	for i := range x.GetR() {
-		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetR()[i])
+	for i := range x.GetRoles() {
+		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetRoles()[i])
 	}
+	return offset
+}
+
+func (x *ListPermissionsReq) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *ListPermissionsReq) fastWriteField1(buf []byte) (offset int) {
+	if x.Page == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetPage())
+	return offset
+}
+
+func (x *ListPermissionsReq) fastWriteField2(buf []byte) (offset int) {
+	if x.PageSize == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetPageSize())
 	return offset
 }
 
@@ -1188,11 +1422,11 @@ func (x *ListPermissionsResp) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *ListPermissionsResp) fastWriteField1(buf []byte) (offset int) {
-	if x.P == nil {
+	if x.Perms == nil {
 		return offset
 	}
-	for i := range x.GetP() {
-		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetP()[i])
+	for i := range x.GetPerms() {
+		offset += fastpb.WriteMessage(buf[offset:], 1, x.GetPerms()[i])
 	}
 	return offset
 }
@@ -1238,6 +1472,7 @@ func (x *Role) Size() (n int) {
 	n += x.sizeField3()
 	n += x.sizeField4()
 	n += x.sizeField5()
+	n += x.sizeField6()
 	return n
 }
 
@@ -1281,6 +1516,14 @@ func (x *Role) sizeField5() (n int) {
 	return n
 }
 
+func (x *Role) sizeField6() (n int) {
+	if x.Code == "" {
+		return n
+	}
+	n += fastpb.SizeString(6, x.GetCode())
+	return n
+}
+
 func (x *Permission) Size() (n int) {
 	if x == nil {
 		return n
@@ -1293,6 +1536,7 @@ func (x *Permission) Size() (n int) {
 	n += x.sizeField6()
 	n += x.sizeField7()
 	n += x.sizeField8()
+	n += x.sizeField9()
 	return n
 }
 
@@ -1360,6 +1604,14 @@ func (x *Permission) sizeField8() (n int) {
 	return n
 }
 
+func (x *Permission) sizeField9() (n int) {
+	if x.Code == "" {
+		return n
+	}
+	n += fastpb.SizeString(9, x.GetCode())
+	return n
+}
+
 func (x *Empty) Size() (n int) {
 	if x == nil {
 		return n
@@ -1373,6 +1625,7 @@ func (x *AssignRoleToUserReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -1392,12 +1645,21 @@ func (x *AssignRoleToUserReq) sizeField2() (n int) {
 	return n
 }
 
+func (x *AssignRoleToUserReq) sizeField3() (n int) {
+	if x.UpdateUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetUpdateUserId())
+	return n
+}
+
 func (x *RemoveRoleFromUserReq) Size() (n int) {
 	if x == nil {
 		return n
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -1414,6 +1676,14 @@ func (x *RemoveRoleFromUserReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint64(2, x.GetRoleId())
+	return n
+}
+
+func (x *RemoveRoleFromUserReq) sizeField3() (n int) {
+	if x.UpdateUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetUpdateUserId())
 	return n
 }
 
@@ -1457,6 +1727,7 @@ func (x *GrantPermissionToRoleReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -1476,12 +1747,21 @@ func (x *GrantPermissionToRoleReq) sizeField2() (n int) {
 	return n
 }
 
+func (x *GrantPermissionToRoleReq) sizeField3() (n int) {
+	if x.UpdateUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetUpdateUserId())
+	return n
+}
+
 func (x *RevokePermissionFromRoleReq) Size() (n int) {
 	if x == nil {
 		return n
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -1498,6 +1778,14 @@ func (x *RevokePermissionFromRoleReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint64(2, x.GetPermissionId())
+	return n
+}
+
+func (x *RevokePermissionFromRoleReq) sizeField3() (n int) {
+	if x.UpdateUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetUpdateUserId())
 	return n
 }
 
@@ -1660,6 +1948,31 @@ func (x *CanAccessResp) sizeField1() (n int) {
 	return n
 }
 
+func (x *ListRolesReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *ListRolesReq) sizeField1() (n int) {
+	if x.Page == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(1, x.GetPage())
+	return n
+}
+
+func (x *ListRolesReq) sizeField2() (n int) {
+	if x.PageSize == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(2, x.GetPageSize())
+	return n
+}
+
 func (x *ListRolesResp) Size() (n int) {
 	if x == nil {
 		return n
@@ -1669,12 +1982,37 @@ func (x *ListRolesResp) Size() (n int) {
 }
 
 func (x *ListRolesResp) sizeField1() (n int) {
-	if x.R == nil {
+	if x.Roles == nil {
 		return n
 	}
-	for i := range x.GetR() {
-		n += fastpb.SizeMessage(1, x.GetR()[i])
+	for i := range x.GetRoles() {
+		n += fastpb.SizeMessage(1, x.GetRoles()[i])
 	}
+	return n
+}
+
+func (x *ListPermissionsReq) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *ListPermissionsReq) sizeField1() (n int) {
+	if x.Page == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(1, x.GetPage())
+	return n
+}
+
+func (x *ListPermissionsReq) sizeField2() (n int) {
+	if x.PageSize == 0 {
+		return n
+	}
+	n += fastpb.SizeUint32(2, x.GetPageSize())
 	return n
 }
 
@@ -1687,11 +2025,11 @@ func (x *ListPermissionsResp) Size() (n int) {
 }
 
 func (x *ListPermissionsResp) sizeField1() (n int) {
-	if x.P == nil {
+	if x.Perms == nil {
 		return n
 	}
-	for i := range x.GetP() {
-		n += fastpb.SizeMessage(1, x.GetP()[i])
+	for i := range x.GetPerms() {
+		n += fastpb.SizeMessage(1, x.GetPerms()[i])
 	}
 	return n
 }
@@ -1734,6 +2072,7 @@ var fieldIDToName_Role = map[int32]string{
 	3: "Description",
 	4: "Status",
 	5: "CreatedBy",
+	6: "Code",
 }
 
 var fieldIDToName_Permission = map[int32]string{
@@ -1745,6 +2084,7 @@ var fieldIDToName_Permission = map[int32]string{
 	6: "Resource",
 	7: "Method",
 	8: "Status",
+	9: "Code",
 }
 
 var fieldIDToName_Empty = map[int32]string{}
@@ -1752,11 +2092,13 @@ var fieldIDToName_Empty = map[int32]string{}
 var fieldIDToName_AssignRoleToUserReq = map[int32]string{
 	1: "UserId",
 	2: "RoleId",
+	3: "UpdateUserId",
 }
 
 var fieldIDToName_RemoveRoleFromUserReq = map[int32]string{
 	1: "UserId",
 	2: "RoleId",
+	3: "UpdateUserId",
 }
 
 var fieldIDToName_GetUserRolesReq = map[int32]string{
@@ -1770,11 +2112,13 @@ var fieldIDToName_GetUserRolesResp = map[int32]string{
 var fieldIDToName_GrantPermissionToRoleReq = map[int32]string{
 	1: "RoleId",
 	2: "PermissionId",
+	3: "UpdateUserId",
 }
 
 var fieldIDToName_RevokePermissionFromRoleReq = map[int32]string{
 	1: "RoleId",
 	2: "PermissionId",
+	3: "UpdateUserId",
 }
 
 var fieldIDToName_GetRolePermissionsReq = map[int32]string{
@@ -1812,12 +2156,22 @@ var fieldIDToName_CanAccessResp = map[int32]string{
 	1: "Ok",
 }
 
+var fieldIDToName_ListRolesReq = map[int32]string{
+	1: "Page",
+	2: "PageSize",
+}
+
 var fieldIDToName_ListRolesResp = map[int32]string{
-	1: "R",
+	1: "Roles",
+}
+
+var fieldIDToName_ListPermissionsReq = map[int32]string{
+	1: "Page",
+	2: "PageSize",
 }
 
 var fieldIDToName_ListPermissionsResp = map[int32]string{
-	1: "P",
+	1: "Perms",
 }
 
 var fieldIDToName_IsSuperAdminReq = map[int32]string{

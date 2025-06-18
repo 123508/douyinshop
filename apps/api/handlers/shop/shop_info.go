@@ -2,9 +2,9 @@ package shop
 
 import (
 	"context"
-	"github.com/123508/douyinshop/apps/api/infras/client"
 	"github.com/123508/douyinshop/kitex_gen/shop"
 	"github.com/123508/douyinshop/pkg/errorno"
+	"github.com/123508/douyinshop/pkg/infras/client"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"

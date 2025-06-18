@@ -4,6 +4,8 @@ import "github.com/123508/douyinshop/pkg/errorno"
 
 var InvalidToken = &errorno.BasicMessageError{Code: 401, Message: "token已过期,请重新登录"}
 
+var IssuerNotMatch = &errorno.BasicMessageError{Code: 302, Message: "警告,签发人不匹配!"}
+
 var ParseTokenError = &errorno.BasicMessageError{Code: 402, Message: "解析token失败"}
 
 var SignFailError = &errorno.BasicMessageError{Code: 500, Message: "token签名失败"}

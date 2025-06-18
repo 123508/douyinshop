@@ -89,7 +89,7 @@ func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*c
 	data, err := Rds.HGetAll(ctx, key).Result()
 
 	if err != nil {
-		util.LogError("查询缓存失败", "GetCart", "", err)
+		util.LogError("查询缓存失败", "GetCart", err)
 	}
 
 	for _, v := range data {
@@ -120,7 +120,7 @@ func (s *CartServiceImpl) GetCart(ctx context.Context, req *cart.GetCartReq) (*c
 		err := Rds.HMSet(ctx, key, cache).Err()
 
 		if err != nil {
-			util.LogError("存储缓存出错", "GetAddressList", "存储缓存hash", err)
+			util.LogError("存储缓存出错", "GetAddressList", err)
 		}
 
 		// 设置随机过期时间，30~45 分钟

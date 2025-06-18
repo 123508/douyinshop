@@ -2,7 +2,7 @@ package payment
 
 import (
 	"context"
-	"github.com/123508/douyinshop/apps/api/infras/client"
+	"github.com/123508/douyinshop/pkg/infras/client"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )

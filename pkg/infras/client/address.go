@@ -89,17 +89,17 @@ func GetAddressList(ctx context.Context, userID uint64) ([]AddressItem, error) {
 	var addresses []AddressItem
 	for _, a := range resp.Address {
 		addresses = append(addresses, AddressItem{
-			ID:            a.AddrId,
-			StreetAddress: a.Address.StreetAddress,
-			City:          a.Address.City,
-			State:         a.Address.State,
-			Country:       a.Address.Country,
-			ZipCode:       a.Address.ZipCode,
-			Consignee:     a.Address.Consignee,
-			Gender:        a.Address.Gender,
-			Phone:         a.Address.Phone,
-			Label:         a.Address.Label,
-			IsDefault:     a.Address.IsDefault,
+			ID:            a.AddressId,
+			StreetAddress: a.StreetAddress,
+			City:          a.City,
+			State:         a.State,
+			Country:       a.Country,
+			ZipCode:       a.ZipCode,
+			Consignee:     a.Consignee,
+			Gender:        a.Gender,
+			Phone:         a.Phone,
+			Label:         a.Label,
+			IsDefault:     a.IsDefault,
 		})
 	}
 	return addresses, nil

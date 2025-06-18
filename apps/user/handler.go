@@ -26,7 +26,7 @@ type UserServiceImpl struct{}
 // 如果两个密码不同,则返回空
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (resp *user.RegisterResp, err error) {
 	if req.Password != req.ConfirmPassword {
-		util.LogError("密码和注册密码不一致", "Register", "密码比对", nil)
+		util.LogError("密码和注册密码不一致", "Register", nil)
 		return nil, PasswordNotEqual
 	}
 
@@ -55,7 +55,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (
 	})
 
 	if err != nil {
-		util.LogError("创建用户对象错误", "Register", "注册提交", err)
+		util.LogError("创建用户对象错误", "Register", err)
 		return nil, err
 	}
 
@@ -105,7 +105,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 			if err := DB.Model(&models.User{}).
 				Where("id = ?", req.UserId).
 				First(&row).Error; err != nil {
-				util.LogError("用户不存在", "GetUserInfo", "", err)
+				util.LogError("用户不存在", "GetUserInfo", err)
 				return models.User{}, UserNotExists
 			}
 			return row, nil
@@ -113,7 +113,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 		Expires: time.Duration(rand.Intn(10)+5) * time.Minute,
 	}
 
-	row, err := simple.QueryWithCache(ctx)
+	row, err := simple.QueryWithCache()
 
 	if err != nil {
 		return nil, err
@@ -210,7 +210,7 @@ func (s *UserServiceImpl) Update(ctx context.Context, req *user.UpdateReq) (resp
 	if err := DB.Model(&models.User{}).
 		Where("id=?", req.UserId).
 		Updates(updates).Error; err != nil {
-		util.LogError("更新用户出错", "Update", "", err)
+		util.LogError("更新用户出错", "Update", err)
 		return nil, UpdateUserInfoError
 	}
 
@@ -243,12 +243,25 @@ func (s *UserServiceImpl) Delete(ctx context.Context, req *user.DeleteReq) (resp
 }
 
 // DeliverTokenByRPC implements the AuthServiceImpl interface.
-// 对外暴露的负责分发令牌的借口
+// 对外暴露的负责分发令牌的接口
 func (s *UserServiceImpl) DeliverTokenByRPC(ctx context.Context, req *user.DeliverTokenReq) (resp *user.DeliveryResp, err error) {
-	token, err := GenerateJWT(req.UserId)
+
+	//生成后端token
+	token, err := GenerateFrontendJWT(req.UserId)
 	if err != nil {
 		return nil, err
 	}
+
+	//生成并存储后端token
+	backendJWT, err := GenerateBackendJWT(req.UserId, req.RoleCodes, req.PermCodes, 0)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//过期时间定为7天
+	Rds.Set(ctx, util.TakeKey("SToken", req.UserId), backendJWT, 7*24*time.Hour)
+
 	resp = &user.DeliveryResp{Token: token}
 	return resp, nil
 }
@@ -261,53 +274,67 @@ func (s *UserServiceImpl) DeliverTokenByRPC(ctx context.Context, req *user.Deliv
 // 如果令牌存活时间大于阈值,直接返回成功响应
 // 注意每次需要使用响应去接收token
 func (s *UserServiceImpl) VerifyTokenByRPC(ctx context.Context, req *user.VerifyTokenReq) (resp *user.VerifyResp, err error) {
+
 	if req.Token == "" {
-		return &user.VerifyResp{Res: false}, NilToken
+		return nil, NilToken
 	}
 
-	//在redis中检查token是否存活
-	result, err := Rds.Exists(ctx, req.Token).Result()
+	//如果这个token已经进入了黑名单,就直接返回
+	isExist, err := Rds.Exists(ctx, req.Token).Result()
 
-	//如果redis连接出错,直接返回错误信息
+	if err != nil || isExist == 1 {
+		return nil, InvalidToken
+	}
+
+	//解析前端token
+	FrontendJwt, err := ParseFrontendJWT(req.Token)
+
+	//解析前端token失败,返回异常
 	if err != nil {
-		util.LogError("redis连接错误", "VerifyTokenByRPC", "", err)
-		return nil, RedisConnectionError
-	} else {
-		//如果在redis中检测到token,则直接返回失败响应
-		if result == 1 {
-			resp = &user.VerifyResp{Res: false}
-			return resp, InvalidToken
-		}
+		return nil, err
 	}
 
-	token, err := ParseJWT(req.Token)
+	key := util.TakeKey("SToken", FrontendJwt.UserId)
+
+	//在redis中检查token是否存在
+	ServerToken, err := Rds.Get(ctx, key).Result()
+
+	//如果出错,或者token不存在,直接返回错误信息
+	if err != nil || ServerToken == "" {
+		util.LogError("Token不存在", "VerifyTokenByRPC", err)
+		return nil, InvalidToken
+	}
+
 	//判断令牌是否可以被解析,如果令牌无法被解析返回失败响应
-	resp = &user.VerifyResp{Res: err == nil}
+	ServerJwt, err := ParseBackendJWT(ServerToken)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if resp.Res {
-		//如果相差时间小于令牌存活阈值,就重新生成令牌
-		diff := config.Conf.AdminTtl - config.Conf.AdminSuv
-		if diff <= 0 {
-			diff = 10800
-		}
-		suv := time.Duration(diff) * time.Second
-		if time.Since(token.IssuedAt.Time) >= suv {
-			newToken, err := GenerateJWT(token.UserId)
-			if err != nil {
-				resp.Res = false
-				return resp, err // 返回错误
-			}
-			//将token重新放入
-			resp.Token = newToken
-		} else {
-			resp.Token = req.Token
-		}
-		resp.UserId = token.UserId
+	//签发人错误,有可能是伪造令牌
+	if ServerJwt.Issuer != FrontendJwt.Issuer {
+		return nil, IssuerNotMatch
 	}
+
+	//如果相差时间小于令牌存活阈值,就重新生成前端令牌
+	suv := time.Duration(max[int](config.Conf.AdminTtl-config.Conf.AdminSuv, 10800)) * time.Second
+
+	resp = &user.VerifyResp{}
+
+	if time.Since(ServerJwt.IssuedAt.Time) >= suv {
+		newToken, err := GenerateFrontendJWT(ServerJwt.UserId)
+		if err != nil {
+			return nil, err // 返回错误
+		}
+		//将token重新放入
+		resp.Token = newToken
+
+		Rds.Set(ctx, req.Token, "1", 7*24*time.Hour)
+	} else {
+		resp.Token = req.Token
+	}
+	resp.UserId = ServerJwt.UserId
 
 	return resp, err
 }
@@ -347,22 +374,14 @@ func (s *UserServiceImpl) ListUsers(ctx context.Context, req *user.ListUsersReq)
 			}
 			return users, nil
 		},
-		PartialQueryExec: func(fail []uint64) ([]models.User, error) {
-			users := make([]models.User, 0, len(fail))
-			if err := DB.Model(&user.User{}).
-				Where(sql, params...).
-				Where("id in ?", fail).
-				Find(&users).Error; err != nil {
-				return nil, err
-			}
-			return users, nil
-		},
 		Expires:     time.Duration(rand.Intn(3)+3) * time.Minute,
 		MaxLostRate: 30,
 		Sort:        nil,
+		IdName:      "id",
+		DB:          DB,
 	}
 
-	listWithCache, err := listQuery.QueryListWithCache(ctx)
+	listWithCache, err := listQuery.QueryListWithCache()
 
 	userList := make([]*user.User, 0, len(listWithCache))
 
@@ -416,7 +435,7 @@ func (s *UserServiceImpl) ChangePassword(ctx context.Context, req *user.ChangePa
 	var userLogin models.UserLogin
 
 	if err := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId).First(&userLogin).Error; err != nil {
-		util.LogError("查询用户密码异常", "GetUserPassword", "", err)
+		util.LogError("查询用户密码异常", "GetUserPassword", err)
 		return nil, err
 	}
 
@@ -428,7 +447,7 @@ func (s *UserServiceImpl) ChangePassword(ctx context.Context, req *user.ChangePa
 	//修改密码部分
 	where := DB.Model(&models.UserLogin{}).Where("user_id = ?", req.UserId)
 	if err = where.Update("password", Encryption(req.NewPassword)).Update("updated_at", time.Now()).Error; err != nil {
-		util.LogError("更新用户密码错误", "ChangePassword", "", err)
+		util.LogError("更新用户密码错误", "ChangePassword", err)
 		return nil, UpdatePasswordError
 	}
 
@@ -550,7 +569,7 @@ func (s *UserServiceImpl) ResetPassword(ctx context.Context, req *user.ResetPass
 	//更新用户密码
 	where := DB.Model(&models.UserLogin{}).Where("id = ?", info.ID)
 	if err = where.Update("password", Encryption(req.NewPassword)).Update("updated_at", time.Now()).Error; err != nil {
-		util.LogError("更新用户密码错误", "ChangePassword", "", err)
+		util.LogError("更新用户密码错误", "ChangePassword", err)
 		return nil, UpdatePasswordError
 	}
 
@@ -585,7 +604,7 @@ func (s *UserServiceImpl) BindEmail(ctx context.Context, req *user.BindEmailReq)
 	if err := DB.Model(&models.User{}).Where("id = ?", req.UserId).
 		Update("updated_at", time.Now()).
 		Update("email", req.Email).Error; err != nil {
-		util.LogError("绑定邮箱错误", "BindEmail", "", err)
+		util.LogError("绑定邮箱错误", "BindEmail", err)
 		return nil, err
 	}
 
@@ -612,7 +631,7 @@ func (s *UserServiceImpl) UnbindEmail(ctx context.Context, req *user.UnbindEmail
 	if err := DB.Model(&models.User{}).Where("user_id", req.UserId).
 		Update("updated_at", time.Now()).
 		Update("email", "").Error; err != nil {
-		util.LogError("解绑邮箱错误", "UnbindEmail", "", err)
+		util.LogError("解绑邮箱错误", "UnbindEmail", err)
 		return nil, err
 	}
 
@@ -639,7 +658,7 @@ func (s *UserServiceImpl) FreezeUser(ctx context.Context, req *user.FreezeUserRe
 		Where("id = ?", req.UserId).
 		Update("status", 1).
 		Update("updated_at", time.Now()).Error; err != nil {
-		util.LogError("冻结用户失败", "FreezeUser", "", err)
+		util.LogError("冻结用户失败", "FreezeUser", err)
 		return nil, err
 	}
 
@@ -666,7 +685,7 @@ func (s *UserServiceImpl) UnfreezeUser(ctx context.Context, req *user.UnfreezeUs
 		Where("id = ?", req.UserId).
 		Update("status", 0).
 		Update("updated_at", time.Now()).Error; err != nil {
-		util.LogError("解冻用户失败", "UnfreezeUser", "", err)
+		util.LogError("解冻用户失败", "UnfreezeUser", err)
 		return nil, err
 	}
 

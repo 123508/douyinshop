@@ -6,6 +6,8 @@ import (
 	"github.com/123508/douyinshop/pkg/config"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/models"
+	"github.com/123508/douyinshop/pkg/myredis"
+	"github.com/123508/douyinshop/pkg/util"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	etcd "github.com/kitex-contrib/registry-etcd"
@@ -30,6 +32,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	rds, err := myredis.InitRedis()
+	if err != nil {
+		util.LogError("打开Redis连接失败", "connectWithRedis", err)
+	}
+
 	database.AutoMigrate(&models.AddressBook{})
 
 	r, err := etcd.NewEtcdRegistryWithAuth(config.Conf.EtcdConfig.Endpoints, config.Conf.EtcdConfig.Username, config.Conf.EtcdConfig.Password)
@@ -40,7 +47,7 @@ func main() {
 	addr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Conf.AddressConfig.Host, config.Conf.AddressConfig.Port))
 
 	svr := address.NewServer(
-		new(AddressServiceImpl),
+		NewAddressServiceImpl(database, rds),
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
 		server.WithServerBasicInfo(

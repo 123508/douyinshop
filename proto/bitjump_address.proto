@@ -35,11 +35,6 @@ message Address {
     uint64 address_id = 11; // 地址ID
 }
 
-message AddressItem {
-    uint64 addr_id = 1; // 地址ID
-    Address address = 2;
-}
-
 message AddAddressReq {
     uint64 user_id = 1;
     Address address = 2;
@@ -54,7 +49,7 @@ message GetAddressListReq {
 }
 
 message GetAddressListResp {
-    repeated AddressItem address = 1;
+    repeated Address address = 1;
 }
 
 message DeleteAddressReq {

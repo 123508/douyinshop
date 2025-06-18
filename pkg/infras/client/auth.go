@@ -150,8 +150,11 @@ func CanAccess(ctx context.Context, userId uint64, resource, action string) (*au
 }
 
 // ListRoles 查询所有角色
-func ListRoles(ctx context.Context) (*auth.ListRolesResp, error) {
-	req := &auth.Empty{}
+func ListRoles(ctx context.Context, page, PageSize uint32) (*auth.ListRolesResp, error) {
+	req := &auth.ListRolesReq{
+		Page:     page,
+		PageSize: PageSize,
+	}
 	resp, err := authClient.ListRoles(ctx, req)
 	if err != nil {
 		return nil, err
@@ -160,9 +163,12 @@ func ListRoles(ctx context.Context) (*auth.ListRolesResp, error) {
 }
 
 // ListPermissions 查询所有权限
-func ListPermissions(ctx context.Context) (*auth.ListPermissionsResp, error) {
+func ListPermissions(ctx context.Context, page, pageSize uint32) (*auth.ListPermissionsResp, error) {
 
-	req := &auth.Empty{}
+	req := &auth.ListPermissionsReq{
+		Page:     page,
+		PageSize: pageSize,
+	}
 	resp, err := authClient.ListPermissions(ctx, req)
 	if err != nil {
 		return nil, err

@@ -20,8 +20,8 @@ type Client interface {
 	GetUserPermissions(ctx context.Context, Req *auth.GetUserPermissionsReq, callOptions ...callopt.Option) (r *auth.GetUserPermissionsResp, err error)
 	HasPermission(ctx context.Context, Req *auth.HasPermissionReq, callOptions ...callopt.Option) (r *auth.HasPermissionResp, err error)
 	CanAccess(ctx context.Context, Req *auth.CanAccessReq, callOptions ...callopt.Option) (r *auth.CanAccessResp, err error)
-	ListRoles(ctx context.Context, Req *auth.Empty, callOptions ...callopt.Option) (r *auth.ListRolesResp, err error)
-	ListPermissions(ctx context.Context, Req *auth.Empty, callOptions ...callopt.Option) (r *auth.ListPermissionsResp, err error)
+	ListRoles(ctx context.Context, Req *auth.ListRolesReq, callOptions ...callopt.Option) (r *auth.ListRolesResp, err error)
+	ListPermissions(ctx context.Context, Req *auth.ListPermissionsReq, callOptions ...callopt.Option) (r *auth.ListPermissionsResp, err error)
 	IsSuperAdmin(ctx context.Context, Req *auth.IsSuperAdminReq, callOptions ...callopt.Option) (r *auth.IsSuperAdminResp, err error)
 }
 
@@ -99,12 +99,12 @@ func (p *kAuthServiceClient) CanAccess(ctx context.Context, Req *auth.CanAccessR
 	return p.kClient.CanAccess(ctx, Req)
 }
 
-func (p *kAuthServiceClient) ListRoles(ctx context.Context, Req *auth.Empty, callOptions ...callopt.Option) (r *auth.ListRolesResp, err error) {
+func (p *kAuthServiceClient) ListRoles(ctx context.Context, Req *auth.ListRolesReq, callOptions ...callopt.Option) (r *auth.ListRolesResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.ListRoles(ctx, Req)
 }
 
-func (p *kAuthServiceClient) ListPermissions(ctx context.Context, Req *auth.Empty, callOptions ...callopt.Option) (r *auth.ListPermissionsResp, err error) {
+func (p *kAuthServiceClient) ListPermissions(ctx context.Context, Req *auth.ListPermissionsReq, callOptions ...callopt.Option) (r *auth.ListPermissionsResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.ListPermissions(ctx, Req)
 }

@@ -70,7 +70,7 @@ func (c *StandCursor) DecodeCursor(s string) error {
 
 	b, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		util.LogError("转换错误", "DecodeCursor", "", err)
+		util.LogError("转换错误", "DecodeCursor", err)
 		return err
 	}
 

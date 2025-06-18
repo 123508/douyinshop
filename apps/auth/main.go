@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/models"
+	"gorm.io/gorm"
 	"log"
 	"net"
 	"time"
@@ -21,14 +22,47 @@ import (
 
 func main() {
 
-	db, err := db.InitDB()
+	Database, err := db.InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db.AutoMigrate(&models.Role{})
-	db.AutoMigrate(&models.Permission{})
-	db.AutoMigrate(&models.RolePermission{})
+	Database.AutoMigrate(&models.Role{})
+	Database.AutoMigrate(&models.Permission{})
+	Database.AutoMigrate(&models.RolePermission{})
+
+	Database.Model(&models.Role{}).FirstOrCreate(&models.Role{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+		},
+		ID:          1,
+		Code:        "role-super-000000",
+		RoleName:    "super_admin",
+		Description: "拥有一切权限,禁止被修改",
+		Status:      1, //强制启用(不允许修改)
+		CreatedBy:   0,
+	})
+
+	Database.Model(&models.Permission{}).FirstOrCreate(&models.Permission{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+		},
+		ID:             1,
+		Code:           "permission-super-000000",
+		PermissionName: "super_perm",
+		Description:    "超级权限",
+		Type:           "*",
+		Status:         1,
+	})
+
+	Database.Model(&models.RolePermission{}).FirstOrCreate(&models.RolePermission{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+		},
+		RoleID:       1,
+		PermissionID: 1,
+		CreatedBy:    0,
+	})
 
 	rdb, err := myredis.InitRedis()
 	if err != nil {

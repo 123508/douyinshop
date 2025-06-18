@@ -2,6 +2,8 @@ syntax="proto3";
 
 package user;
 
+import "bitjump_auth.proto";
+
 option go_package="/user";
 
 service UserService {
@@ -116,6 +118,9 @@ message DeleteReq{
 
 message DeliverTokenReq {
     uint64 user_id = 1;
+    repeated string role_codes=2;
+    repeated string perm_codes=3;
+
 }
 
 message VerifyTokenReq {

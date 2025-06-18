@@ -17,7 +17,7 @@ var Rds = connectWithRedis()
 func connectWithRedis() *redis.Client {
 	rds, err := myredis.InitRedis()
 	if err != nil {
-		util.LogError("打开Redis连接失败", "connectWithRedis", "", err)
+		util.LogError("打开Redis连接失败", "connectWithRedis", err)
 	}
 	return rds
 }

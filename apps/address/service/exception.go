@@ -1,10 +1,8 @@
-package main
+package service
 
 import "github.com/123508/douyinshop/pkg/errorno"
 
 var InvalidAddressIdError = &errorno.BasicMessageError{Code: 400, Message: "地址ID无效"}
-
-var ForbiddenDeleteError = &errorno.BasicMessageError{Code: 401, Message: "地址不存在或无权限删除"}
 
 var DeleteAddrError = &errorno.BasicMessageError{Code: 500, Message: "地址删除失败,请联系管理员"}
 

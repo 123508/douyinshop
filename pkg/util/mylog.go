@@ -14,7 +14,7 @@ func init() {
 }
 
 // LogError 记录错误日志
-func LogError(description, funcName, step string, err error) {
+func LogError(description, funcName string, err error) {
 
 	param := map[string]interface{}{}
 	if description != "" {
@@ -22,9 +22,6 @@ func LogError(description, funcName, step string, err error) {
 	}
 	if funcName != "" {
 		param["报错函数"] = funcName
-	}
-	if step != "" {
-		param["报错步骤"] = step
 	}
 	if err != nil {
 		param["错误原因"] = err

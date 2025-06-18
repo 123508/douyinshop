@@ -52,7 +52,7 @@ func (s *ShopServiceImpl) GetShopId(ctx context.Context, req *pb.GetShopIdReq) (
 	shopId, err := Rds.Get(ctx, key).Result()
 
 	if err != nil {
-		util.LogError("查询shopId缓存失败", "GetShopId", "", err)
+		util.LogError("查询shopId缓存失败", "GetShopId", err)
 	}
 
 	id, err := strconv.Atoi(shopId)
@@ -72,7 +72,7 @@ func (s *ShopServiceImpl) GetShopId(ctx context.Context, req *pb.GetShopIdReq) (
 		err := Rds.Set(ctx, key, util.TakeKey(shop.ID), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
 
 		if err != nil {
-			util.LogError("缓存数据失败", "GetShopId", "", err)
+			util.LogError("缓存数据失败", "GetShopId", err)
 		}
 
 	} else {
@@ -96,7 +96,7 @@ func (s *ShopServiceImpl) GetShopInfo(ctx context.Context, req *pb.GetShopInfoRe
 	jsonData, err := Rds.Get(ctx, key).Result()
 
 	if err != nil {
-		util.LogError("查询shopInfo缓存失败", "GetShopInfo", "", err)
+		util.LogError("查询shopInfo缓存失败", "GetShopInfo", err)
 	}
 
 	err = json.Unmarshal([]byte(jsonData), &shop)
@@ -118,7 +118,7 @@ func (s *ShopServiceImpl) GetShopInfo(ctx context.Context, req *pb.GetShopInfoRe
 		err := Rds.Set(ctx, key, string(jsonData), time.Duration(rand.Intn(15)+30)*time.Minute).Err()
 
 		if err != nil {
-			util.LogError("缓存数据失败", "GetShopInfo", "", err)
+			util.LogError("缓存数据失败", "GetShopInfo", err)
 		}
 
 	} else {
@@ -328,11 +328,11 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 		jsonData, err := json.Marshal(&idList)
 
 		if err != nil {
-			util.LogError("序列化商品数组错误", "GetProductList", "请求hash为"+key, err)
+			util.LogError("序列化商品数组错误", "GetProductList", err)
 		} else {
 			// 设置随机过期时间，3~6 分钟
 			if setErr := Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); setErr != nil {
-				util.LogError("存入商品缓存失败", "GetProductList", "", setErr)
+				util.LogError("存入商品缓存失败", "GetProductList", setErr)
 			}
 		}
 
@@ -341,10 +341,10 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 			key := util.TakeKey(product, "item", v.ID)
 			jsonData, err := json.Marshal(&v)
 			if err != nil {
-				util.LogError("序列化商品错误", "GetProductList", "商品id为"+strconv.Itoa(int(v.ID)), err)
+				util.LogError("序列化商品错误", "GetProductList", err)
 			} else {
 				if err = Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
-					util.LogError("缓存商品失败", "GetProductList", "商品id为"+strconv.Itoa(int(v.ID)), err)
+					util.LogError("缓存商品失败", "GetProductList", err)
 				}
 			}
 		}
@@ -355,7 +355,7 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 		if len(fail) > 0 {
 			var missedProducts []models.Product
 			if err := s.db.Where("id IN ?", fail).Find(&missedProducts).Error; err != nil {
-				util.LogError("查询商品错误", "GetProductList", "", err)
+				util.LogError("查询商品错误", "GetProductList", err)
 				return nil, FailFetchProductList
 			}
 			for _, o := range missedProducts {
@@ -364,10 +364,10 @@ func (s *ShopServiceImpl) GetProductList(ctx context.Context, req *pb.GetProduct
 				key := util.TakeKey(product, "item", o.ID)
 				jsonData, err := json.Marshal(&o)
 				if err != nil {
-					util.LogError("序列化商品错误", "GetProductList", "商品id为"+strconv.Itoa(int(o.ID)), err)
+					util.LogError("序列化商品错误", "GetProductList", err)
 				} else {
 					if err = Rds.Set(ctx, key, jsonData, time.Duration(rand.Intn(3)+3)*time.Minute).Err(); err != nil {
-						util.LogError("缓存商品失败", "GetProductList", "商品id为"+strconv.Itoa(int(o.ID)), err)
+						util.LogError("缓存商品失败", "GetProductList", err)
 					}
 				}
 			}

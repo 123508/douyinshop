@@ -1546,7 +1546,7 @@ func listRolesHandler(ctx context.Context, handler interface{}, arg, result inte
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(auth.Empty)
+		req := new(auth.ListRolesReq)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
@@ -1576,12 +1576,12 @@ func newListRolesResult() interface{} {
 }
 
 type ListRolesArgs struct {
-	Req *auth.Empty
+	Req *auth.ListRolesReq
 }
 
 func (p *ListRolesArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(auth.Empty)
+		p.Req = new(auth.ListRolesReq)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -1608,7 +1608,7 @@ func (p *ListRolesArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *ListRolesArgs) Unmarshal(in []byte) error {
-	msg := new(auth.Empty)
+	msg := new(auth.ListRolesReq)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -1616,9 +1616,9 @@ func (p *ListRolesArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var ListRolesArgs_Req_DEFAULT *auth.Empty
+var ListRolesArgs_Req_DEFAULT *auth.ListRolesReq
 
-func (p *ListRolesArgs) GetReq() *auth.Empty {
+func (p *ListRolesArgs) GetReq() *auth.ListRolesReq {
 	if !p.IsSetReq() {
 		return ListRolesArgs_Req_DEFAULT
 	}
@@ -1699,7 +1699,7 @@ func listPermissionsHandler(ctx context.Context, handler interface{}, arg, resul
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(auth.Empty)
+		req := new(auth.ListPermissionsReq)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
@@ -1729,12 +1729,12 @@ func newListPermissionsResult() interface{} {
 }
 
 type ListPermissionsArgs struct {
-	Req *auth.Empty
+	Req *auth.ListPermissionsReq
 }
 
 func (p *ListPermissionsArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(auth.Empty)
+		p.Req = new(auth.ListPermissionsReq)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -1761,7 +1761,7 @@ func (p *ListPermissionsArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *ListPermissionsArgs) Unmarshal(in []byte) error {
-	msg := new(auth.Empty)
+	msg := new(auth.ListPermissionsReq)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -1769,9 +1769,9 @@ func (p *ListPermissionsArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var ListPermissionsArgs_Req_DEFAULT *auth.Empty
+var ListPermissionsArgs_Req_DEFAULT *auth.ListPermissionsReq
 
-func (p *ListPermissionsArgs) GetReq() *auth.Empty {
+func (p *ListPermissionsArgs) GetReq() *auth.ListPermissionsReq {
 	if !p.IsSetReq() {
 		return ListPermissionsArgs_Req_DEFAULT
 	}
@@ -2101,7 +2101,7 @@ func (p *kClient) CanAccess(ctx context.Context, Req *auth.CanAccessReq) (r *aut
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) ListRoles(ctx context.Context, Req *auth.Empty) (r *auth.ListRolesResp, err error) {
+func (p *kClient) ListRoles(ctx context.Context, Req *auth.ListRolesReq) (r *auth.ListRolesResp, err error) {
 	var _args ListRolesArgs
 	_args.Req = Req
 	var _result ListRolesResult
@@ -2111,7 +2111,7 @@ func (p *kClient) ListRoles(ctx context.Context, Req *auth.Empty) (r *auth.ListR
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) ListPermissions(ctx context.Context, Req *auth.Empty) (r *auth.ListPermissionsResp, err error) {
+func (p *kClient) ListPermissions(ctx context.Context, Req *auth.ListPermissionsReq) (r *auth.ListPermissionsResp, err error) {
 	var _args ListPermissionsArgs
 	_args.Req = Req
 	var _result ListPermissionsResult
