@@ -17,15 +17,15 @@ message Order{
   string username=11;
   string consignee=12;
   uint64 ID=13;
-  uint64 shopId=14;
-  uint32 finalStatus=15;
+  uint64 shop_id=14;
+  uint32 final_status=15;
 }
 
 message Status{
-  string StartTime=1;
-  string EndTime=2;
-  uint32 Status=3;
-  string Description=4;
+  string start_time=1;
+  string end_time=2;
+  uint32 status=3;
+  string description=4;
 }
 
 message OrderDetail{
@@ -39,20 +39,24 @@ message OrderDetail{
 
 message OrderResp{
   Order order=1;
-  uint64 ShopId=2;
-  repeated OrderDetail orderDetails=3;
+  uint64 shop_id=2;
+  repeated OrderDetail order_details=3;
 }
 
 message Empty{}
 
 message OrderReq{
   uint64 order_id=1;
-  uint64 ShopId=2;
+  uint64 shop_id=2;
   repeated OrderDetail list=3;
+  uint64 target_user_id=4;
+  uint64 request_user_id=5;
 }
 
 message CancelReq{
   uint64 order_id=1;
   string cancel_reason=2;
-  uint64 ShopId=3;
+  uint64 shop_id=3;
+  uint64 target_user_id=4;
+  uint64 request_user_id=5;
 }

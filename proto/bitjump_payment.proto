@@ -21,8 +21,9 @@ message ChargeReq {
     float amount = 1;
     CreditCardInfo credit_card = 2;
     uint64 order_id = 3;
-    uint64 user_id = 4;
+    uint64 target_user_id = 4;
     int32 pay_method = 5; // 支付方式 1微信 2支付宝 3银行卡
+    uint64 request_user_id=6;
 }
 
 message ChargeResp {
@@ -33,6 +34,8 @@ message ChargeResp {
 message NotifyReq {
     string transaction_id = 1;
     string order_id = 2;
+    uint64 target_user_id=3;
+    uint64 request_user_id=4;
 }
 
 message NotifyResp {

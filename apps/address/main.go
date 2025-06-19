@@ -7,7 +7,6 @@ import (
 	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/models"
 	"github.com/123508/douyinshop/pkg/myredis"
-	"github.com/123508/douyinshop/pkg/util"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	etcd "github.com/kitex-contrib/registry-etcd"
@@ -34,7 +33,7 @@ func main() {
 
 	rds, err := myredis.InitRedis()
 	if err != nil {
-		util.LogError("打开Redis连接失败", "connectWithRedis", err)
+		log.Fatal(err)
 	}
 
 	database.AutoMigrate(&models.AddressBook{})

@@ -1,16 +1,14 @@
-package main
+package service
 
 import "github.com/123508/douyinshop/pkg/errorno"
 
-var InvalidToken = &errorno.BasicMessageError{Code: 401, Message: "token已过期,请重新登录"}
+var TokenTimeOutError = &errorno.BasicMessageError{Code: 401, Message: "token已过期,请重新登录"}
 
-var IssuerNotMatch = &errorno.BasicMessageError{Code: 302, Message: "警告,签发人不匹配!"}
+var IssuerNotMatchError = &errorno.BasicMessageError{Code: 302, Message: "警告,签发人不匹配!"}
 
 var ParseTokenError = &errorno.BasicMessageError{Code: 402, Message: "解析token失败"}
 
 var SignFailError = &errorno.BasicMessageError{Code: 500, Message: "token签名失败"}
-
-var RedisConnectionError = &errorno.BasicMessageError{Code: 404, Message: "Redis数据库连接异常"}
 
 var UserNotExists = &errorno.BasicMessageError{Code: 401, Message: "用户不存在"}
 
@@ -39,3 +37,15 @@ var VerifyCodeError = &errorno.BasicMessageError{Code: 404, Message: "验证码�
 var BadPageOrPageSize = &errorno.BasicMessageError{Code: 400, Message: "请求页数或页长错误"}
 
 var NotAllowedBindEmail = &errorno.BasicMessageError{Code: 400, Message: "请先解绑邮箱"}
+
+var RegisterUserError = &errorno.BasicMessageError{Code: 500, Message: "注册用户失败"}
+
+var DeleteUserError = &errorno.BasicMessageError{Code: 500, Message: "删除用户失败"}
+
+var GetUserListError = &errorno.BasicMessageError{Code: 500, Message: "获取用户列表失败"}
+
+var SearchUserError = &errorno.BasicMessageError{Code: 500, Message: "查询用户错误"}
+
+var BindEmailError = &errorno.BasicMessageError{Code: 500, Message: "绑定邮箱错误"}
+
+var UnBindEmailError = &errorno.BasicMessageError{Code: 500, Message: "解绑邮箱错误"}

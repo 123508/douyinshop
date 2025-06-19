@@ -21,12 +21,16 @@ type Client interface {
 	DeliverTokenByRPC(ctx context.Context, Req *user.DeliverTokenReq, callOptions ...callopt.Option) (r *user.DeliveryResp, err error)
 	VerifyTokenByRPC(ctx context.Context, Req *user.VerifyTokenReq, callOptions ...callopt.Option) (r *user.VerifyResp, err error)
 	ChangePassword(ctx context.Context, Req *user.ChangePasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
-	ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq, callOptions ...callopt.Option) (r *user.ForgotPasswordResp, err error)
 	VerifySmsCode(ctx context.Context, Req *user.VerifySmsCodeReq, callOptions ...callopt.Option) (r *user.VerifySmsCodeResp, err error)
 	ResetPassword(ctx context.Context, Req *user.ResetPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	PreBindEmail(ctx context.Context, Req *user.PreBindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 	BindEmail(ctx context.Context, Req *user.BindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	PreUnbindEmail(ctx context.Context, Req *user.PreUnbindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 	UnbindEmail(ctx context.Context, Req *user.UnbindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	PreFreezeUser(ctx context.Context, Req *user.PreFreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 	FreezeUser(ctx context.Context, Req *user.FreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error)
+	PreUnfreezeUser(ctx context.Context, Req *user.PreUnFreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 	UnfreezeUser(ctx context.Context, Req *user.UnfreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error)
 }
 
@@ -109,7 +113,7 @@ func (p *kUserServiceClient) ChangePassword(ctx context.Context, Req *user.Chang
 	return p.kClient.ChangePassword(ctx, Req)
 }
 
-func (p *kUserServiceClient) ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+func (p *kUserServiceClient) ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq, callOptions ...callopt.Option) (r *user.ForgotPasswordResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.ForgotPassword(ctx, Req)
 }
@@ -124,9 +128,19 @@ func (p *kUserServiceClient) ResetPassword(ctx context.Context, Req *user.ResetP
 	return p.kClient.ResetPassword(ctx, Req)
 }
 
+func (p *kUserServiceClient) PreBindEmail(ctx context.Context, Req *user.PreBindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.PreBindEmail(ctx, Req)
+}
+
 func (p *kUserServiceClient) BindEmail(ctx context.Context, Req *user.BindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.BindEmail(ctx, Req)
+}
+
+func (p *kUserServiceClient) PreUnbindEmail(ctx context.Context, Req *user.PreUnbindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.PreUnbindEmail(ctx, Req)
 }
 
 func (p *kUserServiceClient) UnbindEmail(ctx context.Context, Req *user.UnbindEmailReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
@@ -134,9 +148,19 @@ func (p *kUserServiceClient) UnbindEmail(ctx context.Context, Req *user.UnbindEm
 	return p.kClient.UnbindEmail(ctx, Req)
 }
 
+func (p *kUserServiceClient) PreFreezeUser(ctx context.Context, Req *user.PreFreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.PreFreezeUser(ctx, Req)
+}
+
 func (p *kUserServiceClient) FreezeUser(ctx context.Context, Req *user.FreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.FreezeUser(ctx, Req)
+}
+
+func (p *kUserServiceClient) PreUnfreezeUser(ctx context.Context, Req *user.PreUnFreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.PreUnfreezeUser(ctx, Req)
 }
 
 func (p *kUserServiceClient) UnfreezeUser(ctx context.Context, Req *user.UnfreezeUserReq, callOptions ...callopt.Option) (r *user.Empty, err error) {

@@ -3,6 +3,7 @@ module github.com/123508/douyinshop
 go 1.23.1
 
 require (
+	github.com/RedisBloom/redisbloom-go v1.0.0
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/cloudwego/fastpb v0.0.5
 	github.com/cloudwego/hertz v0.9.5
@@ -55,6 +56,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/gomodule/redigo v1.8.2 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect

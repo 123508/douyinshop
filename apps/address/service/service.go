@@ -13,13 +13,13 @@ import (
 
 type AddressService interface {
 	GetRedis() *redis.Client
-	AddAddress(ctx context.Context, addr *models.AddressBook) (addrId uint64, err error)
-	DeleteAddress(ctx context.Context, AddrId, UserId uint64) error
-	UpdateAddress(ctx context.Context, addr *models.AddressBook) error
-	SetDefaultAddress(ctx context.Context, AddrId uint64, UserId uint64) error
-	GetAddressList(ctx context.Context, UserId uint64) ([]models.AddressBook, error)
-	GetAddressInfo(ctx context.Context, AddrId, UserId uint64) (*models.AddressBook, error)
-	GetDefaultAddress(ctx context.Context, UserId uint64) (*models.AddressBook, error)
+	AddAddress(ctx context.Context, addr *models.AddressBook, TargetUserId uint64) (addrId uint64, err error)
+	DeleteAddress(ctx context.Context, AddrId, UserId uint64, TargetUserId uint64) error
+	UpdateAddress(ctx context.Context, addr *models.AddressBook, TargetUserId uint64) error
+	SetDefaultAddress(ctx context.Context, AddrId uint64, UserId uint64, TargetUserId uint64) error
+	GetAddressList(ctx context.Context, UserId uint64, TargetUserId uint64) ([]models.AddressBook, error)
+	GetAddressInfo(ctx context.Context, AddrId, UserId uint64, TargetUserId uint64) (*models.AddressBook, error)
+	GetDefaultAddress(ctx context.Context, UserId uint64, TargetUserId uint64) (*models.AddressBook, error)
 }
 
 type ServiceImpl struct {
@@ -48,7 +48,7 @@ func (s *ServiceImpl) GetRedis() *redis.Client {
 	return s.Rds
 }
 
-func (s *ServiceImpl) AddAddress(ctx context.Context, addr *models.AddressBook) (addrId uint64, err error) {
+func (s *ServiceImpl) AddAddress(ctx context.Context, addr *models.AddressBook, TargetUserId uint64) (addrId uint64, err error) {
 
 	//删除对应缓存
 	defer util.CleanCache(s.Rds, ctx, util.TakeKey(serviceName, "default", addr.UserId))
@@ -69,7 +69,7 @@ func (s *ServiceImpl) AddAddress(ctx context.Context, addr *models.AddressBook) 
 	return id, nil
 }
 
-func (s *ServiceImpl) DeleteAddress(ctx context.Context, AddrId, UserId uint64) error {
+func (s *ServiceImpl) DeleteAddress(ctx context.Context, AddrId, UserId, TargetUserId uint64) error {
 	//删除对应缓存
 	defer func() {
 		util.CleanCache(s.Rds, ctx, util.TakeKey(serviceName, info, AddrId))
@@ -90,7 +90,7 @@ func (s *ServiceImpl) DeleteAddress(ctx context.Context, AddrId, UserId uint64) 
 	return nil
 }
 
-func (s *ServiceImpl) UpdateAddress(ctx context.Context, addr *models.AddressBook) error {
+func (s *ServiceImpl) UpdateAddress(ctx context.Context, addr *models.AddressBook, TargetUserId uint64) error {
 	//删除对应缓存
 	defer util.CleanCache(s.Rds, ctx, util.TakeKey(serviceName, info, addr.ID))
 	defer util.CleanCache(s.Rds, ctx, util.TakeKey(serviceName, "default", addr.UserId))
@@ -114,15 +114,23 @@ func (s *ServiceImpl) UpdateAddress(ctx context.Context, addr *models.AddressBoo
 	return s.addrRepo.UpdateAddress(ctx, addr)
 }
 
-func (s *ServiceImpl) SetDefaultAddress(ctx context.Context, AddrId, UserId uint64) error {
+func (s *ServiceImpl) SetDefaultAddress(ctx context.Context, AddrId, UserId, TargetUserId uint64) error {
 	//删除缓存
 	defer s.Rds.Del(ctx, util.TakeKey(serviceName, "default", UserId))
+	s.Rds.Del(ctx, util.TakeKey(serviceName, "info", AddrId))
 
 	// 检查地址是否属于用户
 	is, _, err := s.addrRepo.AskAddress(ctx, UserId, AddrId)
 
 	if !is || err != nil {
 		return ForbiddenAskError
+	}
+
+	//删除默认地址缓存
+	address, err := s.addrRepo.GetDefaultAddress(ctx, UserId)
+
+	if address != nil {
+		s.Rds.Del(ctx, util.TakeKey(serviceName, "info", address.ID))
 	}
 
 	if err = s.addrRepo.SetDefaultAddress(ctx, AddrId, UserId); err != nil {
@@ -132,7 +140,7 @@ func (s *ServiceImpl) SetDefaultAddress(ctx context.Context, AddrId, UserId uint
 	return nil
 }
 
-func (s *ServiceImpl) GetAddressList(ctx context.Context, UserId uint64) ([]models.AddressBook, error) {
+func (s *ServiceImpl) GetAddressList(ctx context.Context, UserId, TargetUserId uint64) ([]models.AddressBook, error) {
 	//通用组件缓存处理
 	component := util.ListCacheComponent[uint64, models.AddressBook]{
 		Rds:             s.Rds,
@@ -169,7 +177,7 @@ func (s *ServiceImpl) GetAddressList(ctx context.Context, UserId uint64) ([]mode
 	return res, nil
 }
 
-func (s *ServiceImpl) GetAddressInfo(ctx context.Context, AddrId, UserId uint64) (*models.AddressBook, error) {
+func (s *ServiceImpl) GetAddressInfo(ctx context.Context, AddrId, UserId, TargetUserId uint64) (*models.AddressBook, error) {
 
 	simple := util.SimpleCacheComponent[uint64, models.AddressBook]{
 		Rds:       s.Rds,
@@ -198,7 +206,7 @@ func (s *ServiceImpl) GetAddressInfo(ctx context.Context, AddrId, UserId uint64)
 
 }
 
-func (s *ServiceImpl) GetDefaultAddress(ctx context.Context, UserId uint64) (*models.AddressBook, error) {
+func (s *ServiceImpl) GetDefaultAddress(ctx context.Context, UserId, TargetUserId uint64) (*models.AddressBook, error) {
 	//通用组件缓存处理
 	simple := util.SimpleCacheComponent[uint64, models.AddressBook]{
 		Rds:       s.Rds,

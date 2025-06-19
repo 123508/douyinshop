@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"context"
@@ -99,7 +99,7 @@ func ParseFrontendJWT(tokenString string) (*FrontendClaims, error) {
 		return claims, nil
 	} else {
 		util.LogError("token已过期", "ParseFrontendJWT", err)
-		return nil, InvalidToken
+		return nil, TokenTimeOutError
 	}
 }
 
@@ -146,7 +146,7 @@ func ParseBackendJWT(tokenString string) (*BackendClaims, error) {
 	if claims, ok := token.Claims.(*BackendClaims); ok && token.Valid {
 		return claims, nil
 	} else {
-		return nil, InvalidToken
+		return nil, TokenTimeOutError
 	}
 }
 

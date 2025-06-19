@@ -52,19 +52,21 @@ message Permission{
 message Empty{}
 
 message AssignRoleToUserReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
     uint64 role_id=2;
-    uint64 update_user_id=3;
+    uint64 request_user_id=3;
 }
 
 message RemoveRoleFromUserReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
     uint64 role_id=2;
-    uint64 update_user_id=3;
+    uint64 request_user_id=3;
+
 }
 
 message GetUserRolesReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
 }
 
 message GetUserRolesResp{
@@ -74,17 +76,18 @@ message GetUserRolesResp{
 message GrantPermissionToRoleReq{
     uint64 role_id=1;
     uint64 permission_id=2;
-    uint64 update_user_id=3;
+    uint64 request_user_id=3;
 }
 
 message RevokePermissionFromRoleReq{
     uint64 role_id=1;
     uint64 permission_id=2;
-    uint64 update_user_id=3;
+    uint64 request_user_id=3;
 }
 
 message GetRolePermissionsReq{
     uint64 role_id=1;
+    uint64 request_user_id=2;
 }
 
 message GetRolePermissionsResp{
@@ -92,7 +95,8 @@ message GetRolePermissionsResp{
 }
 
 message GetUserPermissionsReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
 }
 
 message GetUserPermissionsResp{
@@ -100,8 +104,9 @@ message GetUserPermissionsResp{
 }
 
 message HasPermissionReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
     string permission_code=2;
+    uint64 request_user_id=3;
 }
 
 message  HasPermissionResp{
@@ -109,9 +114,10 @@ message  HasPermissionResp{
 }
 
 message CanAccessReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
     string resource=2;
     string action=3;
+    uint64 request_user_id=4;
 }
 
 message CanAccessResp{
@@ -121,6 +127,7 @@ message CanAccessResp{
 message ListRolesReq{
     uint32 page=1;
     uint32 pageSize=2;
+    uint64 request_user_id=3;
 }
 
 message ListRolesResp{
@@ -130,6 +137,7 @@ message ListRolesResp{
 message ListPermissionsReq{
     uint32 page=1;
     uint32 pageSize=2;
+    uint64 request_user_id=3;
 }
 
 message ListPermissionsResp{
@@ -137,12 +145,12 @@ message ListPermissionsResp{
 }
 
 message IsSuperAdminReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
 }
 
 message IsSuperAdminResp{
     bool ok=1;
 }
-
 
 

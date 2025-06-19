@@ -28,20 +28,27 @@ service UserService {
     //修改密码
     rpc ChangePassword(ChangePasswordReq) returns (Empty);
     //忘记密码
-    rpc ForgotPassword(ForgotPasswordReq) returns (Empty);
+    rpc ForgotPassword(ForgotPasswordReq) returns (ForgotPasswordResp);
     //校验验证码
     rpc VerifySmsCode(VerifySmsCodeReq)returns(VerifySmsCodeResp);
     //重置密码
     rpc ResetPassword(ResetPasswordReq)returns (Empty);
+    //预绑定邮箱
+    rpc PreBindEmail(PreBindEmailReq) returns (Empty);
     //绑定邮箱
     rpc BindEmail(BindEmailReq) returns (Empty);
+    //预解绑邮箱
+    rpc PreUnbindEmail(PreUnbindEmailReq)returns(Empty);
     //解绑邮箱
     rpc UnbindEmail(UnbindEmailReq) returns (Empty);
+    //预冻结用户
+    rpc PreFreezeUser(PreFreezeUserReq)returns(Empty);
     //冻结用户
     rpc FreezeUser(FreezeUserReq) returns (Empty);
+    //预解冻用户
+    rpc PreUnfreezeUser(PreUnFreezeUserReq)returns(Empty);
     //解冻用户
     rpc UnfreezeUser(UnfreezeUserReq) returns (Empty);
-
 }
 
 message Empty{}
@@ -86,7 +93,8 @@ message LoginResp {
 }
 
 message GetUserInfoReq {
-    uint64 user_id=1;
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
 }
 
 message GetUserInfoResp {
@@ -99,32 +107,33 @@ message GetUserInfoResp {
 
 message LogoutReq {
     string token = 1;
+    uint64 target_user_id=2;
+    uint64 request_user_id=3;
 }
 
-
 message UpdateReq{
-    string nickname = 1;
+    string name = 1;
     string avatar = 2;
     string phone = 3;
     uint32 gender = 4;
-    uint64 user_id=5;
+    uint64 target_user_id=5;
+    uint64 request_user_id=6;
 }
-
 
 message DeleteReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
 }
 
-
 message DeliverTokenReq {
-    uint64 user_id = 1;
-    repeated string role_codes=2;
-    repeated string perm_codes=3;
-
+    uint64 target_user_id = 1;
+    uint64 request_user_id=4;
 }
 
 message VerifyTokenReq {
     string token = 1;
+    uint64 target_user_id=2;
+    uint64 request_user_id=3;
 }
 
 message DeliveryResp {
@@ -141,6 +150,7 @@ message ListUsersReq{
     uint32 page = 1;
     uint32 page_size = 2;
     repeated Filter filter=3;
+    uint64 request_user_id=4;
 }
 
 message ListUsersResp{
@@ -149,24 +159,33 @@ message ListUsersResp{
 }
 
 message ChangePasswordReq{
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
     string old_password = 2;
     string new_password = 3;
+    uint64 request_user_id=4;
 }
 
 message ForgotPasswordReq {
     string email = 1;
 }
 
+message ForgotPasswordResp{
+    uint64 user_id=1;
+}
+
 message ResetPasswordReq{
     string reset_token = 1;
     string email=2;
     string new_password = 3;
+    uint64 request_user_id=4;
+    uint64 target_user_id=5;
 }
 
 message VerifySmsCodeReq{
-    string email = 1;
+    uint64 type=1;
     string verify_code = 2;
+    uint64 request_user_id=3;
+    uint64 target_user_id=4;
 }
 
 message VerifySmsCodeResp{
@@ -174,19 +193,47 @@ message VerifySmsCodeResp{
 }
 
 message BindEmailReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
     string email = 2;
-    string verify_code = 3;
+    string reset_token = 3;
+    uint64 request_user_id=4;
 }
 
 message UnbindEmailReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
+    uint64 request_user_id = 2;
+    string reset_token=3;
 }
 
 message FreezeUserReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
+    uint64 request_user_id=2;
+    string reset_token=3;
 }
 
 message UnfreezeUserReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
+    uint64 request_user_id=2;
+    string reset_token=3;
 }
+
+message PreBindEmailReq{
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
+}
+
+message PreUnbindEmailReq{
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
+}
+
+message PreFreezeUserReq{
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
+}
+
+message PreUnFreezeUserReq{
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
+}
+

@@ -18,21 +18,26 @@ service CartService {
 message CartItem {
     uint64 product_id = 1;
     int32  quantity = 2;
+    uint64 request_user_id=3;
+    uint64 target_user_id=4;
 }
 
 message AddItemReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
     CartItem item = 2;
+    uint64 request_user_id=3;
 }
 
 message AddItemResp {}
 
 message EmptyCartReq {
-    uint64 user_id = 1;
+    uint64 request_user_id = 1;
+    uint64 target_user_id=2;
 }
 
 message GetCartReq {
-    uint64 user_id = 1;
+    uint64 request_user_id = 1;
+    uint64 target_user_id = 2;
 }
 
 message GetCartResp {
@@ -41,9 +46,10 @@ message GetCartResp {
 
 // 删除请求
 message DeleteItemReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
     uint64 product_id=2;
     uint32 num=3;
+    uint64 request_user_id=4;
 }
 
 message Cart {

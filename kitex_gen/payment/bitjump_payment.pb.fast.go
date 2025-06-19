@@ -94,6 +94,11 @@ func (x *ChargeReq) FastRead(buf []byte, _type int8, number int32) (offset int, 
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 6:
+		offset, err = x.fastReadField6(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -128,12 +133,17 @@ func (x *ChargeReq) fastReadField3(buf []byte, _type int8) (offset int, err erro
 }
 
 func (x *ChargeReq) fastReadField4(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *ChargeReq) fastReadField5(buf []byte, _type int8) (offset int, err error) {
 	x.PayMethod, offset, err = fastpb.ReadInt32(buf, _type)
+	return offset, err
+}
+
+func (x *ChargeReq) fastReadField6(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -184,6 +194,16 @@ func (x *NotifyReq) FastRead(buf []byte, _type int8, number int32) (offset int, 
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -204,6 +224,16 @@ func (x *NotifyReq) fastReadField1(buf []byte, _type int8) (offset int, err erro
 
 func (x *NotifyReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.OrderId, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *NotifyReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *NotifyReq) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -272,6 +302,7 @@ func (x *ChargeReq) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField3(buf[offset:])
 	offset += x.fastWriteField4(buf[offset:])
 	offset += x.fastWriteField5(buf[offset:])
+	offset += x.fastWriteField6(buf[offset:])
 	return offset
 }
 
@@ -300,10 +331,10 @@ func (x *ChargeReq) fastWriteField3(buf []byte) (offset int) {
 }
 
 func (x *ChargeReq) fastWriteField4(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetTargetUserId())
 	return offset
 }
 
@@ -312,6 +343,14 @@ func (x *ChargeReq) fastWriteField5(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteInt32(buf[offset:], 5, x.GetPayMethod())
+	return offset
+}
+
+func (x *ChargeReq) fastWriteField6(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 6, x.GetRequestUserId())
 	return offset
 }
 
@@ -346,6 +385,8 @@ func (x *NotifyReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
 	return offset
 }
 
@@ -362,6 +403,22 @@ func (x *NotifyReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 2, x.GetOrderId())
+	return offset
+}
+
+func (x *NotifyReq) fastWriteField3(buf []byte) (offset int) {
+	if x.TargetUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetTargetUserId())
+	return offset
+}
+
+func (x *NotifyReq) fastWriteField4(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetRequestUserId())
 	return offset
 }
 
@@ -424,6 +481,7 @@ func (x *ChargeReq) Size() (n int) {
 	n += x.sizeField3()
 	n += x.sizeField4()
 	n += x.sizeField5()
+	n += x.sizeField6()
 	return n
 }
 
@@ -452,10 +510,10 @@ func (x *ChargeReq) sizeField3() (n int) {
 }
 
 func (x *ChargeReq) sizeField4() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(4, x.GetUserId())
+	n += fastpb.SizeUint64(4, x.GetTargetUserId())
 	return n
 }
 
@@ -464,6 +522,14 @@ func (x *ChargeReq) sizeField5() (n int) {
 		return n
 	}
 	n += fastpb.SizeInt32(5, x.GetPayMethod())
+	return n
+}
+
+func (x *ChargeReq) sizeField6() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(6, x.GetRequestUserId())
 	return n
 }
 
@@ -498,6 +564,8 @@ func (x *NotifyReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
+	n += x.sizeField4()
 	return n
 }
 
@@ -514,6 +582,22 @@ func (x *NotifyReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeString(2, x.GetOrderId())
+	return n
+}
+
+func (x *NotifyReq) sizeField3() (n int) {
+	if x.TargetUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetTargetUserId())
+	return n
+}
+
+func (x *NotifyReq) sizeField4() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(4, x.GetRequestUserId())
 	return n
 }
 
@@ -535,8 +619,9 @@ var fieldIDToName_ChargeReq = map[int32]string{
 	1: "Amount",
 	2: "CreditCard",
 	3: "OrderId",
-	4: "UserId",
+	4: "TargetUserId",
 	5: "PayMethod",
+	6: "RequestUserId",
 }
 
 var fieldIDToName_ChargeResp = map[int32]string{
@@ -547,6 +632,8 @@ var fieldIDToName_ChargeResp = map[int32]string{
 var fieldIDToName_NotifyReq = map[int32]string{
 	1: "TransactionId",
 	2: "OrderId",
+	3: "TargetUserId",
+	4: "RequestUserId",
 }
 
 var fieldIDToName_NotifyResp = map[int32]string{}

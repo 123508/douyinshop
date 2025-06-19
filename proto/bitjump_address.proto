@@ -36,8 +36,9 @@ message Address {
 }
 
 message AddAddressReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
     Address address = 2;
+    uint64 request_user_id=3;
 }
 
 message AddAddressResp {
@@ -45,7 +46,8 @@ message AddAddressResp {
 }
 
 message GetAddressListReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
+    uint64 request_user_id = 2;
 }
 
 message GetAddressListResp {
@@ -53,8 +55,9 @@ message GetAddressListResp {
 }
 
 message DeleteAddressReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
     uint64 addr_id = 2;
+    uint64 request_user_id=3;
 }
 
 message DeleteAddressResp {
@@ -62,9 +65,10 @@ message DeleteAddressResp {
 }
 
 message UpdateAddressReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
     uint64 addr_id = 2;
     Address address = 3;
+    uint64 request_user_id=4;
 }
 
 message UpdateAddressResp {
@@ -72,8 +76,9 @@ message UpdateAddressResp {
 }
 
 message SetDefaultAddressReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
     uint64 addr_id = 2;
+    uint64 request_user_id=3;
 }
 
 message SetDefaultAddressResp {
@@ -81,8 +86,9 @@ message SetDefaultAddressResp {
 }
 
 message GetAddressInfoReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
     uint64 addr_id=2;
+    uint64 request_user_id=3;
 }
 
 message GetAddressInfoResp{
@@ -90,7 +96,8 @@ message GetAddressInfoResp{
 }
 
 message GetDefaultAddressReq{
-    uint64 user_id=1;
+    uint64 target_user_id=1;
+    uint64 request_user_id=2;
 }
 
 message GetDefaultAddressResp{

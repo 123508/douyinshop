@@ -24,6 +24,16 @@ func (x *CartItem) FastRead(buf []byte, _type int8, number int32) (offset int, e
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -47,6 +57,16 @@ func (x *CartItem) fastReadField2(buf []byte, _type int8) (offset int, err error
 	return offset, err
 }
 
+func (x *CartItem) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *CartItem) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
 func (x *AddItemReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
 	switch number {
 	case 1:
@@ -56,6 +76,11 @@ func (x *AddItemReq) FastRead(buf []byte, _type int8, number int32) (offset int,
 		}
 	case 2:
 		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -73,7 +98,7 @@ ReadFieldError:
 }
 
 func (x *AddItemReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -85,6 +110,11 @@ func (x *AddItemReq) fastReadField2(buf []byte, _type int8) (offset int, err err
 	}
 	x.Item = &v
 	return offset, nil
+}
+
+func (x *AddItemReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
 }
 
 func (x *AddItemResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
@@ -107,6 +137,11 @@ func (x *EmptyCartReq) FastRead(buf []byte, _type int8, number int32) (offset in
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -121,7 +156,12 @@ ReadFieldError:
 }
 
 func (x *EmptyCartReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *EmptyCartReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -129,6 +169,11 @@ func (x *GetCartReq) FastRead(buf []byte, _type int8, number int32) (offset int,
 	switch number {
 	case 1:
 		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
 		if err != nil {
 			goto ReadFieldError
 		}
@@ -146,7 +191,12 @@ ReadFieldError:
 }
 
 func (x *GetCartReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *GetCartReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -197,6 +247,11 @@ func (x *DeleteItemReq) FastRead(buf []byte, _type int8, number int32) (offset i
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -211,7 +266,7 @@ ReadFieldError:
 }
 
 func (x *DeleteItemReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -222,6 +277,11 @@ func (x *DeleteItemReq) fastReadField2(buf []byte, _type int8) (offset int, err 
 
 func (x *DeleteItemReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
 	x.Num, offset, err = fastpb.ReadUint32(buf, _type)
+	return offset, err
+}
+
+func (x *DeleteItemReq) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -284,6 +344,8 @@ func (x *CartItem) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
 	return offset
 }
 
@@ -303,20 +365,37 @@ func (x *CartItem) fastWriteField2(buf []byte) (offset int) {
 	return offset
 }
 
+func (x *CartItem) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetRequestUserId())
+	return offset
+}
+
+func (x *CartItem) fastWriteField4(buf []byte) (offset int) {
+	if x.TargetUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetTargetUserId())
+	return offset
+}
+
 func (x *AddItemReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
 func (x *AddItemReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
 	return offset
 }
 
@@ -325,6 +404,14 @@ func (x *AddItemReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteMessage(buf[offset:], 2, x.GetItem())
+	return offset
+}
+
+func (x *AddItemReq) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetRequestUserId())
 	return offset
 }
 
@@ -340,14 +427,23 @@ func (x *EmptyCartReq) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
 func (x *EmptyCartReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.RequestUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetRequestUserId())
+	return offset
+}
+
+func (x *EmptyCartReq) fastWriteField2(buf []byte) (offset int) {
+	if x.TargetUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetTargetUserId())
 	return offset
 }
 
@@ -356,14 +452,23 @@ func (x *GetCartReq) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
 func (x *GetCartReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.RequestUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetRequestUserId())
+	return offset
+}
+
+func (x *GetCartReq) fastWriteField2(buf []byte) (offset int) {
+	if x.TargetUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetTargetUserId())
 	return offset
 }
 
@@ -390,14 +495,15 @@ func (x *DeleteItemReq) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
 	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
 	return offset
 }
 
 func (x *DeleteItemReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
 	return offset
 }
 
@@ -414,6 +520,14 @@ func (x *DeleteItemReq) fastWriteField3(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint32(buf[offset:], 3, x.GetNum())
+	return offset
+}
+
+func (x *DeleteItemReq) fastWriteField4(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetRequestUserId())
 	return offset
 }
 
@@ -457,6 +571,8 @@ func (x *CartItem) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
+	n += x.sizeField4()
 	return n
 }
 
@@ -476,20 +592,37 @@ func (x *CartItem) sizeField2() (n int) {
 	return n
 }
 
+func (x *CartItem) sizeField3() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetRequestUserId())
+	return n
+}
+
+func (x *CartItem) sizeField4() (n int) {
+	if x.TargetUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(4, x.GetTargetUserId())
+	return n
+}
+
 func (x *AddItemReq) Size() (n int) {
 	if x == nil {
 		return n
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
 func (x *AddItemReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
 	return n
 }
 
@@ -498,6 +631,14 @@ func (x *AddItemReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeMessage(2, x.GetItem())
+	return n
+}
+
+func (x *AddItemReq) sizeField3() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetRequestUserId())
 	return n
 }
 
@@ -513,14 +654,23 @@ func (x *EmptyCartReq) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
 func (x *EmptyCartReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.RequestUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetRequestUserId())
+	return n
+}
+
+func (x *EmptyCartReq) sizeField2() (n int) {
+	if x.TargetUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetTargetUserId())
 	return n
 }
 
@@ -529,14 +679,23 @@ func (x *GetCartReq) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
 func (x *GetCartReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.RequestUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetRequestUserId())
+	return n
+}
+
+func (x *GetCartReq) sizeField2() (n int) {
+	if x.TargetUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetTargetUserId())
 	return n
 }
 
@@ -563,14 +722,15 @@ func (x *DeleteItemReq) Size() (n int) {
 	n += x.sizeField1()
 	n += x.sizeField2()
 	n += x.sizeField3()
+	n += x.sizeField4()
 	return n
 }
 
 func (x *DeleteItemReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
 	return n
 }
 
@@ -587,6 +747,14 @@ func (x *DeleteItemReq) sizeField3() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint32(3, x.GetNum())
+	return n
+}
+
+func (x *DeleteItemReq) sizeField4() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(4, x.GetRequestUserId())
 	return n
 }
 
@@ -627,21 +795,26 @@ func (x *EmptyCartResp) Size() (n int) {
 var fieldIDToName_CartItem = map[int32]string{
 	1: "ProductId",
 	2: "Quantity",
+	3: "RequestUserId",
+	4: "TargetUserId",
 }
 
 var fieldIDToName_AddItemReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
 	2: "Item",
+	3: "RequestUserId",
 }
 
 var fieldIDToName_AddItemResp = map[int32]string{}
 
 var fieldIDToName_EmptyCartReq = map[int32]string{
-	1: "UserId",
+	1: "RequestUserId",
+	2: "TargetUserId",
 }
 
 var fieldIDToName_GetCartReq = map[int32]string{
-	1: "UserId",
+	1: "RequestUserId",
+	2: "TargetUserId",
 }
 
 var fieldIDToName_GetCartResp = map[int32]string{
@@ -649,9 +822,10 @@ var fieldIDToName_GetCartResp = map[int32]string{
 }
 
 var fieldIDToName_DeleteItemReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
 	2: "ProductId",
 	3: "Num",
+	4: "RequestUserId",
 }
 
 var fieldIDToName_Cart = map[int32]string{

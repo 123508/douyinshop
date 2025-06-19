@@ -66,7 +66,7 @@ func AddAddress(ctx context.Context, item *AddressItem, userID uint64) (uint64, 
 			Phone:         item.Phone,
 			Label:         item.Label,
 		},
-		UserId: userID,
+		TargetUserId: userID,
 	}
 	resp, err := addressClient.AddAddress(ctx, req)
 	if err != nil {
@@ -80,7 +80,7 @@ func AddAddress(ctx context.Context, item *AddressItem, userID uint64) (uint64, 
 // 返回地址列表
 func GetAddressList(ctx context.Context, userID uint64) ([]AddressItem, error) {
 	req := &address.GetAddressListReq{
-		UserId: userID,
+		TargetUserId: userID,
 	}
 	resp, err := addressClient.GetAddressList(ctx, req)
 	if err != nil {
@@ -111,8 +111,8 @@ func GetAddressList(ctx context.Context, userID uint64) ([]AddressItem, error) {
 // 返回是否删除成功
 func DeleteAddress(ctx context.Context, addrID int, userID uint64) (bool, error) {
 	req := &address.DeleteAddressReq{
-		AddrId: uint64(addrID),
-		UserId: userID,
+		AddrId:       uint64(addrID),
+		TargetUserId: userID,
 	}
 	resp, err := addressClient.DeleteAddress(ctx, req)
 	if err != nil {
@@ -140,8 +140,8 @@ func UpdateAddress(ctx context.Context, item *AddressItem, userID uint64) (bool,
 			Label:         item.Label,
 			IsDefault:     item.IsDefault,
 		},
-		UserId: userID,
-		AddrId: item.ID,
+		TargetUserId: userID,
+		AddrId:       item.ID,
 	}
 	resp, err := addressClient.UpdateAddress(ctx, req)
 	if err != nil {
@@ -156,12 +156,41 @@ func UpdateAddress(ctx context.Context, item *AddressItem, userID uint64) (bool,
 // 返回是否设置成功
 func SetDefaultAddress(ctx context.Context, addrID int, userID uint64) (bool, error) {
 	req := &address.SetDefaultAddressReq{
-		AddrId: uint64(addrID),
-		UserId: userID,
+		AddrId:       uint64(addrID),
+		TargetUserId: userID,
 	}
 	resp, err := addressClient.SetDefaultAddress(ctx, req)
 	if err != nil {
 		return false, err
 	}
 	return resp.Res, nil
+}
+
+// GetAddressInfo
+// 获取用户制定地址的详细信息
+func GetAddressInfo(ctx context.Context, addrId, userId uint64) (*AddressItem, error) {
+	req := &address.GetAddressInfoReq{
+		TargetUserId: userId,
+		AddrId:       addrId,
+	}
+	resp, err := addressClient.GetAddressInfo(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	a := resp.Addr
+
+	return &AddressItem{
+		ID:            a.AddressId,
+		StreetAddress: a.StreetAddress,
+		City:          a.City,
+		State:         a.State,
+		Country:       a.Country,
+		ZipCode:       a.ZipCode,
+		Consignee:     a.Consignee,
+		Gender:        a.Gender,
+		Phone:         a.Phone,
+		Label:         a.Label,
+		IsDefault:     a.IsDefault,
+	}, nil
 }

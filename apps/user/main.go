@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/123508/douyinshop/pkg/myredis"
 	"gorm.io/gorm"
 	"log"
 	"net"
@@ -23,6 +24,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	rds, err := myredis.InitRedis()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.UserLogin{})
 	db.AutoMigrate(&models.UserRole{})
@@ -65,7 +73,7 @@ func main() {
 
 	addr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Conf.UserConfig.Host, config.Conf.UserConfig.Port))
 	svr := user.NewServer(
-		new(UserServiceImpl),
+		NewUserServiceImpl(db, rds),
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
 		server.WithServerBasicInfo(

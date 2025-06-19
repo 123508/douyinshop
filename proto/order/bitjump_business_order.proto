@@ -6,52 +6,6 @@ import "order/bitjump_order_common.proto";
 
 option go_package = "order/businessOrder";
 
-message ConfirmReq{
-  uint64 order_id=1;
-  int32 status=2;
-  uint64 shop_id=3;
-}
-
-message RejectionReq{
-  uint64 order_id=1;
-  string rejection_reason=2;
-  uint64 shop_id=3;
-}
-
-message DeliveryReq{
-  uint64 order_id=1;
-  uint64 shop_id=2;
-}
-
-message ReceiveReq{
-  uint64 order_id=1;
-  uint64 shop_id=2;
-}
-
-message GetOrderListReq{
-  uint64 shop_id=1;
-  uint32 page=2;
-  uint32 page_size=3;
-}
-
-message GetOrderListResp{
-  repeated common.OrderResp list=1;
-}
-
-// 提醒消息
-message Notify{
-  uint64 order_id=1;
-  string content=2;
-}
-
-message GetNotifyReq{
-  uint64 order_id=2;
-}
-
-message GetNotifyResp{
-  Notify notify=1;
-}
-
 service OrderBusinessService{
   // 获取订单列表
   rpc GetOrderList(GetOrderListReq) returns (GetOrderListResp);
@@ -69,4 +23,64 @@ service OrderBusinessService{
   rpc Cancel(common.CancelReq) returns (common.Empty);
   // 获取提醒消息
   rpc GetNotify(GetNotifyReq) returns (GetNotifyResp);
+}
+
+message ConfirmReq{
+  uint64 order_id=1;
+  int32 status=2;
+  uint64 shop_id=3;
+  uint64 target_user_id=4;
+  uint64 request_user_id=5;
+}
+
+message RejectionReq{
+  uint64 order_id=1;
+  string rejection_reason=2;
+  uint64 shop_id=3;
+  uint64 target_user_id=4;
+  uint64 request_user_id=5;
+}
+
+message DeliveryReq{
+  uint64 order_id=1;
+  uint64 shop_id=2;
+  uint64 target_user_id=3;
+  uint64 request_user_id=4;
+}
+
+message ReceiveReq{
+  uint64 order_id=1;
+  uint64 shop_id=2;
+  uint64 target_user_id=3;
+  uint64 request_user_id=4;
+}
+
+message GetOrderListReq{
+  uint64 shop_id=1;
+  uint32 page=2;
+  uint32 page_size=3;
+  uint64 target_user_id=4;
+  uint64 request_user_id=5;
+}
+
+message GetOrderListResp{
+  repeated common.OrderResp list=1;
+}
+
+// 提醒消息
+message Notify{
+  uint64 order_id=1;
+  string content=2;
+  uint64 target_user_id=3;
+  uint64 request_user_id=4;
+}
+
+message GetNotifyReq{
+  uint64 order_id=2;
+  uint64 target_user_id=3;
+  uint64 request_user_id=4;
+}
+
+message GetNotifyResp{
+  Notify notify=1;
 }

@@ -20,12 +20,13 @@ service CheckoutService {
 //}
 
 message CheckoutReq {
-    uint64 user_id = 1;
+    uint64 target_user_id = 1;
     string firstname = 2;
     string lastname = 3;
     string email = 4;
     address.Address address = 5;
     payment.CreditCardInfo credit_card = 6;
+    uint64 request_user_id=7;
 }
 
 message CheckoutResp {

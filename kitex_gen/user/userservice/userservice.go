@@ -106,10 +106,24 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"PreBindEmail": kitex.NewMethodInfo(
+		preBindEmailHandler,
+		newPreBindEmailArgs,
+		newPreBindEmailResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 	"BindEmail": kitex.NewMethodInfo(
 		bindEmailHandler,
 		newBindEmailArgs,
 		newBindEmailResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
+	"PreUnbindEmail": kitex.NewMethodInfo(
+		preUnbindEmailHandler,
+		newPreUnbindEmailArgs,
+		newPreUnbindEmailResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
@@ -120,10 +134,24 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"PreFreezeUser": kitex.NewMethodInfo(
+		preFreezeUserHandler,
+		newPreFreezeUserArgs,
+		newPreFreezeUserResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 	"FreezeUser": kitex.NewMethodInfo(
 		freezeUserHandler,
 		newFreezeUserArgs,
 		newFreezeUserResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
+	"PreUnfreezeUser": kitex.NewMethodInfo(
+		preUnfreezeUserHandler,
+		newPreUnfreezeUserArgs,
+		newPreUnfreezeUserResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
@@ -1822,14 +1850,14 @@ func (p *ForgotPasswordArgs) GetFirstArgument() interface{} {
 }
 
 type ForgotPasswordResult struct {
-	Success *user.Empty
+	Success *user.ForgotPasswordResp
 }
 
-var ForgotPasswordResult_Success_DEFAULT *user.Empty
+var ForgotPasswordResult_Success_DEFAULT *user.ForgotPasswordResp
 
 func (p *ForgotPasswordResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(user.Empty)
+		p.Success = new(user.ForgotPasswordResp)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -1856,7 +1884,7 @@ func (p *ForgotPasswordResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *ForgotPasswordResult) Unmarshal(in []byte) error {
-	msg := new(user.Empty)
+	msg := new(user.ForgotPasswordResp)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -1864,7 +1892,7 @@ func (p *ForgotPasswordResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *ForgotPasswordResult) GetSuccess() *user.Empty {
+func (p *ForgotPasswordResult) GetSuccess() *user.ForgotPasswordResp {
 	if !p.IsSetSuccess() {
 		return ForgotPasswordResult_Success_DEFAULT
 	}
@@ -1872,7 +1900,7 @@ func (p *ForgotPasswordResult) GetSuccess() *user.Empty {
 }
 
 func (p *ForgotPasswordResult) SetSuccess(x interface{}) {
-	p.Success = x.(*user.Empty)
+	p.Success = x.(*user.ForgotPasswordResp)
 }
 
 func (p *ForgotPasswordResult) IsSetSuccess() bool {
@@ -2189,6 +2217,159 @@ func (p *ResetPasswordResult) GetResult() interface{} {
 	return p.Success
 }
 
+func preBindEmailHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.PreBindEmailReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).PreBindEmail(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *PreBindEmailArgs:
+		success, err := handler.(user.UserService).PreBindEmail(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*PreBindEmailResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newPreBindEmailArgs() interface{} {
+	return &PreBindEmailArgs{}
+}
+
+func newPreBindEmailResult() interface{} {
+	return &PreBindEmailResult{}
+}
+
+type PreBindEmailArgs struct {
+	Req *user.PreBindEmailReq
+}
+
+func (p *PreBindEmailArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.PreBindEmailReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *PreBindEmailArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *PreBindEmailArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *PreBindEmailArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *PreBindEmailArgs) Unmarshal(in []byte) error {
+	msg := new(user.PreBindEmailReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var PreBindEmailArgs_Req_DEFAULT *user.PreBindEmailReq
+
+func (p *PreBindEmailArgs) GetReq() *user.PreBindEmailReq {
+	if !p.IsSetReq() {
+		return PreBindEmailArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *PreBindEmailArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *PreBindEmailArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type PreBindEmailResult struct {
+	Success *user.Empty
+}
+
+var PreBindEmailResult_Success_DEFAULT *user.Empty
+
+func (p *PreBindEmailResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.Empty)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *PreBindEmailResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *PreBindEmailResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *PreBindEmailResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *PreBindEmailResult) Unmarshal(in []byte) error {
+	msg := new(user.Empty)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *PreBindEmailResult) GetSuccess() *user.Empty {
+	if !p.IsSetSuccess() {
+		return PreBindEmailResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *PreBindEmailResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.Empty)
+}
+
+func (p *PreBindEmailResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *PreBindEmailResult) GetResult() interface{} {
+	return p.Success
+}
+
 func bindEmailHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	switch s := arg.(type) {
 	case *streaming.Args:
@@ -2339,6 +2520,159 @@ func (p *BindEmailResult) IsSetSuccess() bool {
 }
 
 func (p *BindEmailResult) GetResult() interface{} {
+	return p.Success
+}
+
+func preUnbindEmailHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.PreUnbindEmailReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).PreUnbindEmail(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *PreUnbindEmailArgs:
+		success, err := handler.(user.UserService).PreUnbindEmail(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*PreUnbindEmailResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newPreUnbindEmailArgs() interface{} {
+	return &PreUnbindEmailArgs{}
+}
+
+func newPreUnbindEmailResult() interface{} {
+	return &PreUnbindEmailResult{}
+}
+
+type PreUnbindEmailArgs struct {
+	Req *user.PreUnbindEmailReq
+}
+
+func (p *PreUnbindEmailArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.PreUnbindEmailReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *PreUnbindEmailArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *PreUnbindEmailArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *PreUnbindEmailArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *PreUnbindEmailArgs) Unmarshal(in []byte) error {
+	msg := new(user.PreUnbindEmailReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var PreUnbindEmailArgs_Req_DEFAULT *user.PreUnbindEmailReq
+
+func (p *PreUnbindEmailArgs) GetReq() *user.PreUnbindEmailReq {
+	if !p.IsSetReq() {
+		return PreUnbindEmailArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *PreUnbindEmailArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *PreUnbindEmailArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type PreUnbindEmailResult struct {
+	Success *user.Empty
+}
+
+var PreUnbindEmailResult_Success_DEFAULT *user.Empty
+
+func (p *PreUnbindEmailResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.Empty)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *PreUnbindEmailResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *PreUnbindEmailResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *PreUnbindEmailResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *PreUnbindEmailResult) Unmarshal(in []byte) error {
+	msg := new(user.Empty)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *PreUnbindEmailResult) GetSuccess() *user.Empty {
+	if !p.IsSetSuccess() {
+		return PreUnbindEmailResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *PreUnbindEmailResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.Empty)
+}
+
+func (p *PreUnbindEmailResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *PreUnbindEmailResult) GetResult() interface{} {
 	return p.Success
 }
 
@@ -2495,6 +2829,159 @@ func (p *UnbindEmailResult) GetResult() interface{} {
 	return p.Success
 }
 
+func preFreezeUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.PreFreezeUserReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).PreFreezeUser(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *PreFreezeUserArgs:
+		success, err := handler.(user.UserService).PreFreezeUser(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*PreFreezeUserResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newPreFreezeUserArgs() interface{} {
+	return &PreFreezeUserArgs{}
+}
+
+func newPreFreezeUserResult() interface{} {
+	return &PreFreezeUserResult{}
+}
+
+type PreFreezeUserArgs struct {
+	Req *user.PreFreezeUserReq
+}
+
+func (p *PreFreezeUserArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.PreFreezeUserReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *PreFreezeUserArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *PreFreezeUserArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *PreFreezeUserArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *PreFreezeUserArgs) Unmarshal(in []byte) error {
+	msg := new(user.PreFreezeUserReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var PreFreezeUserArgs_Req_DEFAULT *user.PreFreezeUserReq
+
+func (p *PreFreezeUserArgs) GetReq() *user.PreFreezeUserReq {
+	if !p.IsSetReq() {
+		return PreFreezeUserArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *PreFreezeUserArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *PreFreezeUserArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type PreFreezeUserResult struct {
+	Success *user.Empty
+}
+
+var PreFreezeUserResult_Success_DEFAULT *user.Empty
+
+func (p *PreFreezeUserResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.Empty)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *PreFreezeUserResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *PreFreezeUserResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *PreFreezeUserResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *PreFreezeUserResult) Unmarshal(in []byte) error {
+	msg := new(user.Empty)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *PreFreezeUserResult) GetSuccess() *user.Empty {
+	if !p.IsSetSuccess() {
+		return PreFreezeUserResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *PreFreezeUserResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.Empty)
+}
+
+func (p *PreFreezeUserResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *PreFreezeUserResult) GetResult() interface{} {
+	return p.Success
+}
+
 func freezeUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	switch s := arg.(type) {
 	case *streaming.Args:
@@ -2645,6 +3132,159 @@ func (p *FreezeUserResult) IsSetSuccess() bool {
 }
 
 func (p *FreezeUserResult) GetResult() interface{} {
+	return p.Success
+}
+
+func preUnfreezeUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.PreUnFreezeUserReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).PreUnfreezeUser(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *PreUnfreezeUserArgs:
+		success, err := handler.(user.UserService).PreUnfreezeUser(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*PreUnfreezeUserResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newPreUnfreezeUserArgs() interface{} {
+	return &PreUnfreezeUserArgs{}
+}
+
+func newPreUnfreezeUserResult() interface{} {
+	return &PreUnfreezeUserResult{}
+}
+
+type PreUnfreezeUserArgs struct {
+	Req *user.PreUnFreezeUserReq
+}
+
+func (p *PreUnfreezeUserArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.PreUnFreezeUserReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *PreUnfreezeUserArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *PreUnfreezeUserArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *PreUnfreezeUserArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *PreUnfreezeUserArgs) Unmarshal(in []byte) error {
+	msg := new(user.PreUnFreezeUserReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var PreUnfreezeUserArgs_Req_DEFAULT *user.PreUnFreezeUserReq
+
+func (p *PreUnfreezeUserArgs) GetReq() *user.PreUnFreezeUserReq {
+	if !p.IsSetReq() {
+		return PreUnfreezeUserArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *PreUnfreezeUserArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *PreUnfreezeUserArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type PreUnfreezeUserResult struct {
+	Success *user.Empty
+}
+
+var PreUnfreezeUserResult_Success_DEFAULT *user.Empty
+
+func (p *PreUnfreezeUserResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.Empty)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *PreUnfreezeUserResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *PreUnfreezeUserResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *PreUnfreezeUserResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *PreUnfreezeUserResult) Unmarshal(in []byte) error {
+	msg := new(user.Empty)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *PreUnfreezeUserResult) GetSuccess() *user.Empty {
+	if !p.IsSetSuccess() {
+		return PreUnfreezeUserResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *PreUnfreezeUserResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.Empty)
+}
+
+func (p *PreUnfreezeUserResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *PreUnfreezeUserResult) GetResult() interface{} {
 	return p.Success
 }
 
@@ -2911,7 +3551,7 @@ func (p *kClient) ChangePassword(ctx context.Context, Req *user.ChangePasswordRe
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq) (r *user.Empty, err error) {
+func (p *kClient) ForgotPassword(ctx context.Context, Req *user.ForgotPasswordReq) (r *user.ForgotPasswordResp, err error) {
 	var _args ForgotPasswordArgs
 	_args.Req = Req
 	var _result ForgotPasswordResult
@@ -2941,11 +3581,31 @@ func (p *kClient) ResetPassword(ctx context.Context, Req *user.ResetPasswordReq)
 	return _result.GetSuccess(), nil
 }
 
+func (p *kClient) PreBindEmail(ctx context.Context, Req *user.PreBindEmailReq) (r *user.Empty, err error) {
+	var _args PreBindEmailArgs
+	_args.Req = Req
+	var _result PreBindEmailResult
+	if err = p.c.Call(ctx, "PreBindEmail", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
 func (p *kClient) BindEmail(ctx context.Context, Req *user.BindEmailReq) (r *user.Empty, err error) {
 	var _args BindEmailArgs
 	_args.Req = Req
 	var _result BindEmailResult
 	if err = p.c.Call(ctx, "BindEmail", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) PreUnbindEmail(ctx context.Context, Req *user.PreUnbindEmailReq) (r *user.Empty, err error) {
+	var _args PreUnbindEmailArgs
+	_args.Req = Req
+	var _result PreUnbindEmailResult
+	if err = p.c.Call(ctx, "PreUnbindEmail", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -2961,11 +3621,31 @@ func (p *kClient) UnbindEmail(ctx context.Context, Req *user.UnbindEmailReq) (r 
 	return _result.GetSuccess(), nil
 }
 
+func (p *kClient) PreFreezeUser(ctx context.Context, Req *user.PreFreezeUserReq) (r *user.Empty, err error) {
+	var _args PreFreezeUserArgs
+	_args.Req = Req
+	var _result PreFreezeUserResult
+	if err = p.c.Call(ctx, "PreFreezeUser", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
 func (p *kClient) FreezeUser(ctx context.Context, Req *user.FreezeUserReq) (r *user.Empty, err error) {
 	var _args FreezeUserArgs
 	_args.Req = Req
 	var _result FreezeUserResult
 	if err = p.c.Call(ctx, "FreezeUser", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) PreUnfreezeUser(ctx context.Context, Req *user.PreUnFreezeUserReq) (r *user.Empty, err error) {
+	var _args PreUnfreezeUserArgs
+	_args.Req = Req
+	var _result PreUnfreezeUserResult
+	if err = p.c.Call(ctx, "PreUnfreezeUser", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

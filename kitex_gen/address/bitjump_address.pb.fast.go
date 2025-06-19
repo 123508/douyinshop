@@ -149,6 +149,11 @@ func (x *AddAddressReq) FastRead(buf []byte, _type int8, number int32) (offset i
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -163,7 +168,7 @@ ReadFieldError:
 }
 
 func (x *AddAddressReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -175,6 +180,11 @@ func (x *AddAddressReq) fastReadField2(buf []byte, _type int8) (offset int, err 
 	}
 	x.Address = &v
 	return offset, nil
+}
+
+func (x *AddAddressReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
 }
 
 func (x *AddAddressResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
@@ -209,6 +219,11 @@ func (x *GetAddressListReq) FastRead(buf []byte, _type int8, number int32) (offs
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -223,7 +238,12 @@ ReadFieldError:
 }
 
 func (x *GetAddressListReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *GetAddressListReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -269,6 +289,11 @@ func (x *DeleteAddressReq) FastRead(buf []byte, _type int8, number int32) (offse
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -283,12 +308,17 @@ ReadFieldError:
 }
 
 func (x *DeleteAddressReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *DeleteAddressReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.AddrId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *DeleteAddressReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -334,6 +364,11 @@ func (x *UpdateAddressReq) FastRead(buf []byte, _type int8, number int32) (offse
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -348,7 +383,7 @@ ReadFieldError:
 }
 
 func (x *UpdateAddressReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -365,6 +400,11 @@ func (x *UpdateAddressReq) fastReadField3(buf []byte, _type int8) (offset int, e
 	}
 	x.Address = &v
 	return offset, nil
+}
+
+func (x *UpdateAddressReq) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
 }
 
 func (x *UpdateAddressResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
@@ -404,6 +444,11 @@ func (x *SetDefaultAddressReq) FastRead(buf []byte, _type int8, number int32) (o
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -418,12 +463,17 @@ ReadFieldError:
 }
 
 func (x *SetDefaultAddressReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *SetDefaultAddressReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.AddrId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *SetDefaultAddressReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -464,6 +514,11 @@ func (x *GetAddressInfoReq) FastRead(buf []byte, _type int8, number int32) (offs
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -478,12 +533,17 @@ ReadFieldError:
 }
 
 func (x *GetAddressInfoReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *GetAddressInfoReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.AddrId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *GetAddressInfoReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -524,6 +584,11 @@ func (x *GetDefaultAddressReq) FastRead(buf []byte, _type int8, number int32) (o
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -538,7 +603,12 @@ ReadFieldError:
 }
 
 func (x *GetDefaultAddressReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *GetDefaultAddressReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -684,14 +754,15 @@ func (x *AddAddressReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
 func (x *AddAddressReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
 	return offset
 }
 
@@ -700,6 +771,14 @@ func (x *AddAddressReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteMessage(buf[offset:], 2, x.GetAddress())
+	return offset
+}
+
+func (x *AddAddressReq) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetRequestUserId())
 	return offset
 }
 
@@ -724,14 +803,23 @@ func (x *GetAddressListReq) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
 func (x *GetAddressListReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
+	return offset
+}
+
+func (x *GetAddressListReq) fastWriteField2(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetRequestUserId())
 	return offset
 }
 
@@ -759,14 +847,15 @@ func (x *DeleteAddressReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
 func (x *DeleteAddressReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
 	return offset
 }
 
@@ -775,6 +864,14 @@ func (x *DeleteAddressReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetAddrId())
+	return offset
+}
+
+func (x *DeleteAddressReq) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetRequestUserId())
 	return offset
 }
 
@@ -801,14 +898,15 @@ func (x *UpdateAddressReq) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
 	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
 	return offset
 }
 
 func (x *UpdateAddressReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
 	return offset
 }
 
@@ -825,6 +923,14 @@ func (x *UpdateAddressReq) fastWriteField3(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteMessage(buf[offset:], 3, x.GetAddress())
+	return offset
+}
+
+func (x *UpdateAddressReq) fastWriteField4(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 4, x.GetRequestUserId())
 	return offset
 }
 
@@ -850,14 +956,15 @@ func (x *SetDefaultAddressReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
 func (x *SetDefaultAddressReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
 	return offset
 }
 
@@ -866,6 +973,14 @@ func (x *SetDefaultAddressReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetAddrId())
+	return offset
+}
+
+func (x *SetDefaultAddressReq) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetRequestUserId())
 	return offset
 }
 
@@ -891,14 +1006,15 @@ func (x *GetAddressInfoReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
 func (x *GetAddressInfoReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
 	return offset
 }
 
@@ -907,6 +1023,14 @@ func (x *GetAddressInfoReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetAddrId())
+	return offset
+}
+
+func (x *GetAddressInfoReq) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetRequestUserId())
 	return offset
 }
 
@@ -931,14 +1055,23 @@ func (x *GetDefaultAddressReq) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
 func (x *GetDefaultAddressReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
+	return offset
+}
+
+func (x *GetDefaultAddressReq) fastWriteField2(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetRequestUserId())
 	return offset
 }
 
@@ -1070,14 +1203,15 @@ func (x *AddAddressReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
 func (x *AddAddressReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
 	return n
 }
 
@@ -1086,6 +1220,14 @@ func (x *AddAddressReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeMessage(2, x.GetAddress())
+	return n
+}
+
+func (x *AddAddressReq) sizeField3() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetRequestUserId())
 	return n
 }
 
@@ -1110,14 +1252,23 @@ func (x *GetAddressListReq) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
 func (x *GetAddressListReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
+	return n
+}
+
+func (x *GetAddressListReq) sizeField2() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetRequestUserId())
 	return n
 }
 
@@ -1145,14 +1296,15 @@ func (x *DeleteAddressReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
 func (x *DeleteAddressReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
 	return n
 }
 
@@ -1161,6 +1313,14 @@ func (x *DeleteAddressReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint64(2, x.GetAddrId())
+	return n
+}
+
+func (x *DeleteAddressReq) sizeField3() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetRequestUserId())
 	return n
 }
 
@@ -1187,14 +1347,15 @@ func (x *UpdateAddressReq) Size() (n int) {
 	n += x.sizeField1()
 	n += x.sizeField2()
 	n += x.sizeField3()
+	n += x.sizeField4()
 	return n
 }
 
 func (x *UpdateAddressReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
 	return n
 }
 
@@ -1211,6 +1372,14 @@ func (x *UpdateAddressReq) sizeField3() (n int) {
 		return n
 	}
 	n += fastpb.SizeMessage(3, x.GetAddress())
+	return n
+}
+
+func (x *UpdateAddressReq) sizeField4() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(4, x.GetRequestUserId())
 	return n
 }
 
@@ -1236,14 +1405,15 @@ func (x *SetDefaultAddressReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
 func (x *SetDefaultAddressReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
 	return n
 }
 
@@ -1252,6 +1422,14 @@ func (x *SetDefaultAddressReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint64(2, x.GetAddrId())
+	return n
+}
+
+func (x *SetDefaultAddressReq) sizeField3() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetRequestUserId())
 	return n
 }
 
@@ -1277,14 +1455,15 @@ func (x *GetAddressInfoReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
 func (x *GetAddressInfoReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
 	return n
 }
 
@@ -1293,6 +1472,14 @@ func (x *GetAddressInfoReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint64(2, x.GetAddrId())
+	return n
+}
+
+func (x *GetAddressInfoReq) sizeField3() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetRequestUserId())
 	return n
 }
 
@@ -1317,14 +1504,23 @@ func (x *GetDefaultAddressReq) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
 func (x *GetDefaultAddressReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
+	return n
+}
+
+func (x *GetDefaultAddressReq) sizeField2() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetRequestUserId())
 	return n
 }
 
@@ -1359,8 +1555,9 @@ var fieldIDToName_Address = map[int32]string{
 }
 
 var fieldIDToName_AddAddressReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
 	2: "Address",
+	3: "RequestUserId",
 }
 
 var fieldIDToName_AddAddressResp = map[int32]string{
@@ -1368,7 +1565,8 @@ var fieldIDToName_AddAddressResp = map[int32]string{
 }
 
 var fieldIDToName_GetAddressListReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
+	2: "RequestUserId",
 }
 
 var fieldIDToName_GetAddressListResp = map[int32]string{
@@ -1376,8 +1574,9 @@ var fieldIDToName_GetAddressListResp = map[int32]string{
 }
 
 var fieldIDToName_DeleteAddressReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
 	2: "AddrId",
+	3: "RequestUserId",
 }
 
 var fieldIDToName_DeleteAddressResp = map[int32]string{
@@ -1385,9 +1584,10 @@ var fieldIDToName_DeleteAddressResp = map[int32]string{
 }
 
 var fieldIDToName_UpdateAddressReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
 	2: "AddrId",
 	3: "Address",
+	4: "RequestUserId",
 }
 
 var fieldIDToName_UpdateAddressResp = map[int32]string{
@@ -1395,8 +1595,9 @@ var fieldIDToName_UpdateAddressResp = map[int32]string{
 }
 
 var fieldIDToName_SetDefaultAddressReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
 	2: "AddrId",
+	3: "RequestUserId",
 }
 
 var fieldIDToName_SetDefaultAddressResp = map[int32]string{
@@ -1404,8 +1605,9 @@ var fieldIDToName_SetDefaultAddressResp = map[int32]string{
 }
 
 var fieldIDToName_GetAddressInfoReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
 	2: "AddrId",
+	3: "RequestUserId",
 }
 
 var fieldIDToName_GetAddressInfoResp = map[int32]string{
@@ -1413,7 +1615,8 @@ var fieldIDToName_GetAddressInfoResp = map[int32]string{
 }
 
 var fieldIDToName_GetDefaultAddressReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
+	2: "RequestUserId",
 }
 
 var fieldIDToName_GetDefaultAddressResp = map[int32]string{

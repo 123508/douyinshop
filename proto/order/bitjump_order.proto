@@ -6,44 +6,6 @@ option go_package = "order/userOrder";
 
 import "order/bitjump_order_common.proto";
 
-message OrderSubmitReq{
-    uint64 user_id=1;
-    uint64 address_book_id=2;
-    int32 pay_method=3;
-    string remark=4;
-    float amount=5;
-    order.common.OrderReq order=6;
-}
-
-message OrderSubmitResp{
-    uint64 order_id=1;
-    string number=2;
-    float  order_amount=3;
-}
-
-message HistoryReq{
-    uint64 user_id=1;
-    uint32 page=2;
-    uint32 page_size=3;
-    int32 status=4;
-}
-
-message HistoryResp{
-    uint32 total=1;
-    repeated order.common.OrderResp list=2;
-    uint32 page = 3;
-    uint32 page_size = 4;
-}
-
-message ReminderReq{
-    uint64 user_id=1;
-    uint64 order_id=2;
-}
-
-message CompleteReq{
-    uint64 order_id=1;
-}
-
 service OrderUserService{
     // 提交订单
     rpc Submit(OrderSubmitReq) returns (OrderSubmitResp);
@@ -57,4 +19,47 @@ service OrderUserService{
     rpc Reminder(ReminderReq) returns (common.Empty);
     // 确认收货
     rpc Complete(CompleteReq) returns (common.Empty);
+}
+
+message OrderSubmitReq{
+    uint64 target_user_id=1;
+    uint64 address_book_id=2;
+    int32 pay_method=3;
+    string remark=4;
+    float amount=5;
+    order.common.OrderReq order=6;
+    uint64 request_user_id=7;
+}
+
+message OrderSubmitResp{
+    uint64 order_id=1;
+    string number=2;
+    float  order_amount=3;
+}
+
+message HistoryReq{
+    uint64 target_user_id=1;
+    uint32 page=2;
+    uint32 page_size=3;
+    int32 status=4;
+    uint64 request_user_id=5;
+}
+
+message HistoryResp{
+    uint32 total=1;
+    repeated order.common.OrderResp list=2;
+    uint32 page = 3;
+    uint32 page_size = 4;
+}
+
+message ReminderReq{
+    uint64 target_user_id=1;
+    uint64 order_id=2;
+    uint64 request_user_id=3;
+}
+
+message CompleteReq{
+    uint64 order_id=1;
+    uint64 target_user_id=2;
+    uint64 request_user_id=3;
 }

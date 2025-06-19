@@ -146,7 +146,7 @@ func (c *ListCacheComponent[Id, Item]) QueryListWithCache() ([]Item, error) {
 		// 执行查询并处理错误
 		result, err := c.FullQueryExec()
 
-		if err != nil {
+		if err != nil || result == nil {
 			return nil, err
 		} else {
 			res = result
@@ -174,7 +174,7 @@ func (c *ListCacheComponent[Id, Item]) QueryListWithCache() ([]Item, error) {
 		for _, v := range res {
 			key := TakeKey(c.DetailKeyPrefix, v.GetID())
 			jsonData, err := c.Marshal(v)
-			if err != nil {
+			if err != nil || jsonData == nil {
 				LogError("序列化错误", c.FuncName, err)
 			} else {
 				if err = c.Rds.Set(c.Ctx, key, jsonData, c.Expires+time.Duration(rand.Intn(10))*time.Minute).Err(); err != nil {
@@ -206,7 +206,7 @@ func (c *ListCacheComponent[Id, Item]) QueryListWithCache() ([]Item, error) {
 				//放入缓存
 				key := TakeKey(c.DetailKeyPrefix, item.GetID())
 				jsonData, err := c.Marshal(item)
-				if err != nil {
+				if err != nil || jsonData == nil {
 					LogError("序列化错误", c.FuncName, err)
 				} else {
 					if err = c.Rds.Set(c.Ctx, key, jsonData, c.Expires+time.Duration(rand.Intn(10))*time.Second).Err(); err != nil {

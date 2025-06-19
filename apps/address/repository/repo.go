@@ -37,7 +37,7 @@ func (r *RepoImpl) GetDB() *gorm.DB {
 
 func (r *RepoImpl) CreateAddress(ctx context.Context, address *models.AddressBook) (addrId uint64, err error) {
 
-	if err = r.DB.Create(&address).Update("user_id", address.UserId).Error; err != nil {
+	if err = r.DB.WithContext(ctx).Create(&address).Error; err != nil {
 		util.LogError("创建新地址失败", "AddAddress", err)
 		return 0, err
 	}
@@ -49,7 +49,7 @@ func (r *RepoImpl) GetAddressById(ctx context.Context, UserId, AddrId uint64) (a
 
 	addr := models.AddressBook{}
 
-	if err = r.DB.Where("id = ? and user_id = ?", AddrId, UserId).First(&addr).Error; err != nil {
+	if err = r.DB.WithContext(ctx).Where("id = ? and user_id = ?", AddrId, UserId).First(&addr).Error; err != nil {
 		util.LogError("获取地址失败", "GetAddressById", err)
 		return nil, err
 	}
@@ -65,6 +65,7 @@ func (r *RepoImpl) GetAddressList(ctx context.Context, page, pageSize int, userI
 
 	if err = r.DB.
 		Model(&models.AddressBook{}).
+		WithContext(ctx).
 		Where("user_id=?", userId).
 		Offset(offset).
 		Limit(pageSize).
@@ -122,6 +123,7 @@ func (r *RepoImpl) UpdateAddress(ctx context.Context, address *models.AddressBoo
 
 	if err := r.DB.
 		Model(&models.AddressBook{}).
+		WithContext(ctx).
 		Where("id = ?", address.ID).
 		Updates(updates).
 		Error; err != nil {
@@ -135,6 +137,7 @@ func (r *RepoImpl) UpdateAddress(ctx context.Context, address *models.AddressBoo
 func (r *RepoImpl) DeleteAddress(ctx context.Context, AddrId, UserId uint64) (err error) {
 	if err = r.DB.
 		Model(&models.AddressBook{}).
+		WithContext(ctx).
 		Where("id= ? and user_id = ?", AddrId, UserId).
 		Unscoped().
 		Delete(&models.AddressBook{ID: AddrId}).
@@ -151,6 +154,7 @@ func (r *RepoImpl) GetDefaultAddress(ctx context.Context, UserId uint64) (addres
 
 	if err = r.DB.
 		Model(&models.AddressBook{}).
+		WithContext(ctx).
 		Where("user_id = ? and is_default= ?", UserId, true).
 		First(&item).
 		Error; err != nil {
@@ -212,6 +216,7 @@ func (r *RepoImpl) RemoveDefaultAddress(ctx context.Context, UserId uint64) (err
 
 	if err = r.DB.
 		Model(&models.AddressBook{}).
+		WithContext(ctx).
 		Where("user_id = ? and is_default= ?", UserId, true).
 		Update("is_default", false).
 		Error; err != nil {
@@ -226,6 +231,7 @@ func (r *RepoImpl) AskAddress(ctx context.Context, UserId uint64, AddrId uint64)
 	var item models.AddressBook
 	if err = r.DB.
 		Model(&models.AddressBook{}).
+		WithContext(ctx).
 		Where("user_id = ? and id= ?", UserId, AddrId).
 		First(&item).
 		Error; err != nil {

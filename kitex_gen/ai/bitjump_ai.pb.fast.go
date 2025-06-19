@@ -19,6 +19,16 @@ func (x *OrderQueryReq) FastRead(buf []byte, _type int8, number int32) (offset i
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -34,6 +44,16 @@ ReadFieldError:
 
 func (x *OrderQueryReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.OrderId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *OrderQueryReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
+	return offset, err
+}
+
+func (x *OrderQueryReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -74,6 +94,11 @@ func (x *AutoPlaceOrderReq) FastRead(buf []byte, _type int8, number int32) (offs
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -88,12 +113,17 @@ ReadFieldError:
 }
 
 func (x *AutoPlaceOrderReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadUint64(buf, _type)
+	x.TargetUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
 func (x *AutoPlaceOrderReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.Request, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *AutoPlaceOrderReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadUint64(buf, _type)
 	return offset, err
 }
 
@@ -129,6 +159,16 @@ func (x *AIChatReq) FastRead(buf []byte, _type int8, number int32) (offset int, 
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -144,6 +184,16 @@ ReadFieldError:
 
 func (x *AIChatReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.Question, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *AIChatReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.TargetUserId, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *AIChatReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.RequestUserId, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
@@ -177,6 +227,8 @@ func (x *OrderQueryReq) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -185,6 +237,22 @@ func (x *OrderQueryReq) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetOrderId())
+	return offset
+}
+
+func (x *OrderQueryReq) fastWriteField2(buf []byte) (offset int) {
+	if x.TargetUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 2, x.GetTargetUserId())
+	return offset
+}
+
+func (x *OrderQueryReq) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetRequestUserId())
 	return offset
 }
 
@@ -210,14 +278,15 @@ func (x *AutoPlaceOrderReq) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
 func (x *AutoPlaceOrderReq) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetUserId())
+	offset += fastpb.WriteUint64(buf[offset:], 1, x.GetTargetUserId())
 	return offset
 }
 
@@ -226,6 +295,14 @@ func (x *AutoPlaceOrderReq) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 2, x.GetRequest())
+	return offset
+}
+
+func (x *AutoPlaceOrderReq) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteUint64(buf[offset:], 3, x.GetRequestUserId())
 	return offset
 }
 
@@ -250,6 +327,8 @@ func (x *AIChatReq) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -258,6 +337,22 @@ func (x *AIChatReq) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 1, x.GetQuestion())
+	return offset
+}
+
+func (x *AIChatReq) fastWriteField2(buf []byte) (offset int) {
+	if x.TargetUserId == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetTargetUserId())
+	return offset
+}
+
+func (x *AIChatReq) fastWriteField3(buf []byte) (offset int) {
+	if x.RequestUserId == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 3, x.GetRequestUserId())
 	return offset
 }
 
@@ -282,6 +377,8 @@ func (x *OrderQueryReq) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -290,6 +387,22 @@ func (x *OrderQueryReq) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeUint64(1, x.GetOrderId())
+	return n
+}
+
+func (x *OrderQueryReq) sizeField2() (n int) {
+	if x.TargetUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(2, x.GetTargetUserId())
+	return n
+}
+
+func (x *OrderQueryReq) sizeField3() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetRequestUserId())
 	return n
 }
 
@@ -315,14 +428,15 @@ func (x *AutoPlaceOrderReq) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
 func (x *AutoPlaceOrderReq) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if x.TargetUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeUint64(1, x.GetUserId())
+	n += fastpb.SizeUint64(1, x.GetTargetUserId())
 	return n
 }
 
@@ -331,6 +445,14 @@ func (x *AutoPlaceOrderReq) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeString(2, x.GetRequest())
+	return n
+}
+
+func (x *AutoPlaceOrderReq) sizeField3() (n int) {
+	if x.RequestUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeUint64(3, x.GetRequestUserId())
 	return n
 }
 
@@ -355,6 +477,8 @@ func (x *AIChatReq) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -363,6 +487,22 @@ func (x *AIChatReq) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeString(1, x.GetQuestion())
+	return n
+}
+
+func (x *AIChatReq) sizeField2() (n int) {
+	if x.TargetUserId == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetTargetUserId())
+	return n
+}
+
+func (x *AIChatReq) sizeField3() (n int) {
+	if x.RequestUserId == "" {
+		return n
+	}
+	n += fastpb.SizeString(3, x.GetRequestUserId())
 	return n
 }
 
@@ -384,6 +524,8 @@ func (x *AIChatResp) sizeField1() (n int) {
 
 var fieldIDToName_OrderQueryReq = map[int32]string{
 	1: "OrderId",
+	2: "TargetUserId",
+	3: "RequestUserId",
 }
 
 var fieldIDToName_OrderQueryResp = map[int32]string{
@@ -391,8 +533,9 @@ var fieldIDToName_OrderQueryResp = map[int32]string{
 }
 
 var fieldIDToName_AutoPlaceOrderReq = map[int32]string{
-	1: "UserId",
+	1: "TargetUserId",
 	2: "Request",
+	3: "RequestUserId",
 }
 
 var fieldIDToName_AutoPlaceOrderResp = map[int32]string{
@@ -401,6 +544,8 @@ var fieldIDToName_AutoPlaceOrderResp = map[int32]string{
 
 var fieldIDToName_AIChatReq = map[int32]string{
 	1: "Question",
+	2: "TargetUserId",
+	3: "RequestUserId",
 }
 
 var fieldIDToName_AIChatResp = map[int32]string{

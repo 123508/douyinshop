@@ -6,22 +6,10 @@ import (
 	"github.com/123508/douyinshop/apps/address/repository"
 	"github.com/123508/douyinshop/apps/address/service"
 	"github.com/123508/douyinshop/kitex_gen/address"
-	"github.com/123508/douyinshop/pkg/db"
 	"github.com/123508/douyinshop/pkg/models"
-	"github.com/123508/douyinshop/pkg/util"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
-
-var database = connectWithMySQL()
-
-func connectWithMySQL() *gorm.DB {
-	DB, err := db.InitDB()
-	if err != nil {
-		util.LogError("打开MySQL连接失败", "connectWithMySQL", err)
-	}
-	return DB
-}
 
 // AddressServiceImpl implements the last service interface defined in the IDL.
 type AddressServiceImpl struct {
@@ -41,9 +29,9 @@ func (s *AddressServiceImpl) AddAddress(ctx context.Context, req *address.AddAdd
 
 	addressBook := AddressToAddressBook(req.Address)
 
-	addressBook.UserId = req.UserId
+	addressBook.UserId = req.TargetUserId
 
-	id, err := s.AddressService.AddAddress(ctx, addressBook)
+	id, err := s.AddressService.AddAddress(ctx, addressBook, req.RequestUserId)
 
 	if err != nil {
 		return nil, err
@@ -56,7 +44,7 @@ func (s *AddressServiceImpl) AddAddress(ctx context.Context, req *address.AddAdd
 // 删除地址接口
 func (s *AddressServiceImpl) DeleteAddress(ctx context.Context, req *address.DeleteAddressReq) (resp *address.DeleteAddressResp, err error) {
 
-	if err = s.AddressService.DeleteAddress(ctx, req.AddrId, req.UserId); err != nil {
+	if err = s.AddressService.DeleteAddress(ctx, req.AddrId, req.TargetUserId, req.RequestUserId); err != nil {
 		return nil, err
 	}
 
@@ -69,11 +57,11 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 
 	addressBook := AddressToAddressBook(req.Address)
 
-	addressBook.UserId = req.UserId
+	addressBook.UserId = req.TargetUserId
 
 	addressBook.ID = req.AddrId
 
-	if err = s.AddressService.UpdateAddress(ctx, addressBook); err != nil {
+	if err = s.AddressService.UpdateAddress(ctx, addressBook, req.RequestUserId); err != nil {
 		return nil, err
 	}
 
@@ -84,7 +72,7 @@ func (s *AddressServiceImpl) UpdateAddress(ctx context.Context, req *address.Upd
 // 设置默认地址
 func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address.SetDefaultAddressReq) (resp *address.SetDefaultAddressResp, err error) {
 
-	if err = s.AddressService.SetDefaultAddress(ctx, req.AddrId, req.UserId); err != nil {
+	if err = s.AddressService.SetDefaultAddress(ctx, req.AddrId, req.TargetUserId, req.RequestUserId); err != nil {
 		return nil, err
 	}
 
@@ -95,7 +83,7 @@ func (s *AddressServiceImpl) SetDefaultAddress(ctx context.Context, req *address
 // 获取地址列表接口
 func (s *AddressServiceImpl) GetAddressList(ctx context.Context, req *address.GetAddressListReq) (resp *address.GetAddressListResp, err error) {
 
-	res, err := s.AddressService.GetAddressList(ctx, req.UserId)
+	res, err := s.AddressService.GetAddressList(ctx, req.TargetUserId, req.RequestUserId)
 
 	if err != nil {
 		return nil, err
@@ -117,7 +105,7 @@ func (s *AddressServiceImpl) GetAddressList(ctx context.Context, req *address.Ge
 // 获取指定地址信息
 func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.GetAddressInfoReq) (resp *address.GetAddressInfoResp, err error) {
 
-	addr, err := s.AddressService.GetAddressInfo(ctx, req.AddrId, req.UserId)
+	addr, err := s.AddressService.GetAddressInfo(ctx, req.AddrId, req.TargetUserId, req.RequestUserId)
 
 	if addr == nil || addr.ID == 0 {
 		return nil, err
@@ -142,7 +130,7 @@ func (s *AddressServiceImpl) GetAddressInfo(ctx context.Context, req *address.Ge
 // 获取默认地址
 func (s *AddressServiceImpl) GetDefaultAddress(ctx context.Context, req *address.GetDefaultAddressReq) (resp *address.GetDefaultAddressResp, err error) {
 
-	addr, err := s.AddressService.GetDefaultAddress(ctx, req.UserId)
+	addr, err := s.AddressService.GetDefaultAddress(ctx, req.TargetUserId, req.RequestUserId)
 
 	if err != nil {
 		return nil, err

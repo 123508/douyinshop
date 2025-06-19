@@ -17,6 +17,8 @@ message ListProductsReq{
     int32 page = 1;
     int64 pageSize = 2;
     string categoryName = 3;
+    uint64 target_user_id=4;
+    uint64 request_user_id=5;
 }
 
 message Product {
@@ -36,7 +38,8 @@ message ListProductsResp {
 }
 
 message GetProductReq {
-    uint64 id = 1;
+    uint64 request_user_id = 1;
+    uint64 id=2;
 }
 
 message GetProductResp {
@@ -47,6 +50,7 @@ message SearchProductsReq {
     string query = 1;
     uint32 page = 2;
     uint32 page_size = 3;
+    uint64 request_user_id=4;
 }
 
 message SearchProductsResp {
