@@ -312,24 +312,32 @@ func (s *UserServiceImpl) UnfreezeUser(ctx context.Context, req *user.UnfreezeUs
 
 // PreBindEmail implements the UserServiceImpl interface.
 func (s *UserServiceImpl) PreBindEmail(ctx context.Context, req *user.PreBindEmailReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+	if err = s.UserService.PreBindEmail(ctx, req.TargetUserId, req.RequestUserId); err != nil {
+		return nil, err
+	}
+	return &user.Empty{}, nil
 }
 
 // PreUnbindEmail implements the UserServiceImpl interface.
 func (s *UserServiceImpl) PreUnbindEmail(ctx context.Context, req *user.PreUnbindEmailReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+	if err = s.UserService.PreUnbindEmail(ctx, req.TargetUserId, req.RequestUserId); err != nil {
+		return nil, err
+	}
+	return &user.Empty{}, nil
 }
 
 // PreFreezeUser implements the UserServiceImpl interface.
 func (s *UserServiceImpl) PreFreezeUser(ctx context.Context, req *user.PreFreezeUserReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+	if err = s.UserService.PreFreezeUser(ctx, req.TargetUserId, req.RequestUserId); err != nil {
+		return nil, err
+	}
+	return &user.Empty{}, nil
 }
 
 // PreUnfreezeUser implements the UserServiceImpl interface.
 func (s *UserServiceImpl) PreUnfreezeUser(ctx context.Context, req *user.PreUnFreezeUserReq) (resp *user.Empty, err error) {
-	// TODO: Your code here...
-	return
+	if err = s.UserService.PreUnfreezeUser(ctx, req.TargetUserId, req.RequestUserId); err != nil {
+		return nil, err
+	}
+	return &user.Empty{}, nil
 }

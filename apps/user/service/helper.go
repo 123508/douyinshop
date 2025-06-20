@@ -1,18 +1,13 @@
 package service
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"github.com/123508/douyinshop/pkg/config"
-	"github.com/123508/douyinshop/pkg/db"
-	"github.com/123508/douyinshop/pkg/models"
-	"github.com/123508/douyinshop/pkg/myredis"
 	"github.com/123508/douyinshop/pkg/util"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -36,27 +31,7 @@ type BackendClaims struct {
 
 var frontendSecretKey = config.Conf.Jwt.AdminSecretKey
 
-var backendSecretKey = config.Conf.Jwt.AdminSecretKey
-
-var DB = connectWithMySQL()
-
-func connectWithMySQL() *gorm.DB {
-	DB, err := db.InitDB()
-	if err != nil {
-		util.LogError("打开MySQL连接失败", "connectWithMySQL", err)
-	}
-	return DB
-}
-
-var Rds = connectWithRedis()
-
-func connectWithRedis() *redis.Client {
-	rds, err := myredis.InitRedis()
-	if err != nil {
-		util.LogError("打开Redis连接失败", "connectWithRedis", err)
-	}
-	return rds
-}
+var backendSecretKey = config.Conf.Jwt.ServiceSecretKey
 
 // GenerateFrontendJWT 产生一个jwt令牌
 func GenerateFrontendJWT(userId uint64) (string, error) {
@@ -69,7 +44,7 @@ func GenerateFrontendJWT(userId uint64) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Conf.AdminTtl) * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "user service delivery this token",
+			Issuer:    util.Md5Hash("user service delivery this token"),
 			ID:        jti.String(),
 		},
 	}
@@ -125,7 +100,10 @@ func GenerateBackendJWT(
 			ID:        jti.String(),
 		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+
+	fmt.Println(backendSecretKey)
+
 	signedToken, err := token.SignedString([]byte(backendSecretKey))
 	if err != nil {
 		util.LogError("token签名失败:", "GenerateBackendJWT", err)
@@ -157,15 +135,4 @@ func Encryption(origin string) string {
 	hashBytes := hash.Sum(nil)
 	res := hex.EncodeToString(hashBytes)
 	return res
-}
-
-func GetUserInfo(ctx context.Context, userId uint64) (models.User, error) {
-	var row models.User
-	if err := DB.Model(&models.User{}).Where("id = ?", userId).First(&row).Error; err != nil {
-		util.LogError("查询用户异常", "GetUserInfo", err)
-		return models.User{}, SearchMySQLError
-	}
-
-	return row, nil
-
 }

@@ -150,6 +150,7 @@ func (s *ServiceImpl) Update(ctx context.Context, user *models.User, RequestUser
 func (s *ServiceImpl) Delete(ctx context.Context, TargetUserId, RequestUserId uint64) error {
 	//清理缓存
 	defer util.CleanCache(s.Rds, ctx, util.TakeKey(serviceName, TargetUserId))
+	defer DelUserCache(ctx, s.Rds)
 
 	if err := s.userRepo.DeleteUser(ctx, TargetUserId); err != nil {
 		return DeleteUserError
@@ -228,7 +229,14 @@ func (s *ServiceImpl) VerifyToken(ctx context.Context, token string, TargetUserI
 	var respToken string
 
 	//如果相差时间小于令牌存活阈值,就重新生成前端令牌
-	suv := time.Duration(max[int](config.Conf.AdminTtl-config.Conf.AdminSuv, 10800)) * time.Second
+
+	maxNum := 10800
+
+	if config.Conf.AdminTtl-config.Conf.AdminSuv > maxNum {
+		maxNum = config.Conf.AdminTtl - config.Conf.AdminSuv
+	}
+
+	suv := time.Duration(maxNum) * time.Second
 
 	if time.Since(ServerJwt.IssuedAt.Time) >= suv {
 		newToken, err := GenerateFrontendJWT(ServerJwt.UserId)
@@ -264,7 +272,7 @@ func (s *ServiceImpl) GetUserList(ctx context.Context, RequestUserId uint64,
 	listQuery := util.ListCacheComponent[uint64, models.User]{
 		Rds:             s.Rds,
 		Ctx:             ctx,
-		IdListKey:       util.TakeKey(serviceName, util.Md5Hash(util.TakeKey(pageSize, pageSize))),
+		IdListKey:       util.TakeKey(serviceName, "list", util.Md5Hash(util.TakeKey(pageSize, pageSize, sql, params))),
 		DetailKeyPrefix: util.TakeKey(serviceName),
 		Marshal:         json.Marshal,
 		Unmarshal:       json.Unmarshal,
@@ -332,7 +340,7 @@ func (s *ServiceImpl) ForgotPassword(ctx context.Context, email string) (uint64,
 		return 0, SearchUserError
 	}
 
-	vCode := rand.Intn(6)
+	vCode := fmt.Sprintf("%06d", rand.Intn(1000000))
 
 	if err = s.Rds.Set(ctx, util.TakeKey(serviceName, "Sms", info.ID, util.Md5Hash("0")), vCode, 10*time.Minute).Err(); err != nil {
 		return 0, RedisSetError
@@ -360,10 +368,12 @@ func (s *ServiceImpl) VerifySmsCode(ctx context.Context, SmsCode string, Type, T
 		return "", VerifyCodeTimeOutError
 	}
 
-	info, err := s.IsLegalUserById(ctx, TargetUserId)
+	//用户状态合法性校验
+	info, err := s.userRepo.GetUserInfoFromId(ctx, TargetUserId)
 
+	//查询错误
 	if err != nil || info == nil {
-		return "", err
+		return "", SearchUserError
 	}
 
 	//验证码错误
@@ -427,7 +437,7 @@ func (s *ServiceImpl) PreBindEmail(ctx context.Context, TargetUserId, RequestUse
 		return SearchUserError
 	}
 
-	vCode := rand.Intn(6)
+	vCode := fmt.Sprintf("%06d", rand.Intn(1000000))
 
 	if err = s.Rds.Set(ctx, util.TakeKey(serviceName, "Sms", TargetUserId, util.Md5Hash("1")), vCode, 10*time.Minute).Err(); err != nil {
 		return RedisSetError
@@ -484,7 +494,7 @@ func (s *ServiceImpl) PreUnbindEmail(ctx context.Context, TargetUserId, RequestU
 		return SearchUserError
 	}
 
-	vCode := rand.Intn(6)
+	vCode := fmt.Sprintf("%06d", rand.Intn(1000000))
 
 	if err = s.Rds.Set(ctx, util.TakeKey(serviceName, "Sms", TargetUserId, util.Md5Hash("2")), vCode, 10*time.Minute).Err(); err != nil {
 		return RedisSetError
@@ -536,7 +546,7 @@ func (s *ServiceImpl) PreFreezeUser(ctx context.Context, TargetUserId, RequestUs
 		return SearchUserError
 	}
 
-	vCode := rand.Intn(6)
+	vCode := fmt.Sprintf("%06d", rand.Intn(1000000))
 
 	if err = s.Rds.Set(ctx, util.TakeKey(serviceName, "Sms", TargetUserId, util.Md5Hash("3")), vCode, 10*time.Minute).Err(); err != nil {
 		return RedisSetError
@@ -593,7 +603,7 @@ func (s *ServiceImpl) PreUnfreezeUser(ctx context.Context, TargetUserId, Request
 		return SearchUserError
 	}
 
-	vCode := rand.Intn(6)
+	vCode := fmt.Sprintf("%06d", rand.Intn(1000000))
 
 	if err = s.Rds.Set(ctx, util.TakeKey(serviceName, "Sms", TargetUserId, util.Md5Hash("4")), vCode, 10*time.Minute).Err(); err != nil {
 		return RedisSetError
@@ -672,5 +682,34 @@ func (s *ServiceImpl) IsLegalUserByEmail(ctx context.Context, Email string) (*mo
 func (s *ServiceImpl) SendSmsCode(ctx context.Context, vCode any) {
 	//TODO 这里之后调用发送验证码的逻辑
 
-	fmt.Println(vCode)
+	fmt.Println("验证码:", vCode)
+}
+
+func DelUserCache(ctx context.Context, rds *redis.Client) {
+	// 构建 pattern
+	pattern := util.TakeKey(serviceName, "list", "*")
+	var cursor uint64 = 0
+	var batchSize int64 = 100 // 每次扫描的数量，可根据实际情况调整
+
+	for {
+		// 使用 SCAN 命令遍历所有匹配的 key
+		keys, nextCursor, err := rds.Scan(ctx, cursor, pattern, batchSize).Result()
+		if err != nil {
+			util.LogError("redis扫描错误", "DelAddressCache", err)
+		}
+		if len(keys) > 0 {
+			// pipeline 批量删除，提升性能
+			pipe := rds.Pipeline()
+			for _, key := range keys {
+				pipe.Del(ctx, key)
+			}
+			if _, err := pipe.Exec(ctx); err != nil {
+				util.LogError("redis pipeline删除错误", "DelUserCache", err)
+			}
+		}
+		cursor = nextCursor
+		if cursor == 0 {
+			break
+		}
+	}
 }

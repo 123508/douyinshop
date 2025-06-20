@@ -72,7 +72,8 @@ func (r *RepoImpl) CompareUserPassword(ctx context.Context, userId uint64, passw
 		util.LogError("查询用户密码错误", "GetUserPassword", err)
 		return false, err
 	}
-	return true, nil
+
+	return res.ID != 0, nil
 }
 
 func (r *RepoImpl) GetUserInfoFromId(ctx context.Context, userId uint64) (*models.User, error) {
