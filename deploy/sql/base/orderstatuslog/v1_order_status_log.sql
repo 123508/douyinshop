@@ -24,9 +24,6 @@ create table if not exists order_status_log(
      index idx_old_event(old_status,event_time),    -- 状态监控(高频)
      index idx_new_event(new_status,event_time),    -- 审计分析(低频)
 
-    -- 防止重复状态变更 (相同订单+新状态+时间戳去重)
-     unique index order_status_log_udx_order_status (order_id, new_status, (UNIX_TIMESTAMP(event_time) div 10)),
-
      constraint order_status_log_chk_status check ((old_status between 0 and 9) and (new_status between 0 and 9))
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='订单日志表';
