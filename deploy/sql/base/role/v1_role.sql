@@ -3,7 +3,7 @@ use tiktok;
 
 -- 角色表
 create table if not exists roles(
-      id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '角色表',
+      id  binary(16) not null  comment '角色表',
       code varchar(100) not null comment '角色唯一标识符',
       name varchar(100) not null  default '' comment '角色名称',
       description varchar(255) not null default '' comment '角色详细描述',
@@ -29,10 +29,10 @@ create table if not exists roles(
 
       primary key (id) comment '主键',
 
-      unique index udx_code (code,deleted_at_fixed) comment '保证角色标识符唯一存在',
+      unique index roles_udx_code (code,deleted_at_fixed) comment '保证角色标识符唯一存在',
 
-      index idx_code_deleted_status(code,is_deleted,status),
+      index roles_idx_code_deleted_status(code,is_deleted,status),
 
-      constraint check_status check ( status in (0,1) )
+      constraint roles_chk_status check ( status in (0,1) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='角色表';

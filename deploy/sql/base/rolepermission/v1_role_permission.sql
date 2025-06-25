@@ -14,7 +14,7 @@ create table if not exists role_permission(
     operator_id binary(16) null  comment '操作人(null=系统)',
 
     primary key (role_id,permission_id),
-    index idx_role_status(role_id,status),
-    constraint chk_status check ( status in (0,1) )
+    index role_permission_idx_role_status(role_id,status),
+    constraint role_permission_chk_status check ( status in (0,1) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='角色-权限表';

@@ -4,7 +4,7 @@ use tiktok;
 -- 商品表
 create table if not exists product(
 
-    id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '商品id',
+    id  binary(16) not null  comment '商品id',
     name varchar(512) not null comment '商品名称',
     shop_id binary(16) not null comment '店家id',
     price  decimal(18,2) not null default 0 comment '商品价格',
@@ -25,11 +25,11 @@ create table if not exists product(
 
     primary key (id),
 
-    index idx_shop_deleted_status(shop_id,is_deleted,status),
-    index idx_sales_deleted(sales,is_deleted),
-    INDEX idx_price_shop (price,shop_id),
-    INDEX idx_shop_created (shop_id, created_at),
+    index product_idx_shop_deleted_status(shop_id,is_deleted,status),
+    index product_idx_sales_deleted(sales,is_deleted),
+    INDEX product_idx_price_shop (price,shop_id),
+    INDEX product_idx_shop_created (shop_id, created_at),
 
-    constraint chk_status check ( status between 0 and 2)
+    constraint product_chk_status check ( status between 0 and 2)
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='商品表';

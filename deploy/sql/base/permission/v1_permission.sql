@@ -3,7 +3,7 @@ use tiktok;
 
 -- 权限表
 create table if not exists permission (
-    id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '权限表的唯一标识(默认使用uuid7,失败的时候兜底为有序uuid1)',
+    id  binary(16) not null  comment '权限表的唯一标识',
     code varchar(100) not null  comment '权限唯一标识符',
     name varchar(100) not null  default '' comment '权限名称',
     description varchar(255) not null default '' comment '权限详细描述',
@@ -51,24 +51,24 @@ create table if not exists permission (
     primary key (id) comment '主键',
 
     -- 唯一约束优化
-    unique index udx_code (code,deleted_at_fixed) comment '保证权限标识符唯一存在',
+    unique index permission_udx_code (code,deleted_at_fixed) comment '保证权限标识符唯一存在',
 
-    index idx_code_deleted_status(code,is_deleted,status),
+    index permission_idx_code_deleted_status(code,is_deleted,status),
 
     -- API权限唯一约束
-    unique index udx_resource_method (resource, method, deleted_at_fixed)
+    unique index permission_udx_resource_method (resource, method, deleted_at_fixed)
         comment '同一资源+方法只能有一个权限',
 
     -- 树形结构索引
-    index idx_parent_id (parent_id),
+    index permission_idx_parent_id (parent_id),
 
     -- 类型查询优化
-    index idx_type (type),
+    index permission_idx_type (type),
 
     -- 启用类型约束
-    constraint check_status check ( status in (0,1) ),
+    constraint permission_chk_status check ( status in (0,1) ),
 
     -- 类型枚举约束
-    constraint chk_type check (type in ('API','MENU','BUTTON','DATA','FIELD','MODULE','FILE','TASK'))
+    constraint permission_chk_type check (type in ('API','MENU','BUTTON','DATA','FIELD','MODULE','FILE','TASK'))
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='权限表';

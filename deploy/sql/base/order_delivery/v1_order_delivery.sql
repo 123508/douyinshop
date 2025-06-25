@@ -3,7 +3,7 @@ use tiktok;
 
 -- 物流表
 create table if not exists order_delivery(
-    id              binary(16) not null default UUID_TO_BIN(uuid(),1) comment '订单物流id',
+    id              binary(16) not null  comment '订单物流id',
     order_id        binary(16) not null comment '订单ID',
     delivery_no     varchar(64) not null comment '运单号/快递单号',
 
@@ -32,9 +32,9 @@ create table if not exists order_delivery(
 
 
     primary key (id),
-    index idx_order(order_id),
-    index idx_delivery_no(delivery_no),
-    index idx_express_code(express_code),
-    constraint chk_status check ( status between 0 and 5)
+    index order_delivery_idx_order(order_id),
+    index order_delivery_idx_delivery_no(delivery_no),
+    index order_delivery_idx_express_code(express_code),
+    constraint order_delivery_chk_status check ( status between 0 and 5)
 )  engine =InnoDB charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     comment='订单物流表';

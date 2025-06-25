@@ -4,9 +4,9 @@ use tiktok;
 -- 用户组表
 create table if not exists user_group(
 
-     id binary(16) not null default (UUID_TO_BIN(UUID(), 1)) comment '用户组ID',
+     id binary(16) not null  comment '用户组ID',
      name varchar(255) not null comment '用户组名称',
-     code varchar(100) not null default CONCAT('group_', REPLACE(UUID(), '-', '')) comment '用户组唯一标识符',
+     code varchar(100) not null  comment '用户组唯一标识符',
      status tinyint(1) not null default 0 comment '权限是否启用:0不启用 1启用',
 
     -- 父级优化：允许NULL表示根节点
@@ -33,9 +33,9 @@ create table if not exists user_group(
 
      primary key (id),
 
-     index idx_name_deleted (name,is_deleted),
-     unique index udx_code_deleted (code,deleted_at_fixed) comment '确保用户组标识符唯一存在',
+     index user_group_idx_name_deleted (name,is_deleted),
+     unique index user_group_udx_code_deleted (code,deleted_at_fixed) comment '确保用户组标识符唯一存在',
 
-     constraint chk_status check ( status in ( 0,1 ) )
+     constraint user_group_chk_status check ( status in ( 0,1 ) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='用户组表';

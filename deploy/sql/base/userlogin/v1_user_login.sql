@@ -20,6 +20,6 @@ create table if not exists user_login(
     version  int not null default 0 comment '版本号',
 
     primary key (user_id),
-    index idx_user_pwd(user_id,password)
+    index user_login_idx_user_pwd(user_id,password)
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='用户密码表';

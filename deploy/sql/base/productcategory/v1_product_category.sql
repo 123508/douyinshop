@@ -16,7 +16,7 @@ create table if not exists product_category(
     operator_id binary(16) null  comment '操作人(null=系统)',
 
     primary key (product_id,category_id),
-    index idx_category_active(category_id,status),
-    constraint chk_status check ( status in (0,1) )
+    index product_category_idx_category_active(category_id,status),
+    constraint product_category_chk_status check ( status in (0,1) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='商品-分类表';

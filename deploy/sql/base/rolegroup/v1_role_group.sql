@@ -14,7 +14,7 @@ create table if not exists role_group(
     operator_id binary(16) null  comment '操作人(null=系统)',
 
     primary key (role_id,group_id),
-    index idx_group_status(group_id,status),
-    constraint chk_status check ( status in (0,1) )
+    index role_group_idx_group_status(group_id,status),
+    constraint role_group_chk_status check ( status in (0,1) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='角色-用户组表';

@@ -3,7 +3,7 @@ use tiktok;
 
 -- 信用卡表
 create table if not exists credit_card(
-    id binary(16) not null default (UUID_TO_BIN(UUID(), 1)) comment '支付方式ID',
+    id binary(16) not null comment '支付方式ID',
     user_id binary(16) not null comment '用户ID',
 
     -- 支付平台信息
@@ -56,22 +56,22 @@ create table if not exists credit_card(
     updated_by binary(16) null comment '修改人id',   -- 允许null
 
     PRIMARY KEY (id),
-    index idx_user (user_id),
-    unique index uniq_user_platform (user_id, platform, platform_uid,deleted_at_fixed),
+    index credit_card_idx_user (user_id),
+    unique index credit_card_udx_user_platform (user_id, platform, platform_uid,deleted_at_fixed),
     -- 条件唯一索引（MySQL 8.0+）
-    unique index uniq_bank_token (bank_token,deleted_at_fixed),
-    unique index udx_user_default (user_id, is_default_card) invisible ,
+    unique index credit_card_udx_bank_token (bank_token,deleted_at_fixed),
+    unique index credit_card_udx_user_default (user_id, is_default_card) invisible ,
     -- 默认支付方式索引（新增）
-    unique index udx_user_default_pay (user_id, is_default_pay_flag) invisible ,
+    unique index credit_card_udx_user_default_pay (user_id, is_default_pay_flag) invisible ,
 
     -- 数据完整性约束（MySQL 8.0.16+）
-    constraint chk_platform_data check (
+    constraint credit_card_chk_platform_data check (
         (platform = 3 and bank_token is not null and platform_user_id is null)
             or
         (platform in (1,2,4) and platform_user_id is not null)
     ),
 
-    constraint chk_default check ( is_default_card in (0,1) and is_default_pay in (0,1) )
+    constraint credit_card_chk_default check ( is_default_card in (0,1) and is_default_pay in (0,1) )
 
 ) engine =InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     comment '用户支付方式表';

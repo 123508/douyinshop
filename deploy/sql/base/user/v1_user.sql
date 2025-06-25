@@ -3,7 +3,7 @@ use tiktok;
 
 -- 用户表
 create table if not exists users(
-    id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '用户id',
+    id  binary(16) not null comment '用户id',
     name varchar(60) not null default '' comment '用户名称',
     email varchar(255) not null default '' comment '用户邮箱',
     phone varchar(20) not null  comment '用户手机',
@@ -25,10 +25,10 @@ create table if not exists users(
     last_updated_by binary(16) comment '最后修改人',
 
     primary key (id),
-    unique index udx_email(email),
-    unique index udx_phone(phone),
+    unique index users_udx_email(email),
+    unique index users_udx_phone(phone),
 
-    constraint chk_status check ( status in(0,1) ),
-    constraint chk_gender check ( gender in(0,1,2) )
+    constraint users_chk_status check ( status in(0,1) ),
+    constraint users_chk_gender check ( gender in(0,1,2) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='用户表';

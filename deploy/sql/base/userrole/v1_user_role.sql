@@ -14,7 +14,7 @@ create table if not exists user_role(
     operator_id binary(16) null  comment '操作人(null=系统)',
 
     primary key (user_id,role_id),
-    index idx_user_status(user_id,status),
-    constraint chk_status check ( status in (0,1) )
+    index user_role_idx_user_status(user_id,status),
+    constraint user_role_chk_status check ( status in (0,1) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='用户-角色表';

@@ -3,7 +3,7 @@ use tiktok;
 
 -- 分类表
 create table if not exists product_category(
-      id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '分类表id',
+      id  binary(16) not null comment '分类表id',
       name varchar(100) not null  default '' comment '分类名称',
       status tinyint(1) not null default 0 comment '分类是否启用:0不启用 1启用',
 
@@ -24,9 +24,9 @@ create table if not exists product_category(
 
       primary key (id) comment '主键',
 
-      unique index udx_name_deleted(name,is_deleted,deleted_at_fixed),
+      unique index product_category_udx_name_deleted(name,is_deleted,deleted_at_fixed),
 
       -- 约束
-      constraint check_status check ( status in (0,1) )
+      constraint product_category_chk_status check ( status in (0,1) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     comment = '分类表'

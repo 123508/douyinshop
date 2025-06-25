@@ -4,7 +4,7 @@ use tiktok;
 -- 订单表  
 create table if not exists orders(
         -- 订单基本信息
-        id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '订单id',
+        id  binary(16) not null  comment '订单id',
         user_id binary(16) not null comment '用户id',
         shop_id binary(16) not null comment '店铺id',
         coupon_id binary(16) null comment '优惠券id',
@@ -29,21 +29,20 @@ create table if not exists orders(
 
         -- 审计字段
         version  int not null default 0 comment '版本号',
+        created_by binary(16) null comment '创建人id',   -- 允许null
+        updated_by binary(16) null comment '修改人id',   -- 允许null
 
         -- 唯一约束的虚拟列
         deleted_at_fixed datetime(3) generated always as (COALESCE(deleted_at, '1970-01-01 00:00:00.000')) virtual,
 
         primary key (id),
-        index idx_status_deleted (final_status,is_deleted),
-        index idx_user_deleted(user_id,is_deleted),
-        index idx_shop_deleted(shop_id,is_deleted),
+        index orders_idx_status_deleted (final_status,is_deleted),
+        index orders_idx_user_deleted(user_id,is_deleted),
+        index orders_idx_shop_deleted(shop_id,is_deleted),
         -- 保证订单号唯一存在
-        unique index udx_order_no(order_no,deleted_at_fixed),
-        created_by binary(16) null comment '创建人id',   -- 允许null
-        updated_by binary(16) null comment '修改人id',   -- 允许null
-
-        constraint chk_status check ( final_status between 0 and 9),
-        constraint chk_pay  check ( pay_method between 1 and 4)
+        unique index orders_udx_order_no(order_no,deleted_at_fixed),
+        constraint orders_chk_status check ( final_status between 0 and 9),
+        constraint orders_chk_pay  check ( pay_method between 1 and 4)
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='订单表';
 

@@ -4,7 +4,7 @@ use tiktok;
 -- 地址表
 create table if not exists address_books (
     -- 基本信息
-    id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '地址表的唯一标识(默认使用uuid7,失败的时候兜底为有序uuid1)',
+    id  binary(16) not null comment '地址表的唯一标识(uuid7)',
     user_id binary(16) not null comment '持有该地址的用户唯一标识',
     consignee varchar(60) not null default '' comment '收货人',
     gender  tinyint unsigned default 0 comment '性别:0=未知 1=男 2=女',
@@ -44,17 +44,17 @@ create table if not exists address_books (
 
     primary key (id) comment '主键',
     -- 索引优化                               ,
-    index index_user_deleted_phone (user_id,is_deleted,phone) comment '建立联合索引方便查询',
-    index idx_location (country_code, state, city),
-    index idx_default (user_id, is_default) ,
-    index idx_verification (verification_status),
+    index address_index_user_deleted_phone (user_id,is_deleted,phone) comment '建立联合索引方便查询',
+    index address_idx_location (country_code, state, city),
+    index address_idx_default (user_id, is_default) ,
+    index address_idx_verification (verification_status),
 
     -- 唯一约束确保单个默认地址
-    unique index udx_user_default (user_id, is_default,deleted_at_fixed)
+    unique index address_udx_user_default (user_id, is_default,deleted_at_fixed)
         comment '确保每个用户只有一个默认地址'
         invisible , -- MySQL 8.0+ 隐藏索引
     -- 约束
-    constraint chk_gender check (gender in (0,1,2)) ,
-    constraint chk_default check (is_default in (0,1)) -- 字段检查
+    constraint address_chk_gender check (gender in (0,1,2)) ,
+    constraint address_chk_default check (is_default in (0,1)) -- 字段检查
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='地址表';

@@ -3,7 +3,7 @@ use tiktok;
 
 -- 订单明细表
 create table if not exists order_details(
-    id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '订单明细id',
+    id  binary(16) not null  comment '订单明细id',
     order_id binary(16) not null comment '订单id',
     coupon_id binary(16) null comment '优惠券id',
     promotion_id binary(16) null comment '活动id',
@@ -32,9 +32,9 @@ create table if not exists order_details(
     version  int not null default 0 comment '版本号',
 
     primary key (id),
-    index idx_order_deleted(order_id,is_deleted),
-    index idx_created(created_at),
-    constraint chk_quantity check ( sku_quantity >= 0 )
+    index order_details_idx_order_deleted(order_id,is_deleted),
+    index order_details_idx_created(created_at),
+    constraint order_details_chk_quantity check ( sku_quantity >= 0 )
 
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='订单明细表';

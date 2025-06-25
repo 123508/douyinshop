@@ -3,7 +3,7 @@ use tiktok;
 
 -- 店铺表
 create table if not exists shops(
-    id  binary(16) not null default UUID_TO_BIN(uuid(),1) comment '店铺id',
+    id  binary(16) not null  comment '店铺id',
     name varchar(255) not null comment '店铺名称',
     user_id binary(16) not null comment '店主id',
     type tinyint(1) not null default 0 comment '店铺类型: 0普通 1旗舰 2品牌',
@@ -28,9 +28,9 @@ create table if not exists shops(
 
     primary key (id),
 
-    index idx_name_deleted_status(name,is_deleted,status),
+    index shops_idx_name_deleted_status(name,is_deleted,status),
 
-    constraint chk_type check ( type in (0,1,2) ),
-    constraint chk_status check ( status in (0,1) )
+    constraint shops_chk_type check ( type in (0,1,2) ),
+    constraint shops_chk_status check ( status in (0,1) )
 )engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci
     COMMENT='店铺表';
