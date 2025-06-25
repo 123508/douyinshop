@@ -4,7 +4,7 @@ use tiktok;
 -- 用户表
 create table if not exists users(
     id  binary(16) not null comment '用户id',
-    name varchar(60) not null default '' comment '用户名称',
+    username varchar(60) not null default '' comment '用户名称',
     email varchar(255) not null default '' comment '用户邮箱',
     phone varchar(20) not null  comment '用户手机',
     gender tinyint(1) not null default 0 comment '用户性别:0未知  1男  2女',
@@ -27,6 +27,7 @@ create table if not exists users(
     primary key (id),
     unique index users_udx_email(email),
     unique index users_udx_phone(phone),
+    unique index users_udx_username(username),
 
     constraint users_chk_status check ( status in(0,1) ),
     constraint users_chk_gender check ( gender in(0,1,2) )
